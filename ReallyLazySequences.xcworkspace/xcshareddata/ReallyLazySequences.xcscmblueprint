@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "1EE1374CF372C382E861171D0F9680B05C21E1DC",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "1EE1374CF372C382E861171D0F9680B05C21E1DC" : 9223372036854775807,
+    "ECD349E1AE4F6154C57450528E342C45E770225A" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "7541CBC2-618B-4DC9-98C0-9635A03C3BC7",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "1EE1374CF372C382E861171D0F9680B05C21E1DC" : "ReallyLazySequences\/",
+    "ECD349E1AE4F6154C57450528E342C45E770225A" : "..\/HarvardExtension\/e65g\/E65g_materials"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "ReallyLazySequences",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "ReallyLazySequences.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/rvsrvs\/ReallyLazySequences.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "1EE1374CF372C382E861171D0F9680B05C21E1DC"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:rvsrvs\/E65g_materials.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "ECD349E1AE4F6154C57450528E342C45E770225A"
+    }
+  ]
+}
