@@ -19,7 +19,8 @@ class ReallyLazySequencesTests: XCTestCase {
         super.tearDown()
     }
     
-    func testSimpleSequence() {
+    func testSimpleSynchronousSequence() {
+        
         var accumulatedResults: [Double] = []
         let s = AsynchronousSequence<Int>()
             .filter { $0 < 10 }
