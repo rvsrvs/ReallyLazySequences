@@ -73,8 +73,8 @@
 		FB33E02C1EBE7E85009CA3AC /* ReallyLazySequences */ = {
 			isa = PBXGroup;
 			children = (
-				FBFC58501EBE7FBD00F3D63A /* AsynchronousSequence.swift */,
 				FB33E02D1EBE7E85009CA3AC /* ReallyLazySequences.h */,
+				FBFC58501EBE7FBD00F3D63A /* AsynchronousSequence.swift */,
 				FB33E02E1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequences;

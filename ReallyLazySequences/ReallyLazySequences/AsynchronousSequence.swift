@@ -84,11 +84,11 @@ protocol AsynchronousSequenceProtocol: Observable {
 }
 
 extension AsynchronousSequenceProtocol {
-    func map<U>(_ transform: @escaping (ObservableType) -> U ) -> Map<Self, U> {
+    func map<T>(_ transform: @escaping (ObservableType) -> T ) -> Map<Self, T> {
         return Map(predecessor: self, transform: transform)
     }
 
-    func reduce<U>(_ initialValue: U, _ combine: @escaping (U, ObservableType) -> U) -> Reduce<Self, U> {
+    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, ObservableType) -> T) -> Reduce<Self, T> {
         return Reduce(predecessor: self, initialValue: initialValue, combine: combine)
     }
 
@@ -101,9 +101,8 @@ extension AsynchronousSequenceProtocol {
     }
 }
 
-struct AsynchronousSequence<T>: AsynchronousSequenceProtocol {
-    typealias PushableType = T
-    typealias ObservableType = PushableType
+struct AsynchronousSequence<ObservableType>: AsynchronousSequenceProtocol {
+    typealias PushableType = ObservableType
     func compose(_ delivery: @escaping (ObservableType?) -> Void) -> ((PushableType?) -> Void) {
         return delivery
     }
