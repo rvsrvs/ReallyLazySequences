@@ -27,9 +27,7 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { Double($0) }
             .map { $0 * 2 }
             .sort(<)
-            .observe {
-                accumulatedResults.append($0)
-            }
+            .observe { accumulatedResults.append($0) }
         
         print(type(of:s))
         
