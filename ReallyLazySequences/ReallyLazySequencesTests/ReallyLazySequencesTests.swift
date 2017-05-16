@@ -19,15 +19,21 @@ class ReallyLazySequencesTests: XCTestCase {
         super.tearDown()
     }
     
+    func testQueueHandling() {
+    }
+    
     func testSimpleSynchronousSequence() {
-        
-        var accumulatedResults: [Double] = []
+        var accumulatedResults: [Int] = []
         let s = AsynchronousSequence<Int>()
             .filter { $0 < 10 }
             .map { Double($0) }
             .map { $0 * 2 }
             .sort(<)
-            .observe { accumulatedResults.append($0) }
+            .map { (value: Double) -> Int in Int(value) }
+            .reduce(0) {(partialResult: Int, value: Int) -> Int in return (partialResult + value) }
+            .observe {
+                if let value = $0 { accumulatedResults.append(value) }
+            }
         
         print(type(of:s))
         
@@ -44,6 +50,7 @@ class ReallyLazySequencesTests: XCTestCase {
             print(error.localizedDescription)
         }
         
-        XCTAssertEqual(accumulatedResults, [4.0, 6.0, 8.0, 16.0])
+//        XCTAssertEqual(accumulatedResults, [4, 6, 8, 16])
+        XCTAssertEqual(accumulatedResults, [34])
     }
 }
