@@ -50,11 +50,29 @@ extension Pushable {
 
 typealias Continuation = () -> Any?
 
+let nilContinutation: Continuation = { nil }
+
+func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation, value: Continuation?) -> Continuation {
+    if let value = value {
+        let newValue = value() as? Continuation
+        return { deliver(values: values, delivery: delivery, value: newValue ) }
+    } else if values.count > 0 {
+        let value = delivery(values.first!)
+        let values = Array(values.dropFirst())
+        return { deliver(values: values, delivery: delivery, value: value) }
+    } else {
+        return { delivery(nil) }
+    }
+}
+
+
 protocol Observable: Pushable {
     associatedtype ObservableType
-    typealias PushFunction = (PushableType?) -> Void
-    func observe(_ delivery: @escaping (ObservableType?) -> Void) -> Observed<Self>
-    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> PushFunction
+    typealias Delivery = (ObservableType?) -> Void
+    typealias ContinuableDelivery = (ObservableType?) -> Continuation
+    typealias PushFunction = (PushableType?) throws -> Void
+    func observe(_ delivery: @escaping Delivery) -> Observed<Self>
+    func compose(_ delivery: @escaping ContinuableDelivery) -> PushFunction
 }
 
 extension Observable {
@@ -63,20 +81,18 @@ extension Observable {
     }
 }
 
-let nilContinutation: Continuation = { nil }
 struct Observed<Predecessor: Observable>{
     var push: (Predecessor.PushableType?) throws -> Void
     init(predecessor:Predecessor, delivery: @escaping ((Predecessor.ObservableType) -> Void)) {
         var isComplete = false
-        let localDelivery = { (value: Predecessor.ObservableType?) -> Continuation in
+        let deliveryWrapper = { (value: Predecessor.ObservableType?) -> Continuation in
             guard let value = value else { isComplete = true; return nilContinutation }
-            let continuation: Continuation = { delivery(value); return Optional<Continuation>.none }
-            return continuation
+            return { delivery(value); return nil }
         }
-        let composition = predecessor.compose(localDelivery)
+        let composition = predecessor.compose(deliveryWrapper)
         push = { (value:Predecessor.PushableType?) throws -> Void in
             guard isComplete == false else { throw AsynchronousSequenceError.isComplete }
-            composition(value)
+            try composition(value)
         }
     }
 }
@@ -108,11 +124,9 @@ extension AsynchronousSequenceProtocol {
 
 struct AsynchronousSequence<ObservableType>: AsynchronousSequenceProtocol {
     typealias PushableType = ObservableType
-    func compose(_ delivery: @escaping (ObservableType?) -> Continuation ) -> ((PushableType?) -> Void) {
-        return  { value in
-            var nextDelivery: Continuation? = delivery(value)
-            while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
-        }
+    func compose(_ delivery: @escaping (ObservableType?) -> Continuation ) -> ((PushableType?) throws -> Void) {
+        let dispatcher = Dispatcher()
+        return  { value in try dispatcher.manage { delivery(value) } }
     }
 }
 
@@ -128,7 +142,7 @@ struct Map<Predecessor: AsynchronousSequenceProtocol, ObservableType>: Asynchron
         self.transform = transform
     }
     
-    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> ((Predecessor.PushableType?) -> Void) {
+    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> ((Predecessor.PushableType?) throws -> Void) {
         let transform = self.transform
         let composition = { (input: Predecessor.ObservableType?) -> Continuation in
             guard let input = input else { return { delivery(nil) } }
@@ -136,18 +150,6 @@ struct Map<Predecessor: AsynchronousSequenceProtocol, ObservableType>: Asynchron
         }
         return predecessor.compose(composition)
     }
-}
-
-func deliverAccumulated<T>(values:[T], delivery: @escaping (T?) -> Continuation, value: Continuation?) -> Continuation {
-    if let value = value {
-        let newValue = value() as? Continuation
-        return { deliverAccumulated(values: values, delivery: delivery, value: newValue ) }
-    } else if values.count > 0 {
-        let value = delivery(values.first!)
-        let values = Array(values.dropFirst())
-        return { deliverAccumulated(values: values, delivery: delivery, value: value) }
-    }
-    return { delivery(nil) }
 }
 
 struct Reduce<Predecessor: AsynchronousSequenceProtocol, ObservableType>: AsynchronousSequenceProtocol {
@@ -164,12 +166,12 @@ struct Reduce<Predecessor: AsynchronousSequenceProtocol, ObservableType>: Asynch
         self.combine = combine
     }
     
-    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> ((Predecessor.PushableType?) -> Void) {
+    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> ((Predecessor.PushableType?) throws -> Void) {
         let combine = self.combine
         var partialValue = self.initialValue
         let composition = { (input: Predecessor.ObservableType?) -> Continuation in
             guard let input = input else {
-                return deliverAccumulated(values: [partialValue], delivery: delivery, value: nil )
+                return deliver(values: [partialValue], delivery: delivery, value: nil )
             }
             partialValue = combine(partialValue, input)
             return { nil }
@@ -191,7 +193,7 @@ struct Filter<Predecessor: AsynchronousSequenceProtocol>: AsynchronousSequencePr
         self.filter = filter
     }
     
-    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> ((Predecessor.PushableType?) -> Void) {
+    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> ((Predecessor.PushableType?) throws -> Void) {
         let filter = self.filter
         let composition = { (input: ObservableType?) -> Continuation in
             guard let input = input else { return delivery(nil) }
@@ -215,12 +217,12 @@ struct Sort<Predecessor: AsynchronousSequenceProtocol>: AsynchronousSequenceProt
         self.comparison = comparison
     }
     
-    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> ((Predecessor.PushableType?) -> Void) {
+    func compose(_ delivery: @escaping (ObservableType?) -> Continuation) -> ((Predecessor.PushableType?) throws -> Void) {
         let comparison = self.comparison
         var accumulator: [ObservableType] = []
         let composition = { (input: ObservableType?) -> Continuation in
             guard let input = input else {
-                return deliverAccumulated(values: accumulator.sorted(by: comparison), delivery: delivery, value: nil)
+                return deliver(values: accumulator.sorted(by: comparison), delivery: delivery, value: nil)
             }
             accumulator.append(input)
             return nilContinutation
