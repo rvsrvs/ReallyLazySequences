@@ -45,6 +45,10 @@ func synchronized(_ token: AnyHashable, operation: (Void) -> Void) throws {
 
 fileprivate var dispatcherSequence: Int = 0
 class Dispatcher: Hashable, Equatable {
+    enum DispatchStatus {
+        case complete
+        case hasNext
+    }
 
     static func ==(left: Dispatcher, right: Dispatcher) -> Bool {
         return left.hashValue == right.hashValue
@@ -69,7 +73,7 @@ class Dispatcher: Hashable, Equatable {
         }
     }
     
-    func dispatch() throws {
+    func dispatch() throws -> DispatchStatus {
         var dispatchable:Dispatchable? = nil
         try synchronized(self) {
             for (k,d) in dispatchables {
@@ -85,14 +89,14 @@ class Dispatcher: Hashable, Equatable {
                 dispatchables[newDispatchable.sequence] = newDispatchable
                 steps[newDispatchable.sequence] = newDispatchable.step
             }
-            try dispatch()
+            return .hasNext
         } else {
             try synchronized(self) {
                 if let dispatchable = dispatchable {
                     steps.removeValue(forKey: dispatchable.sequence)
                 }
             }
-            return
+            return .complete
         }
     }
     
@@ -103,7 +107,8 @@ class Dispatcher: Hashable, Equatable {
             dispatchables[nextSequence] = dispatchAble
             nextSequence += 1
         }
-        try dispatch()
+        var status = try dispatch()
+        while (status == .hasNext) { status = try dispatch() }
     }
 }
 
