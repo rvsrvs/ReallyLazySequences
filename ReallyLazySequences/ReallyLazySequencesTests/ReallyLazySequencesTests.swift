@@ -24,37 +24,21 @@ class ReallyLazySequencesTests: XCTestCase {
     
     func testSimpleSynchronousSequence() {
         var accumulatedResults: [Int] = []
+        
         let s = AsynchronousSequence<Int>()
-            .filter {
-                $0 < 10
-            }
-            .map {
-                Double($0)
-            }
-            .map {
-                $0 * 2
-            }
+            .filter { $0 < 10 }
+            .map { Double($0) }
+            .map { $0 * 2 }
             .sort(<)
-            .map { (value: Double) -> Int in
-                Int(value)
-            }
-            .reduce(0) {(partialResult: Int, value: Int) -> Int in
-                return (partialResult + value)
-            }
-            .observe {
-                if let value = $0 {
-                    accumulatedResults.append(value)
-                }
-            }
+            .map { (value: Double) -> Int in Int(value) }
+            .reduce(0) {(partialResult: Int, value: Int) -> Int in return (partialResult + value) }
+            .observe { if let value = $0 { accumulatedResults.append(value) } }
         
         print(type(of:s))
         
         do {
-            try s.push(8)
-            try s.push(12)
-            try s.push(4)
-            try s.push(3)
-            try s.push(2)
+            for _ in 0 ..< 100000 { try s.push(200) }
+            for i in [8, 12, 4, 3, 2] { try s.push(i) }
             try s.push(nil)
         } catch AsynchronousSequenceError.isComplete {
             print("Can't push to a completed sequence")
@@ -62,7 +46,6 @@ class ReallyLazySequencesTests: XCTestCase {
             print(error.localizedDescription)
         }
         
-//        XCTAssertEqual(accumulatedResults, [4, 6, 8, 16])
         XCTAssertEqual(accumulatedResults, [34])
     }
 }

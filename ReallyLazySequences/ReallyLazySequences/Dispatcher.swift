@@ -44,73 +44,7 @@ func synchronized(_ token: AnyHashable, operation: (Void) -> Void) throws {
 }
 
 fileprivate var dispatcherSequence: Int = 0
-class Dispatcher: Hashable, Equatable {
-    enum DispatchStatus {
-        case complete
-        case hasNext
-    }
-
-    static func ==(left: Dispatcher, right: Dispatcher) -> Bool {
-        return left.hashValue == right.hashValue
-    }
-    
-    var hashValue: Int
-    var steps: [Int64: Int64] = [:]
-    var dispatchables: [Int64: Dispatchable] = [:]
-    var nextSequence: Int64 = 0
-    
-    init() {
-        self.hashValue = dispatcherSequence + 1
-        dispatcherSequence += 1
-    }
-    
-    func canDispatch(_ dispatchable: Dispatchable) -> Bool {
-        let prev = steps.filter { $0.key < dispatchable.sequence }.min { $0.key < $1.key }
-        if let prev = prev {
-            return dispatchable.step < prev.value
-        } else {
-            return true
-        }
-    }
-    
-    func dispatch() throws -> DispatchStatus {
-        var dispatchable:Dispatchable? = nil
-        try synchronized(self) {
-            for (k,d) in dispatchables {
-                if canDispatch(d) {
-                    dispatchable = dispatchables.removeValue(forKey: k)
-                    break
-                }
-            }
-        }
-        if dispatchable != nil { print("dispatch!") } else { print("nothing to do") }
-        if let newDispatchable = dispatchable?.dispatch() {
-            try synchronized(self) {
-                dispatchables[newDispatchable.sequence] = newDispatchable
-                steps[newDispatchable.sequence] = newDispatchable.step
-            }
-            return .hasNext
-        } else {
-            try synchronized(self) {
-                if let dispatchable = dispatchable {
-                    steps.removeValue(forKey: dispatchable.sequence)
-                }
-            }
-            return .complete
-        }
-    }
-    
-    func manage(_ continuation: @escaping Continuation) throws {
-        try synchronized(self) {
-            let dispatchAble = Dispatchable(sequence: nextSequence, step: 0, nextStep: continuation)
-            steps[nextSequence] = 0
-            dispatchables[nextSequence] = dispatchAble
-            nextSequence += 1
-        }
-        var status = try dispatch()
-        while (status == .hasNext) { status = try dispatch() }
-    }
-}
+typealias SequenceNumber = Int64
 
 struct Dispatchable {
     var sequence: Int64
@@ -122,3 +56,65 @@ struct Dispatchable {
         return Dispatchable(sequence: self.sequence, step: self.step+1, nextStep: next)
     }
 }
+
+class Dispatcher: Hashable, Equatable {
+    enum DispatchStatus {
+        case complete
+        case hasNext
+    }
+
+    static func ==(left: Dispatcher, right: Dispatcher) -> Bool { return left.hashValue == right.hashValue }
+    
+    var hashValue: Int
+    var steps: [SequenceNumber: Int64] = [:]
+    var dispatchables: [SequenceNumber: Dispatchable] = [:]
+    var nextSequence: Int64 = 0
+    
+    init() {
+        dispatcherSequence += 1
+        self.hashValue = dispatcherSequence - 1
+    }
+    
+    func canDispatch(_ dispatchable: Dispatchable) -> Bool {
+        let prev = steps.filter { $0.key < dispatchable.sequence }.min { $0.key < $1.key }
+        return prev != nil ? dispatchable.step < prev!.value : true
+    }
+    
+    func nextDispatchable() throws -> Dispatchable? {
+        var dispatchable:Dispatchable? = nil
+        try synchronized(self) {
+            if let (k, _) = dispatchables.first(where: { (_,d) in canDispatch(d) }) {
+                dispatchable = dispatchables.removeValue(forKey: k)
+            }
+        }
+        return dispatchable
+    }
+    
+    func insert(_ dispatchable: Dispatchable) throws -> DispatchStatus {
+        try synchronized(self) {
+            dispatchables[dispatchable.sequence] = dispatchable
+            steps[dispatchable.sequence] = dispatchable.step
+        }
+        return .hasNext
+    }
+    
+    func remove(_ dispatchable: Dispatchable) throws -> DispatchStatus {
+        try synchronized(self) { steps.removeValue(forKey: dispatchable.sequence) }
+        return .complete
+    }
+    
+    func dispatch() throws -> DispatchStatus {
+        guard let dispatchable = try self.nextDispatchable() else { return .complete }
+        let next = dispatchable.dispatch()
+        return next == nil ? try remove(dispatchable) : try insert(dispatchable)
+    }
+    
+    func manage(_ continuation: @escaping Continuation) throws {
+        nextSequence += 1
+        let dispatchable = Dispatchable(sequence: nextSequence - 1, step: 0, nextStep: continuation)
+        _ = try insert(dispatchable)
+        var status: DispatchStatus
+        repeat { status = try dispatch() } while (status == .hasNext)
+    }
+}
+
