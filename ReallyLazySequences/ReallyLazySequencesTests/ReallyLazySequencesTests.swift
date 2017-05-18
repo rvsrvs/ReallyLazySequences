@@ -26,13 +26,25 @@ class ReallyLazySequencesTests: XCTestCase {
         var accumulatedResults: [Int] = []
         
         let s = AsynchronousSequence<Int>()
-            .filter { $0 < 10 }
-            .map { Double($0) }
-            .map { $0 * 2 }
+            .filter {
+                $0 < 10
+            }
+            .map {
+                Double($0)
+            }
+            .map {
+                $0 * 2
+            }
             .sort(<)
-            .map { (value: Double) -> Int in Int(value) }
-            .reduce(0) {(partialResult: Int, value: Int) -> Int in return (partialResult + value) }
-            .observe { if let value = $0 { accumulatedResults.append(value) } }
+            .map { (value: Double) -> Int in
+                Int(value)
+            }
+            .reduce(0) {(partialResult: Int, value: Int) -> Int in
+                return (partialResult + value)
+            }
+            .observe {
+                if let value = $0 { accumulatedResults.append(value) }
+            }
         
         print(type(of:s))
         
