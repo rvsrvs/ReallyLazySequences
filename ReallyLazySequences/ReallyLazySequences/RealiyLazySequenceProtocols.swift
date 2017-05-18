@@ -52,7 +52,7 @@ public extension AsynchronousSequenceProtocol {
     }
     
     func sort(_ comparison: @escaping (ObservableType, ObservableType) -> Bool) -> Sort<Self> {
-        return Sort( predecessor: self, comparison: comparison)
+        return Sort(predecessor: self, comparison: comparison)
     }
 }
 
