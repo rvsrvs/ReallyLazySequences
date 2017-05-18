@@ -104,7 +104,7 @@ class Dispatcher: Hashable, Equatable {
         var status = DispatchStatus.complete
         try synchronized(self) {
             steps.removeValue(forKey: dispatchable.sequence)
-            status = steps.count > 0 ? .complete : .hasNext
+            status = steps.count > 0 ? .hasNext : .complete
         }
         return status
     }
