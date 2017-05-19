@@ -118,7 +118,7 @@ class Dispatcher: Hashable, Equatable {
         }
     }
     
-    func manage(_ continuation: @escaping Continuation) throws {
+    func dispatch(_ continuation: @escaping Continuation) throws {
         nextSequence += 1
         let dispatchable = Dispatchable(sequence: nextSequence - 1, step: 0, nextStep: continuation)
         var status = try insert(dispatchable)

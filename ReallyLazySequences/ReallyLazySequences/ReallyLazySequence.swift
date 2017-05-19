@@ -78,7 +78,7 @@ public struct AsynchronousSequence<ObservableType>: AsynchronousSequenceProtocol
     public typealias PushableType = ObservableType
     public func compose(_ delivery: @escaping (ObservableType?) -> Continuation ) -> ((PushableType?) throws -> Void) {
         let dispatcher = Dispatcher()
-        return  { value in try dispatcher.manage { delivery(value) } }
+        return  { value in try dispatcher.dispatch { delivery(value) } }
    }
 }
 
