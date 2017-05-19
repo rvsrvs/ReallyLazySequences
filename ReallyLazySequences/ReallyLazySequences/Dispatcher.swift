@@ -57,13 +57,29 @@ struct Dispatchable {
 typealias SequenceNumber = Int64
 fileprivate var dispatcherSequence: Int = 0
 
-class Dispatcher: Hashable, Equatable {
-    enum DispatchStatus {
-        case complete
-        case hasNext
+enum DispatchStatus {
+    case complete
+    case hasNext
+}
+
+protocol DispatcherProtocol {
+    func dispatch(_ continuation: @escaping Continuation) throws -> Void
+    func dispatch() throws -> DispatchStatus
+}
+
+class Dispatcher: DispatcherProtocol {
+    func dispatch() throws -> DispatchStatus {
+        return .complete
     }
 
-    static func ==(left: Dispatcher, right: Dispatcher) -> Bool {
+    func dispatch(_ continuation: @escaping Continuation) throws {
+        var nextDelivery: Continuation? = continuation() as? Continuation
+        while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
+    }
+}
+
+class ThreadSafeDispatcher: DispatcherProtocol, Hashable, Equatable {
+    static func ==(left: ThreadSafeDispatcher, right: ThreadSafeDispatcher) -> Bool {
         return left.hashValue == right.hashValue
     }
     
