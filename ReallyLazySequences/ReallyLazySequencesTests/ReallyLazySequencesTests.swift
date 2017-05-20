@@ -42,7 +42,7 @@ class ReallyLazySequencesTests: XCTestCase {
             .reduce(0) {(partialResult: Int, value: Int) -> Int in
                 return (partialResult + value)
             }
-            .observe {
+            .consume {
                 if let value = $0 { accumulatedResults.append(value) }
             }
         
