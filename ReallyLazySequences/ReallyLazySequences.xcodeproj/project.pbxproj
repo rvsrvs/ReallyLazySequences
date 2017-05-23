@@ -14,6 +14,7 @@
 		FB6255B71ECD4A3F00849037 /* RealiyLazySequenceProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6255B61ECD4A3F00849037 /* RealiyLazySequenceProtocols.swift */; };
 		FB6255B91ECDD88800849037 /* SortedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6255B81ECDD88800849037 /* SortedArray.swift */; };
 		FBF5B0311ED4670A00BCAFB0 /* Composable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF5B0301ED4670A00BCAFB0 /* Composable.swift */; };
+		FBF5B0331ED4894600BCAFB0 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = FBF5B0321ED4894600BCAFB0 /* README.md */; };
 		FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +39,7 @@
 		FB6255B61ECD4A3F00849037 /* RealiyLazySequenceProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealiyLazySequenceProtocols.swift; sourceTree = "<group>"; };
 		FB6255B81ECDD88800849037 /* SortedArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortedArray.swift; sourceTree = "<group>"; };
 		FBF5B0301ED4670A00BCAFB0 /* Composable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Composable.swift; sourceTree = "<group>"; };
+		FBF5B0321ED4894600BCAFB0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReallyLazySequence.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,6 +65,7 @@
 		FB33E0201EBE7E85009CA3AC = {
 			isa = PBXGroup;
 			children = (
+				FBF5B0321ED4894600BCAFB0 /* README.md */,
 				FB33E02C1EBE7E85009CA3AC /* ReallyLazySequences */,
 				FB33E0371EBE7E85009CA3AC /* ReallyLazySequencesTests */,
 				FB33E02B1EBE7E85009CA3AC /* Products */,
@@ -214,6 +217,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBF5B0331ED4894600BCAFB0 /* README.md in Sources */,
 				FBF5B0311ED4670A00BCAFB0 /* Composable.swift in Sources */,
 				FB6255B91ECDD88800849037 /* SortedArray.swift in Sources */,
 				FB6255B51ECB6C7800849037 /* Dispatcher.swift in Sources */,
