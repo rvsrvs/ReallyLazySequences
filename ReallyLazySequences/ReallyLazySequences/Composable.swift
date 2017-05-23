@@ -10,12 +10,12 @@ public protocol Composable {
     associatedtype OutputType
     associatedtype HeadType
     func compose(_ output: @escaping (OutputType?) -> Continuation) -> ((HeadType?) -> Continuation)
-    func map<U>(_ transform: @escaping (OutputType) -> U ) -> Chain.Map<Self, U>
+    func map<U>(_ transform: @escaping (OutputType) -> U ) -> RLS.Map<Self, U>
 }
 
 public extension Composable {
-    public func map<T>(_ transform: @escaping (OutputType) -> T ) -> Chain.Map<Self, T> {
-        return Chain.Map<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
+    public func map<T>(_ transform: @escaping (OutputType) -> T ) -> RLS.Map<Self, T> {
+        return RLS.Map<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
             return { (input: OutputType?) -> Continuation in
                 guard let input = input else { return { delivery(nil) } }
                 return { delivery(transform(input)) }
@@ -29,8 +29,6 @@ public protocol ChainedComposable: Composable {
     typealias Composer = (@escaping (OutputType?) -> Continuation) -> ((PredecessorType.OutputType?) -> Continuation)
     var predecessor: PredecessorType { get set }
     var composer: Composer { get set }
-    init(predecessor: PredecessorType, composer: @escaping Composer)
-    func compose(_ output: @escaping (OutputType?) -> Continuation) -> ((PredecessorType.HeadType?) -> Continuation)
 }
 
 public extension ChainedComposable {
@@ -40,7 +38,7 @@ public extension ChainedComposable {
     }
 }
 
-public struct Chain {
+public struct RLS {
     public struct Map<Predecessor: Composable, Output>: ChainedComposable {
         public typealias PredecessorType = Predecessor
         public typealias HeadType = Predecessor.HeadType
