@@ -13,6 +13,7 @@
 		FB6255B51ECB6C7800849037 /* Dispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6255B41ECB6C7800849037 /* Dispatcher.swift */; };
 		FB6255B71ECD4A3F00849037 /* RealiyLazySequenceProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6255B61ECD4A3F00849037 /* RealiyLazySequenceProtocols.swift */; };
 		FB6255B91ECDD88800849037 /* SortedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6255B81ECDD88800849037 /* SortedArray.swift */; };
+		FBF5B0311ED4670A00BCAFB0 /* Composable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBF5B0301ED4670A00BCAFB0 /* Composable.swift */; };
 		FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +37,7 @@
 		FB6255B41ECB6C7800849037 /* Dispatcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dispatcher.swift; sourceTree = "<group>"; };
 		FB6255B61ECD4A3F00849037 /* RealiyLazySequenceProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealiyLazySequenceProtocols.swift; sourceTree = "<group>"; };
 		FB6255B81ECDD88800849037 /* SortedArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortedArray.swift; sourceTree = "<group>"; };
+		FBF5B0301ED4670A00BCAFB0 /* Composable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Composable.swift; sourceTree = "<group>"; };
 		FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReallyLazySequence.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -82,6 +84,7 @@
 				FB33E02D1EBE7E85009CA3AC /* ReallyLazySequences.h */,
 				FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */,
 				FB6255B61ECD4A3F00849037 /* RealiyLazySequenceProtocols.swift */,
+				FBF5B0301ED4670A00BCAFB0 /* Composable.swift */,
 				FB6255B41ECB6C7800849037 /* Dispatcher.swift */,
 				FB6255B81ECDD88800849037 /* SortedArray.swift */,
 				FB33E02E1EBE7E85009CA3AC /* Info.plist */,
@@ -211,6 +214,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBF5B0311ED4670A00BCAFB0 /* Composable.swift in Sources */,
 				FB6255B91ECDD88800849037 /* SortedArray.swift in Sources */,
 				FB6255B51ECB6C7800849037 /* Dispatcher.swift in Sources */,
 				FB6255B71ECD4A3F00849037 /* RealiyLazySequenceProtocols.swift in Sources */,
