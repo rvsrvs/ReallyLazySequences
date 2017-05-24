@@ -9,3 +9,4 @@ Asynchronous Sequences for Swift
 1. single-thread and thread-safe versions supported (for performance)
 1. error handling is in line rather than passed to end
 1. sequence is preserved
+1. the order of evaluation for each sequence can be read from the nested type information

@@ -1,31 +1,12 @@
 //
-//  AsynchronousSequence.swift
-//  frp
+//  Composable.swift
+//  ReallyLazySequences
 //
-//  Created by Van Simmons on 4/7/17.
-//  Copyright © 2017 Harvard University. All rights reserved.
+//  Created by Van Simmons on 5/23/17.
+//  Copyright © 2017 ComputeCycles, LLC. All rights reserved.
 //
 
-
-/**
- ### Cases:
- 1. Map (Single Value in/Single Value out)
- 1. Reduce (Sequence in/Single Value out)
- 1. Filter (Many value in/ Many value out
- 1. Sort
- 1. FlatMap (Sequence in/Many Sequences out)
- 1. Skip
- 1. Take (early termination)
- 1. Batch (Subsequence in / Sequence(Collection?) out)
- 
- ### Threads and Queues
- 
- ### Multiplex/Demultiplex
- 1. Many Sequences in/Tuple out
- 1. Tuple In/ Many Sequences out
- */
-
-enum AsynchronousSequenceError: Error {
+enum ReallyLazySequenceError: Error {
     case mustHaveDelivery
     case isComplete
     
@@ -39,34 +20,20 @@ enum AsynchronousSequenceError: Error {
     }
 }
 
-fileprivate let nilContinutation: Continuation = { nil }
-
-func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation, value: Continuation? = nil) -> Continuation {
-    if let value = value {
-        return { deliver(values: values, delivery: delivery, value: value() as? Continuation ) }
-    } else if values.count > 0 {
-        let value = delivery(values.first!)
-        let values = Array(values.dropFirst())
-        return { deliver(values: values, delivery: delivery, value: value) }
-    } else {
-        return { delivery(nil) }
-    }
-}
-
-public struct Consumer<Predecessor: Consumable>: ConsumerProtcol{
-    public typealias PushableType = Predecessor.PushableType
-
+public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
+    public typealias PushableType = Predecessor.HeadType
+    
     private let _push: (PushableType?) throws -> Void
     
-    init(predecessor:Predecessor, delivery: @escaping ((Predecessor.ConsumableType?) -> Void)) {
+    init(predecessor:Predecessor, delivery: @escaping ((Predecessor.SequentialType?) -> Void)) {
         var isComplete = false
-        let deliveryWrapper = { (value: Predecessor.ConsumableType?) -> Continuation in
+        let deliveryWrapper = { (value: Predecessor.SequentialType?) -> Continuation in
             if value == nil { isComplete = true }
             return { delivery(value); return nil }
         }
         let composition = predecessor.compose(deliveryWrapper)
-        _push = { (value:Predecessor.PushableType?) throws -> Void in
-            guard !isComplete else { throw AsynchronousSequenceError.isComplete }
+        _push = { (value:PushableType?) throws -> Void in
+            guard !isComplete else { throw ReallyLazySequenceError.isComplete }
             try composition(value)
         }
     }
@@ -74,139 +41,86 @@ public struct Consumer<Predecessor: Consumable>: ConsumerProtcol{
     public func push(_ value: PushableType?) throws -> Void { try _push(value) }
 }
 
-public struct AsynchronousSequence<ConsumableType>: AsynchronousSequenceProtocol {
-    public typealias PushableType = ConsumableType
-    public func compose(_ delivery: @escaping (ConsumableType?) -> Continuation ) -> ((PushableType?) throws -> Void) {
-        let dispatcher = Dispatcher()
-        return  { value in try dispatcher.dispatch { delivery(value) } }
-   }
-}
-
-public struct Map<Predecessor: AsynchronousSequenceProtocol, ConsumableType>: AsynchronousSequenceProtocol {
-    public typealias PushableType = Predecessor.PushableType
-    typealias Mapper = (Predecessor.ConsumableType) -> ConsumableType
-    
-    var predecessor: Predecessor
-    var transform: Mapper
-    
-    init(predecessor: Predecessor, transform: @escaping Mapper) {
-        self.predecessor = predecessor
-        self.transform = transform
-    }
-    
-    public func compose(_ delivery: @escaping (ConsumableType?) -> Continuation) -> ((Predecessor.PushableType?) throws -> Void) {
-        let transform = self.transform
-        let composition = { (input: Predecessor.ConsumableType?) -> Continuation in
-            guard let input = input else { return { delivery(nil) } }
-            return { delivery(transform(input)) }
+public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
+    public typealias HeadType = T
+    public typealias SequentialType = T
+    public func compose(_ output: @escaping (SequentialType?) -> Continuation) -> ((HeadType?) throws -> Void) {
+        return { (value: HeadType?) -> Void in
+            var nextDelivery: Continuation? = output(value)
+            while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
+            return
         }
-        return predecessor.compose(composition)
     }
 }
 
-public struct Reduce<Predecessor: AsynchronousSequenceProtocol, ConsumableType>: AsynchronousSequenceProtocol {
-    public typealias PushableType = Predecessor.PushableType
-    typealias Combiner = (ConsumableType, Predecessor.ConsumableType) -> ConsumableType
+// Template struct for chaining
+public struct ReallyLazyChainedSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias HeadType = Predecessor.HeadType
+    public typealias SequentialType = Output
     
-    var predecessor: Predecessor
-    var initialValue: ConsumableType
-    var combine: Combiner
+    public var predecessor: Predecessor
+    public var composer: Composer
     
-    init(predecessor: Predecessor, initialValue: ConsumableType, combine: @escaping Combiner) {
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
-        self.initialValue = initialValue
-        self.combine = combine
-    }
-    
-    public func compose(_ delivery: @escaping (ConsumableType?) -> Continuation) -> ((Predecessor.PushableType?) throws -> Void) {
-        let combine = self.combine
-        var partialValue = self.initialValue
-        let composition = { (input: Predecessor.ConsumableType?) -> Continuation in
-            guard let input = input else { return deliver(values: [partialValue], delivery: delivery) }
-            return { partialValue = combine(partialValue, input); return nil }
-        }
-        return predecessor.compose(composition)
+        self.composer = composer
     }
 }
 
-public struct Filter<Predecessor: AsynchronousSequenceProtocol>: AsynchronousSequenceProtocol {
-    public typealias PushableType = Predecessor.PushableType
-    public typealias ConsumableType = Predecessor.ConsumableType
-    typealias Filterer = (Predecessor.ConsumableType) -> Bool
+// structs for Chaining
+public struct Map<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias HeadType = Predecessor.HeadType
+    public typealias SequentialType = Output
     
-    var predecessor: Predecessor
-    var filter: Filterer
+    public var predecessor: Predecessor
+    public var composer: Composer
     
-    init(predecessor: Predecessor, filter: @escaping Filterer) {
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
-        self.filter = filter
-    }
-    
-    public func compose(_ delivery: @escaping (ConsumableType?) -> Continuation) -> ((Predecessor.PushableType?) throws -> Void) {
-        let filter = self.filter
-        let composition = { (input: ConsumableType?) -> Continuation in
-            if input == nil || filter(input!) { return { delivery(input) } }
-            return nilContinutation
-        }
-        return predecessor.compose(composition)
+        self.composer = composer
     }
 }
 
-public struct Sort<Predecessor: AsynchronousSequenceProtocol>: AsynchronousSequenceProtocol {
-    public typealias PushableType = Predecessor.PushableType
-    public typealias ConsumableType = Predecessor.ConsumableType
-    typealias Comparator = (Predecessor.ConsumableType, Predecessor.ConsumableType) -> Bool
+public struct Reduce<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias HeadType = Predecessor.HeadType
+    public typealias SequentialType = Output
     
-    var predecessor: Predecessor
-    var comparison: Comparator
+    public var predecessor: Predecessor
+    public var composer: Composer
     
-    init(predecessor: Predecessor, comparison: @escaping Comparator) {
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
-        self.comparison = comparison
-    }
-    
-    public func compose(_ delivery: @escaping (ConsumableType?) -> Continuation) -> ((Predecessor.PushableType?) throws -> Void) {
-        let comparison = self.comparison
-        var accumulator: [ConsumableType] = []
-        let composition = { (input: ConsumableType?) -> Continuation in
-            guard let input = input else {
-                return deliver(values: accumulator.sorted(by: comparison), delivery: delivery)
-            }
-            return { accumulator.append(input); return nil }
-        }
-        return predecessor.compose(composition)
+        self.composer = composer
     }
 }
 
-//struct FlatMapAsynchronousSequence<Predecessor: AsynchronousSequenceProtocol, T>: AsynchronousSequenceProtocol {
-//    typealias PushableType = Predecessor.PushableType
-//    typealias ConsumableType = T
-//
-//    var predecessor: Predecessor
-//    var generator: (PushableType) -> [T]
-//
-//    init(predecessor: Predecessor, generator: @escaping (PushableType) -> [T]) {
-//        self.predecessor = predecessor
-//        self.generator = generator
-//    }
-//    
-//    func compose(_ delivery: @escaping (ConsumableType?) -> Void) -> ((Predecessor.PushableType?) -> Void) {
-//        let generator = self.generator
-//        let composition = { (input: PushableType?) -> Void in
-//            guard let input = input else { delivery(nil); return }
-//            for i in generator(input) { delivery(i) }
-//        }
-//        return predecessor.compose(composition)
-//    }
-//}
+public struct Filter<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias HeadType = Predecessor.HeadType
+    public typealias SequentialType = Output
+    
+    public var predecessor: Predecessor
+    public var composer: Composer
+    
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
+        self.predecessor = predecessor
+        self.composer = composer
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
+public struct Sort<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias HeadType = Predecessor.HeadType
+    public typealias SequentialType = Output
+    
+    public var predecessor: Predecessor
+    public var composer: Composer
+    
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
+        self.predecessor = predecessor
+        self.composer = composer
+    }
+}

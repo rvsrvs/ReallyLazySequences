@@ -25,7 +25,7 @@ class ReallyLazySequencesTests: XCTestCase {
     func testSimpleSynchronousSequence() {
         var accumulatedResults: [Int] = []
         
-        let s = AsynchronousSequence<Int>()
+        let s = ReallyLazySequence<Int>()
             .filter {
                 $0 < 10
             }
@@ -52,7 +52,7 @@ class ReallyLazySequencesTests: XCTestCase {
             for _ in 0 ..< 100000 { try s.push(200) }
             for i in [8, 12, 4, 3, 2] { try s.push(i) }
             try s.push(nil)
-        } catch AsynchronousSequenceError.isComplete {
+        } catch ReallyLazySequenceError.isComplete {
             print("Can't push to a completed sequence")
         } catch {
             print(error.localizedDescription)
