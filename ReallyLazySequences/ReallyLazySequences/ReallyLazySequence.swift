@@ -7,15 +7,12 @@
 //
 
 enum ReallyLazySequenceError: Error {
-    case mustHaveDelivery
     case isComplete
     
     var description: String {
         switch self {
-        case .mustHaveDelivery:
-            return "AsynchronousSequences must have a specified delivery mechanism before calling push()"
         case .isComplete:
-            return "AsynchronousSequences has already completed.  Pushes not allowed"
+            return "ReallyLazySequence has already completed.  Pushes not allowed"
         }
     }
 }
