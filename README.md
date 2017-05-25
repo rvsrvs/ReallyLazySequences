@@ -16,6 +16,7 @@ Asynchronous Sequences for Swift
 ### Notes
 
 1. Sequences have a HeadType and a ConsumableType.  Values of type HeadType enter at the head of the sequence and values of type ConsumableType come out at the end.
+1. Putting a value in does not necessarily cause a value to come out.  Sending the nil value in will cause all values to emerge at the end.
 1. You cannot put values into a sequence, you must create a Consumer of the sequence by calling consume() on a sequence and passing a closure which will consume the values.  Values of HeadType may be pushed into the resulting Consumer.
 1. You may create a Producer from a sequence by specifying a closure which produces values of type HeadType.  
 1. Producers must be consumed before they can be started.  Consuming a Producer returns a Task which may be started and which will call a ccompletion handler when the TaskCompletes
@@ -28,7 +29,7 @@ Asynchronous Sequences for Swift
 Consumer<Reduce<Map<Sort<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Double>, Int>, Int>>
 ```
 
-1. How to get rid of boilerplate in the RLS extensions?
+2. How to get rid of boilerplate in the RLS extensions?
 1. Should sending nil in be complete or clear/reset?
 
 
