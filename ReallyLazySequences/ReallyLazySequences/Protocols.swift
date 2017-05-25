@@ -14,31 +14,14 @@ public protocol TaskProtocol {
 
 // Consumers allow new values to be pushed into a ReallyLazySequence
 public protocol ConsumerProtocol {
-    associatedtype PushableType
-    func push(_ value: PushableType?) throws -> Void
+    associatedtype PredecessorType: ReallyLazySequenceProtocol
+    func push(_ value: PredecessorType.HeadType?) throws -> Void
 }
 
 public protocol ProducerProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
-    var starter: ((Consumer<PredecessorType>.PushableType?) -> Void) -> Void { get }
+    var starter: ((PredecessorType.HeadType?) -> Void) -> Void { get }
     func consume(_ delivery: @escaping (PredecessorType.ConsumableType?) -> Void) -> Task<PredecessorType>
-}
-
-public struct Producer<Predecessor: ReallyLazySequenceProtocol>: ProducerProtocol {
-    public typealias HeadType = Predecessor.HeadType
-    public typealias ConsumerType = Predecessor
-    public typealias PredecessorType = Predecessor
-    var predecessor: Predecessor
-    public let starter: ((Consumer<Predecessor>.PushableType?) -> Void) -> Void
-    
-    public init(predecessor: Predecessor, _ starter: @escaping ((Consumer<Predecessor>.PushableType?) -> Void) -> Void) {
-        self.predecessor = predecessor
-        self.starter = starter
-    }
-    
-    public func consume(_ delivery: @escaping (Predecessor.ConsumableType?) -> Void) -> Task<Predecessor> {
-        return Task(producer: self, consumer: predecessor.consume(delivery))
-    }
 }
 
 public protocol ReallyLazySequenceProtocol {

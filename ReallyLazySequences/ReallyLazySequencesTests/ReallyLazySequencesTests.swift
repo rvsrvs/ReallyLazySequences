@@ -26,19 +26,11 @@ class ReallyLazySequencesTests: XCTestCase {
         var accumulatedResults: [Int] = []
         
         let s = ReallyLazySequence<Int>()
-            .filter {
-                $0 < 10
-            }
-            .map {
-                Double($0)
-            }
-            .map {
-                $0 * 2
-            }
+            .filter { $0 < 10 }
+            .map { Double($0) }
+            .map {  $0 * 2 }
             .sort(<)
-            .map { (value: Double) -> Int in
-                Int(value)
-            }
+            .map { (value: Double) -> Int in Int(value) }
             .reduce(0) {(partialResult: Int, value: Int) -> Int in
                 return (partialResult + value)
             }

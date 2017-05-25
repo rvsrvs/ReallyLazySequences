@@ -43,10 +43,7 @@ public extension ReallyLazySequenceProtocol {
             var partialValue = initialValue
             return { (input: ConsumableType?) -> Continuation in
                 guard let input = input else { return deliver(values: [partialValue], delivery: delivery) }
-                return {
-                    partialValue = combine(partialValue, input);
-                    return nil
-                }
+                return { partialValue = combine(partialValue, input); return nil }
             }
         }
     }

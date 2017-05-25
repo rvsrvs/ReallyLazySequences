@@ -27,7 +27,7 @@ public struct Task<Predecessor: ReallyLazySequenceProtocol>: TaskProtocol {
     }
     
     public func start(_ completionHandler: @escaping (TaskProtocol) -> Void) {
-        producer.starter { (input: Consumer<Predecessor>.PushableType?) -> Void in
+        producer.starter { (input: Predecessor.HeadType?) -> Void in
             guard let input = input else {
                 try? consumer.push(nil)
                 completionHandler(self)
@@ -38,10 +38,25 @@ public struct Task<Predecessor: ReallyLazySequenceProtocol>: TaskProtocol {
     }
 }
 
-public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
-    public typealias PushableType = Predecessor.HeadType
+public struct Producer<Predecessor: ReallyLazySequenceProtocol>: ProducerProtocol {
+    public typealias PredecessorType = Predecessor
+    var predecessor: Predecessor
+    public let starter: ((PredecessorType.HeadType?) -> Void) -> Void
     
-    private let _push: (PushableType?) throws -> Void
+    public init(predecessor: Predecessor, _ starter: @escaping ((PredecessorType.HeadType?) -> Void) -> Void) {
+        self.predecessor = predecessor
+        self.starter = starter
+    }
+    
+    public func consume(_ delivery: @escaping (Predecessor.ConsumableType?) -> Void) -> Task<Predecessor> {
+        return Task(producer: self, consumer: predecessor.consume(delivery))
+    }
+}
+
+public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
+    public typealias PredecessorType = Predecessor
+    
+    private let _push: (Predecessor.HeadType?) throws -> Void
     
     init(predecessor:Predecessor, delivery: @escaping ((Predecessor.ConsumableType?) -> Void)) {
         var isComplete = false
@@ -50,13 +65,13 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
             return { delivery(value); return nil }
         }
         let composition = predecessor.compose(deliveryWrapper)
-        _push = { (value:PushableType?) throws -> Void in
+        _push = { (value:Predecessor.HeadType?) throws -> Void in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }
             try composition(value)
         }
     }
     
-    public func push(_ value: PushableType?) throws -> Void { try _push(value) }
+    public func push(_ value: Predecessor.HeadType?) throws -> Void { try _push(value) }
 }
 
 public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
