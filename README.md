@@ -19,5 +19,15 @@ Asynchronous Sequences for Swift
 1. You cannot put values into a sequence, you must create a Consumer of the sequence by calling consume() on a sequence and passing a closure which will consume the values.  Values of HeadType may be pushed into the resulting Consumer.
 1. You may create a Producer from a sequence by specifying a closure which produces values of type HeadType.  
 1. Producers must be consumed before they can be started.  Consuming a Producer returns a Task which may be started and which will call a ccompletion handler when the TaskCompletes
+1. Composition of a sequence consists of creating a single closure from the closures and values associated with each predecessor of the given sequence
+
+
+### Questions
+1. Is it worth it to preserve the type names in long form? e.g.
+```
+Consumer<Reduce<Map<Sort<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Double>, Int>, Int>>
+```
+
+
 
 

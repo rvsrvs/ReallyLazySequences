@@ -22,7 +22,7 @@ class ReallyLazySequencesTests: XCTestCase {
     func testQueueHandling() {
     }
     
-    func testSimpleSynchronousSequence() {
+    func testSimpleSequence() {
         var accumulatedResults: [Int] = []
         
         let s = ReallyLazySequence<Int>()
@@ -34,9 +34,7 @@ class ReallyLazySequencesTests: XCTestCase {
             .reduce(0) {(partialResult: Int, value: Int) -> Int in
                 return (partialResult + value)
             }
-            .consume {
-                if let value = $0 { accumulatedResults.append(value) }
-            }
+            .consume { if let value = $0 { accumulatedResults.append(value) } }
         
         print(type(of:s))
         
