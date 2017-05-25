@@ -41,9 +41,19 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
-    func flatMap<T>(_ transform: @escaping (ConsumableType) -> Producer<T>) -> FlatMapSequence<Self, T> {
+    func flatMap<T>(_ transform: @escaping (ConsumableType) -> Producer<ReallyLazySequence<T>>) -> FlatMapSequence<Self, T> {
         return FlatMapSequence<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((ConsumableType?) -> Continuation) in
             return { (input: ConsumableType?) -> Continuation in
+                guard let input = input else { return { delivery(nil) } }
+                let producer = transform(input)
+                let task = producer.consume { (value: T?) -> Void in
+                    guard let value = value else { return }
+                    var nextDelivery: Continuation? = delivery(value)
+                    while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
+                }
+                task.start { (t:TaskProtocol) in
+                    
+                }
                 // Need to process the Sequence from transform here
                 return { delivery(nil) }
             }
@@ -54,7 +64,10 @@ public extension ReallyLazySequenceProtocol {
         return Reduce<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((ConsumableType?) -> Continuation) in
             var partialValue = initialValue
             return { (input: ConsumableType?) -> Continuation in
-                guard let input = input else { return deliver(values: [partialValue], delivery: delivery) }
+                guard let input = input else {
+                    let finalValue = [partialValue]; partialValue = initialValue
+                    return deliver(values: finalValue, delivery: delivery)
+                }
                 return { partialValue = combine(partialValue, input); return nil }
             }
         }
@@ -76,7 +89,8 @@ public extension ReallyLazySequenceProtocol {
             var accumulator: [ConsumableType] = []
             return { (input: ConsumableType?) -> Continuation in
                 guard let input = input else {
-                    return deliver(values: accumulator.sorted(by: comparison), delivery: delivery)
+                    let sorted = accumulator.sorted(by: comparison); accumulator = []
+                    return deliver(values: sorted, delivery: delivery)
                 }
                 return { accumulator.append(input); return nil }
             }

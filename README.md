@@ -28,6 +28,9 @@ Asynchronous Sequences for Swift
 Consumer<Reduce<Map<Sort<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Double>, Int>, Int>>
 ```
 
+1. How to get rid of boilerplate in the RLS extensions?
+1. Should sending nil in be complete or clear/reset?
+
 
 
 

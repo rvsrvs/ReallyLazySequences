@@ -24,7 +24,7 @@ public protocol ReallyLazySequenceProtocol {
     // swift.Sequence replication 
     // in Swift 4 these will all return ChainedSequence where PredecessorType == Self && ConsumableType = T (or Self.ConsumableType)
     func map<T>(_ transform: @escaping (ConsumableType) -> T ) -> Map<Self, T>
-    func flatMap<T>(_ transform: @escaping (ConsumableType) -> Producer<T>) -> FlatMapSequence<Self, T>
+    func flatMap<T>(_ transform: @escaping (ConsumableType) -> Producer<ReallyLazySequence<T>>) -> FlatMapSequence<Self, T>
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, ConsumableType) -> T ) -> Reduce<Self, T>
     func filter(_ filter: @escaping (ConsumableType) -> Bool ) -> Filter<Self, ConsumableType>
     func sort(_ comparison: @escaping (ConsumableType, ConsumableType) -> Bool ) -> Sort<Self, ConsumableType>
