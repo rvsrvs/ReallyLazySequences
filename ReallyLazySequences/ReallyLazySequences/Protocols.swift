@@ -20,7 +20,7 @@ public protocol ConsumerProtocol {
 
 public protocol ProducerProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
-    var starter: ((PredecessorType.HeadType?) -> Void) -> Void { get }
+    var produce: (PredecessorType.PushFunction) throws -> Void { get }
     func consume(_ delivery: @escaping (PredecessorType.ConsumableType?) -> Void) -> Task<PredecessorType>
 }
 
@@ -33,12 +33,14 @@ public protocol ReallyLazySequenceProtocol {
     
     // To be used, ReallyLazySequences must be first consumed. 
     // Consumation uses compose to create a function which accepts input of HeadType and outputs ConsumableType
-    func consume(_ delivery: @escaping (ConsumableType?) -> Void) -> Consumer<Self>
     func compose(_ output: @escaping ConsumerFunction) -> PushFunction
+    func consume(_ delivery: @escaping (ConsumableType?) -> Void) -> Consumer<Self>
+    func produce(_ input: @escaping (PushFunction) throws -> Void) -> Producer<Self>
     
     // swift.Sequence replication 
     // in Swift 4 these will all return ChainedSequence where PredecessorType == Self && ConsumableType = T (or Self.ConsumableType)
     func map<T>(_ transform: @escaping (ConsumableType) -> T ) -> Map<Self, T>
+//    func flatMap(_ transform: @escaping (ConsumableType) -> ConsumableType?) -> FlatMapOptional<Self, ConsumableType>
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, ConsumableType) -> T ) -> Reduce<Self, T>
     func filter(_ filter: @escaping (ConsumableType) -> Bool ) -> Filter<Self, ConsumableType>
     func sort(_ comparison: @escaping (ConsumableType, ConsumableType) -> Bool ) -> Sort<Self, ConsumableType>

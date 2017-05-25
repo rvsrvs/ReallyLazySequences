@@ -27,7 +27,7 @@ public struct Task<Predecessor: ReallyLazySequenceProtocol>: TaskProtocol {
     }
     
     public func start(_ completionHandler: @escaping (TaskProtocol) -> Void) {
-        producer.starter { (input: Predecessor.HeadType?) -> Void in
+        try? producer.produce { (input: Predecessor.HeadType?) throws -> Void in
             guard let input = input else {
                 try? consumer.push(nil)
                 completionHandler(self)
@@ -41,11 +41,11 @@ public struct Task<Predecessor: ReallyLazySequenceProtocol>: TaskProtocol {
 public struct Producer<Predecessor: ReallyLazySequenceProtocol>: ProducerProtocol {
     public typealias PredecessorType = Predecessor
     var predecessor: Predecessor
-    public let starter: ((PredecessorType.HeadType?) -> Void) -> Void
+    public let produce: (Predecessor.PushFunction) throws -> Void
     
-    public init(predecessor: Predecessor, _ starter: @escaping ((PredecessorType.HeadType?) -> Void) -> Void) {
+    public init(predecessor: Predecessor, _ produce: @escaping (Predecessor.PushFunction) throws -> Void) {
         self.predecessor = predecessor
-        self.starter = starter
+        self.produce = produce
     }
     
     public func consume(_ delivery: @escaping (Predecessor.ConsumableType?) -> Void) -> Task<Predecessor> {
@@ -145,6 +145,20 @@ public struct Filter<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSe
 }
 
 public struct Sort<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias HeadType = Predecessor.HeadType
+    public typealias ConsumableType = Output
+    
+    public var predecessor: Predecessor
+    public var composer: Composer
+    
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
+        self.predecessor = predecessor
+        self.composer = composer
+    }
+}
+
+public struct FlatMapOptional<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias HeadType = Predecessor.HeadType
     public typealias ConsumableType = Output

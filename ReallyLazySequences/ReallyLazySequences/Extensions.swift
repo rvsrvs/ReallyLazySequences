@@ -25,6 +25,9 @@ public extension ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (ConsumableType?) -> Void) -> Consumer<Self> {
         return Consumer(predecessor: self, delivery: delivery)
     }
+    func produce(_ input: @escaping (PushFunction) throws -> Void) -> Producer<Self> {
+        return Producer<Self>(predecessor: self, input)
+    }
 }
 
 // Implement Sequencing
@@ -38,6 +41,16 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
+//    func flatMap(_ transform: @escaping (ConsumableType) -> ConsumableType?) -> FlatMapOptional<Self, ConsumableType> {
+//        return FlatMapOptional<Self, ConsumableType>(predecessor: self) { (delivery: @escaping (ConsumableType??) -> Continuation) -> ((ConsumableType?) -> Continuation) in
+//            return { (input: ConsumableType?) -> Continuation in
+//                guard let input = input else { return { delivery(nil) } }
+//                guard let tInput = input else { return { nil } }
+//                return { delivery(tInput) }
+//            }
+//        }
+//    }
+
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, ConsumableType) -> T ) -> Reduce<Self, T> {
         return Reduce<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((ConsumableType?) -> Continuation) in
             var partialValue = initialValue
