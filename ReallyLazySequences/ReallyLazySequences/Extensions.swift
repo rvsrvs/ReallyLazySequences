@@ -22,7 +22,7 @@ fileprivate func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation
 
 // Implement Sequential
 public extension ReallyLazySequenceProtocol {
-    func consume(_ delivery: @escaping (ConsumableType?) -> Void) -> Consumer<Self> {
+    func consume(_ delivery: @escaping (OutputType?) -> Void) -> Consumer<Self> {
         return Consumer(predecessor: self, delivery: delivery)
     }
     func produce(_ input: @escaping (PushFunction) throws -> Void) -> Producer<Self> {
@@ -32,18 +32,18 @@ public extension ReallyLazySequenceProtocol {
 
 // Implement Sequencing
 public extension ReallyLazySequenceProtocol {
-    public func map<T>(_ transform: @escaping (ConsumableType) -> T ) -> Map<Self, T> {
-        return Map<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((ConsumableType?) -> Continuation) in
-            return { (input: ConsumableType?) -> Continuation in
+    public func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T> {
+        return Map<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
+            return { (input: OutputType?) -> Continuation in
                 guard let input = input else { return { delivery(nil) } }
                 return { delivery(transform(input)) }
             }
         }
     }
     
-    func flatMap<T>(_ transform: @escaping (ConsumableType) -> Producer<ReallyLazySequence<T>>) -> FlatMapSequence<Self, T> {
-        return FlatMapSequence<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((ConsumableType?) -> Continuation) in
-            return { (input: ConsumableType?) -> Continuation in
+    func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<ReallyLazySequence<T>>) -> FlatMapSequence<Self, T> {
+        return FlatMapSequence<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
+            return { (input: OutputType?) -> Continuation in
                 guard let input = input else { return { delivery(nil) } }
                 let producer = transform(input)
                 let task = producer.consume { (value: T?) -> Void in
@@ -60,10 +60,10 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
-    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, ConsumableType) -> T ) -> Reduce<Self, T> {
-        return Reduce<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((ConsumableType?) -> Continuation) in
+    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T ) -> Reduce<Self, T> {
+        return Reduce<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
             var partialValue = initialValue
-            return { (input: ConsumableType?) -> Continuation in
+            return { (input: OutputType?) -> Continuation in
                 guard let input = input else {
                     let finalValue = [partialValue]; partialValue = initialValue
                     return deliver(values: finalValue, delivery: delivery)
@@ -73,21 +73,21 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
-    func filter(_ filter: @escaping (ConsumableType) -> Bool ) -> Filter<Self, ConsumableType> {
-        return Filter<Self, ConsumableType>(predecessor: self) {
-            (delivery: @escaping (ConsumableType?) -> Continuation) -> ((ConsumableType?) -> Continuation) in
-            return { (input: ConsumableType?) -> Continuation in
+    func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType> {
+        return Filter<Self, OutputType>(predecessor: self) {
+            (delivery: @escaping (OutputType?) -> Continuation) -> ((OutputType?) -> Continuation) in
+            return { (input: OutputType?) -> Continuation in
                 if input == nil || filter(input!) { return { delivery(input) } }
                 return { return nil }
             }
         }
     }
     
-    func sort(_ comparison: @escaping (ConsumableType, ConsumableType) -> Bool ) -> Sort<Self, ConsumableType> {
-        return Sort<Self, ConsumableType>(predecessor: self) {
-            (delivery: @escaping (ConsumableType?) -> Continuation) -> ((ConsumableType?) -> Continuation) in
-            var accumulator: [ConsumableType] = []
-            return { (input: ConsumableType?) -> Continuation in
+    func sort(_ comparison: @escaping (OutputType, OutputType) -> Bool ) -> Sort<Self, OutputType> {
+        return Sort<Self, OutputType>(predecessor: self) {
+            (delivery: @escaping (OutputType?) -> Continuation) -> ((OutputType?) -> Continuation) in
+            var accumulator: [OutputType] = []
+            return { (input: OutputType?) -> Continuation in
                 guard let input = input else {
                     let sorted = accumulator.sorted(by: comparison); accumulator = []
                     return deliver(values: sorted, delivery: delivery)
@@ -99,7 +99,7 @@ public extension ReallyLazySequenceProtocol {
 }
 
 public extension ChainedSequence {
-    public func compose(_ output: @escaping (ConsumableType?) -> Continuation) -> ((PredecessorType.HeadType?) throws -> Void) {
+    public func compose(_ output: @escaping (OutputType?) -> Continuation) -> ((PredecessorType.InputType?) throws -> Void) {
         let composition = self.composer(output)
         return predecessor.compose(composition)
     }

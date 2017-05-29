@@ -18,10 +18,10 @@ enum ReallyLazySequenceError: Error {
 }
 
 public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
-    public typealias HeadType = T
-    public typealias ConsumableType = T
-    public func compose(_ output: @escaping (ConsumableType?) -> Continuation) -> ((HeadType?) throws -> Void) {
-        return { (value: HeadType?) -> Void in
+    public typealias InputType = T
+    public typealias OutputType = T
+    public func compose(_ output: @escaping (OutputType?) -> Continuation) -> ((InputType?) throws -> Void) {
+        return { (value: InputType?) -> Void in
             var nextDelivery: Continuation? = output(value)
             while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
         }
@@ -31,8 +31,8 @@ public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
 // Template struct for chaining.
 public struct ReallyLazyChainedSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
-    public typealias HeadType = Predecessor.HeadType
-    public typealias ConsumableType = Output
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
     
     public var predecessor: Predecessor
     public var composer: Composer
@@ -53,7 +53,7 @@ public struct Task<Predecessor: ReallyLazySequenceProtocol>: TaskProtocol {
     }
     
     public func start(_ completionHandler: @escaping (TaskProtocol) -> Void) {
-        try? producer.produce { (input: Predecessor.HeadType?) throws -> Void in
+        try? producer.produce { (input: Predecessor.InputType?) throws -> Void in
             guard let input = input else {
                 try? consumer.push(nil)
                 completionHandler(self)
@@ -74,7 +74,7 @@ public struct Producer<Predecessor: ReallyLazySequenceProtocol>: ProducerProtoco
         self.produce = produce
     }
     
-    public func consume(_ delivery: @escaping (Predecessor.ConsumableType?) -> Void) -> Task<Predecessor> {
+    public func consume(_ delivery: @escaping (Predecessor.OutputType?) -> Void) -> Task<Predecessor> {
         return Task(producer: self, consumer: predecessor.consume(delivery))
     }
 }
@@ -83,23 +83,23 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     public typealias PredecessorType = Predecessor
     
     private let predecessor: Predecessor
-    private let _push: (Predecessor.HeadType?) throws -> Void
+    private let _push: (Predecessor.InputType?) throws -> Void
     
-    init(predecessor:Predecessor, delivery: @escaping ((Predecessor.ConsumableType?) -> Void)) {
+    init(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void)) {
         self.predecessor = predecessor
         var isComplete = false
-        let deliveryWrapper = { (value: Predecessor.ConsumableType?) -> Continuation in
+        let deliveryWrapper = { (value: Predecessor.OutputType?) -> Continuation in
             if value == nil { isComplete = true }
             return { delivery(value); return nil }
         }
         let composition = predecessor.compose(deliveryWrapper)
-        _push = { (value:Predecessor.HeadType?) throws -> Void in
+        _push = { (value:Predecessor.InputType?) throws -> Void in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }
             try composition(value)
         }
     }
     
-    public func push(_ value: Predecessor.HeadType?) throws -> Void { try _push(value) }
+    public func push(_ value: Predecessor.InputType?) throws -> Void { try _push(value) }
     public func produce(_ handler: @escaping (Predecessor.PushFunction) throws -> Void) -> Task<Predecessor> {
         return Task(producer: predecessor.produce(handler), consumer: self)
     }
@@ -109,8 +109,8 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
 // structs for Chaining
 public struct Map<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
-    public typealias HeadType = Predecessor.HeadType
-    public typealias ConsumableType = Output
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
     
     public var predecessor: Predecessor
     public var composer: Composer
@@ -123,8 +123,8 @@ public struct Map<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSeque
 
 public struct Reduce<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
-    public typealias HeadType = Predecessor.HeadType
-    public typealias ConsumableType = Output
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
     
     public var predecessor: Predecessor
     public var composer: Composer
@@ -137,8 +137,8 @@ public struct Reduce<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSe
 
 public struct Filter<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
-    public typealias HeadType = Predecessor.HeadType
-    public typealias ConsumableType = Output
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
     
     public var predecessor: Predecessor
     public var composer: Composer
@@ -151,8 +151,8 @@ public struct Filter<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSe
 
 public struct Sort<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
-    public typealias HeadType = Predecessor.HeadType
-    public typealias ConsumableType = Output
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
     
     public var predecessor: Predecessor
     public var composer: Composer
@@ -165,8 +165,8 @@ public struct Sort<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequ
 
 public struct FlatMapSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
-    public typealias HeadType = Predecessor.HeadType
-    public typealias ConsumableType = Output
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
     
     public var predecessor: Predecessor
     public var composer: Composer
