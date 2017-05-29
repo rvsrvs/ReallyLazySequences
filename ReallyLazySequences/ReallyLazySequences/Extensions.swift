@@ -22,10 +22,10 @@ fileprivate func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation
 
 // Implement Sequential
 public extension ReallyLazySequenceProtocol {
-    func consume(_ delivery: @escaping (OutputType?) -> Void) -> Consumer<Self> {
-        return Consumer(predecessor: self, delivery: delivery)
+    func consume(_ delivery: @escaping (OutputType?) -> Continuation) -> Consumer<Self> {
+        return Consumer(predecessor: self, delivery:  delivery )
     }
-    func produce(_ input: @escaping (PushFunction) throws -> Void) -> Producer<Self> {
+    func produce(_ input: @escaping (InputFunction) throws -> Void) -> Producer<Self> {
         return Producer<Self>(predecessor: self, input)
     }
 }
@@ -46,10 +46,11 @@ public extension ReallyLazySequenceProtocol {
             return { (input: OutputType?) -> Continuation in
                 guard let input = input else { return { delivery(nil) } }
                 let producer = transform(input)
-                let task = producer.consume { (value: T?) -> Void in
-                    guard let value = value else { return }
+                let task = producer.consume { (value: T?) -> Continuation in
+                    guard let value = value else { return { nil } }
                     var nextDelivery: Continuation? = delivery(value)
                     while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
+                    return { nil }
                 }
                 task.start { (t:TaskProtocol) in
                     

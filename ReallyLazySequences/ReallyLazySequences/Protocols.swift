@@ -9,17 +9,17 @@
 public typealias Continuation = () -> Any?
 
 public protocol ReallyLazySequenceProtocol {
-    associatedtype InputType // The type which can be input for a given RLS
+    associatedtype InputType  // The type which can be input for a given RLS
     associatedtype OutputType // The type which is output from a given RLS
     
-    typealias PushFunction = (InputType?) throws -> Void // a function to allow input to an RLS
-    typealias ConsumerFunction = (OutputType?) -> Continuation  // a function which consumes the output of an RLS
+    typealias InputFunction  = (InputType?) throws -> Void // a function to allow input to an RLS
+    typealias OutputFunction = (OutputType?) -> Continuation  // a function which consumes the output of an RLS
     
     // To be used, ReallyLazySequences must be first consumed. 
     // Consumation uses compose to create a function which accepts input of InputType and outputs OutputType
-    func compose(_ output: @escaping ConsumerFunction) -> PushFunction
-    func consume(_ delivery: @escaping (OutputType?) -> Void) -> Consumer<Self>
-    func produce(_ input: @escaping (PushFunction) throws -> Void) -> Producer<Self>
+    func compose(_ output: @escaping OutputFunction) -> InputFunction
+    func consume(_ delivery: @escaping OutputFunction) -> Consumer<Self>
+    func produce(_ input: @escaping (InputFunction) throws -> Void) -> Producer<Self>
     
     // swift.Sequence replication 
     // in Swift 4 these will all return ChainedSequence where PredecessorType == Self && OutputType = T (or Self.OutputType)
@@ -42,13 +42,13 @@ public protocol ChainedSequence: ReallyLazySequenceProtocol {
 public protocol ConsumerProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
     func push(_ value: PredecessorType.InputType?) throws -> Void
-    func produce(_ handler: @escaping (PredecessorType.PushFunction) throws -> Void) -> Task<PredecessorType>
+    func produce(_ handler: @escaping (PredecessorType.InputFunction) throws -> Void) -> Task<PredecessorType>
 }
 
 public protocol ProducerProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
-    var produce: (PredecessorType.PushFunction) throws -> Void { get }
-    func consume(_ delivery: @escaping (PredecessorType.OutputType?) -> Void) -> Task<PredecessorType>
+    var produce: (PredecessorType.InputFunction) throws -> Void { get }
+    func consume(_ delivery: @escaping (PredecessorType.OutputType?) -> Continuation) -> Task<PredecessorType>
 }
 
 public protocol TaskProtocol {

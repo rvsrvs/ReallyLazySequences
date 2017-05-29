@@ -34,7 +34,7 @@ class ReallyLazySequencesTests: XCTestCase {
             .reduce(0) {(partialResult: Int, value: Int) -> Int in
                 return (partialResult + value)
             }
-            .consume { if let value = $0 { accumulatedResults.append(value) } }
+            .consume { if let value = $0 { accumulatedResults.append(value) }; return { nil } }
         
         print(type(of:s))
         

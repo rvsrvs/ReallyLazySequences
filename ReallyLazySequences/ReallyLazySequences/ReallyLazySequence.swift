@@ -67,14 +67,14 @@ public struct Task<Predecessor: ReallyLazySequenceProtocol>: TaskProtocol {
 public struct Producer<Predecessor: ReallyLazySequenceProtocol>: ProducerProtocol {
     public typealias PredecessorType = Predecessor
     var predecessor: Predecessor
-    public let produce: (Predecessor.PushFunction) throws -> Void
+    public let produce: (Predecessor.InputFunction) throws -> Void
     
-    public init(predecessor: Predecessor, _ produce: @escaping (Predecessor.PushFunction) throws -> Void) {
+    public init(predecessor: Predecessor, _ produce: @escaping (Predecessor.InputFunction) throws -> Void) {
         self.predecessor = predecessor
         self.produce = produce
     }
     
-    public func consume(_ delivery: @escaping (Predecessor.OutputType?) -> Void) -> Task<Predecessor> {
+    public func consume(_ delivery: @escaping (Predecessor.OutputType?) -> Continuation) -> Task<Predecessor> {
         return Task(producer: self, consumer: predecessor.consume(delivery))
     }
 }
@@ -85,12 +85,12 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     private let predecessor: Predecessor
     private let _push: (Predecessor.InputType?) throws -> Void
     
-    init(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void)) {
+    init(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Continuation)) {
         self.predecessor = predecessor
         var isComplete = false
         let deliveryWrapper = { (value: Predecessor.OutputType?) -> Continuation in
             if value == nil { isComplete = true }
-            return { delivery(value); return nil }
+            return { return delivery(value) }
         }
         let composition = predecessor.compose(deliveryWrapper)
         _push = { (value:Predecessor.InputType?) throws -> Void in
@@ -100,7 +100,7 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     }
     
     public func push(_ value: Predecessor.InputType?) throws -> Void { try _push(value) }
-    public func produce(_ handler: @escaping (Predecessor.PushFunction) throws -> Void) -> Task<Predecessor> {
+    public func produce(_ handler: @escaping (Predecessor.InputFunction) throws -> Void) -> Task<Predecessor> {
         return Task(producer: predecessor.produce(handler), consumer: self)
     }
 }

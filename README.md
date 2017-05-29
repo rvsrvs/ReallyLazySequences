@@ -16,11 +16,11 @@ in the single-threaded environment
 
 ### Notes
 
-1. All Sequences have a HeadType and a ConsumableType.  Values of type HeadType enter at the head of the sequence and values of type ConsumableType come out at the end.
+1. All Sequences have a InputType and a OutputType.  Values of type InputType enter at the head of the sequence and values of type OutputType come out at the end.
 1. Putting a value in does not necessarily cause a value to come out.  
 1. Sending the nil value in will cause all in-progress values to emerge at the end and reset internal state
-1. You cannot put values into a Sequence object, you must first create a Consumer of the sequence by calling consume() on a Sequence and passing a closure which will consume the output values.  Values of HeadType may be pushed into the resulting Consumer.
-1. You may create a Producer from a Sequence by specifying a closure which produces values of type HeadType.  
+1. You cannot put values into a Sequence object, you must first create a Consumer of the sequence by calling consume() on a Sequence and passing a closure which will consume the output values.  Values of InputType may be pushed into the resulting Consumer.
+1. You may create a Producer from a Sequence by specifying a closure which produces values of type InputType.  
 1. Producers must be consumed before they can be started.  Consuming a Producer returns a Task which may be started and which will call a ccompletion handler when the TaskCompletes
 1. Composition of a sequence consists of creating a single closure from the closures and values associated with each predecessor of the given sequence
 
