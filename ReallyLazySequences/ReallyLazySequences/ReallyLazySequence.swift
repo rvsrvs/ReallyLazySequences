@@ -8,11 +8,16 @@
 
 enum ReallyLazySequenceError: Error {
     case isComplete
-    
+    case nonStartable
+    case nonPushable
     var description: String {
         switch self {
         case .isComplete:
             return "ReallyLazySequence has already completed.  Pushes not allowed"
+        case .nonStartable:
+            return "start may only be called on Sequences with attached Producers"
+        case .nonPushable:
+            return "push may only be called on Sequences which are NOT already attached to producers"
         }
     }
 }
@@ -28,54 +33,27 @@ public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     }
 }
 
-// Template struct for chaining.
-public struct ReallyLazyChainedSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
+public struct Producer<T>: ReallyLazySequenceProtocol {
+    public typealias InputType = Void
+    public typealias OutputType = T
+    public var produce: (OutputFunction) -> InputFunction
     
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
-public struct Task<Predecessor: ReallyLazySequenceProtocol>: TaskProtocol {
-    private let producer: Producer<Predecessor>
-    private let consumer: Consumer<Predecessor>
-    
-    public init(producer: Producer<Predecessor>, consumer: Consumer<Predecessor>) {
-        self.producer = producer
-        self.consumer = consumer
-    }
-    
-    public func start(_ completionHandler: @escaping (TaskProtocol) -> Void) {
-        try? producer.produce { (input: Predecessor.InputType?) throws -> Void in
-            guard let input = input else {
-                try? consumer.push(nil)
-                completionHandler(self)
-                return
-            }
-            try? consumer.push(input)
-        }
-    }
-}
-
-public struct Producer<Predecessor: ReallyLazySequenceProtocol>: ProducerProtocol {
-    public typealias PredecessorType = Predecessor
-    var predecessor: Predecessor
-    public let produce: (Predecessor.InputFunction) throws -> Void
-    
-    public init(predecessor: Predecessor, _ produce: @escaping (Predecessor.InputFunction) throws -> Void) {
-        self.predecessor = predecessor
+    public init(_ produce: @escaping (OutputFunction) -> InputFunction) {
         self.produce = produce
     }
     
-    public func consume(_ delivery: @escaping (Predecessor.OutputType?) -> Continuation) -> Task<Predecessor> {
-        return Task(producer: self, consumer: predecessor.consume(delivery))
+    public func compose(_ output: @escaping OutputFunction) -> InputFunction {
+        var completed = false
+        return { (value: InputType?) throws -> Void in
+            guard !completed else { throw ReallyLazySequenceError.isComplete }
+            completed = true
+            let wrappedOutput = { (value: OutputType?) -> Continuation in
+                var nextDelivery: Continuation? = output(value)
+                while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
+                return { nil }
+            }
+            try self.produce(wrappedOutput)(())
+        }
     }
 }
 
@@ -99,9 +77,36 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
         }
     }
     
-    public func push(_ value: Predecessor.InputType?) throws -> Void { try _push(value) }
-    public func produce(_ handler: @escaping (Predecessor.InputFunction) throws -> Void) -> Task<Predecessor> {
-        return Task(producer: predecessor.produce(handler), consumer: self)
+    public func push(_ value: Predecessor.InputType?) throws -> Void {
+        if Predecessor.InputType.self == Void.self {
+            throw ReallyLazySequenceError.nonPushable
+        } else {
+            try _push(value)
+        }
+    }
+
+    public func start() throws -> Void {
+        if Predecessor.InputType.self != Void.self {
+            throw ReallyLazySequenceError.nonPushable
+        } else {
+            let value: Predecessor.InputType? = .none
+            try _push(value)
+        }
+    }
+}
+
+// Template struct for chaining.
+public struct ReallyLazyChainedSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
+    
+    public var predecessor: Predecessor
+    public var composer: Composer
+    
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
+        self.predecessor = predecessor
+        self.composer = composer
     }
 }
 

@@ -22,11 +22,8 @@ fileprivate func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation
 
 // Implement Sequential
 public extension ReallyLazySequenceProtocol {
-    func consume(_ delivery: @escaping (OutputType?) -> Continuation) -> Consumer<Self> {
-        return Consumer(predecessor: self, delivery:  delivery )
-    }
-    func produce(_ input: @escaping (InputFunction) throws -> Void) -> Producer<Self> {
-        return Producer<Self>(predecessor: self, input)
+    func consume(_ delivery: @escaping (Self.OutputType?) -> Continuation) -> Consumer<Self> {
+        return Consumer<Self>(predecessor: self, delivery:  delivery )
     }
 }
 
@@ -37,26 +34,6 @@ public extension ReallyLazySequenceProtocol {
             return { (input: OutputType?) -> Continuation in
                 guard let input = input else { return { delivery(nil) } }
                 return { delivery(transform(input)) }
-            }
-        }
-    }
-    
-    func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<ReallyLazySequence<T>>) -> FlatMapSequence<Self, T> {
-        return FlatMapSequence<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
-            return { (input: OutputType?) -> Continuation in
-                guard let input = input else { return { delivery(nil) } }
-                let producer = transform(input)
-                let task = producer.consume { (value: T?) -> Continuation in
-                    guard let value = value else { return { nil } }
-                    var nextDelivery: Continuation? = delivery(value)
-                    while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
-                    return { nil }
-                }
-                task.start { (t:TaskProtocol) in
-                    
-                }
-                // Need to process the Sequence from transform here
-                return { delivery(nil) }
             }
         }
     }
@@ -94,6 +71,22 @@ public extension ReallyLazySequenceProtocol {
                     return deliver(values: sorted, delivery: delivery)
                 }
                 return { accumulator.append(input); return nil }
+            }
+        }
+    }
+    
+    func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMapSequence<Self, T> {
+        return FlatMapSequence<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
+            return { (input: OutputType?) -> Continuation in
+                guard let input = input else { return { delivery(nil) } }
+                let producer = transform(input)
+                let task = producer.consume { (value: T?) -> Continuation in
+                    guard let value = value else { return { nil } }
+                    var nextDelivery: Continuation? = delivery(value)
+                    while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
+                    return { nil }
+                }
+                return { try? task.start(); return nil }
             }
         }
     }
