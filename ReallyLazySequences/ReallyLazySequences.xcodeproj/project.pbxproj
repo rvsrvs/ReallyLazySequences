@@ -12,7 +12,6 @@
 		FB33E03B1EBE7E85009CA3AC /* ReallyLazySequences.h in Headers */ = {isa = PBXBuildFile; fileRef = FB33E02D1EBE7E85009CA3AC /* ReallyLazySequences.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FB3F3AC61ED5C0E80005EFB4 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3F3AC51ED5C0E80005EFB4 /* Protocols.swift */; };
 		FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */; };
-		FB6255B51ECB6C7800849037 /* Dispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6255B41ECB6C7800849037 /* Dispatcher.swift */; };
 		FB6255B91ECDD88800849037 /* SortedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6255B81ECDD88800849037 /* SortedArray.swift */; };
 		FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */; };
 /* End PBXBuildFile section */
@@ -160,18 +159,19 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = "ComputeCycles, LLC";
 				TargetAttributes = {
 					FB33E0291EBE7E85009CA3AC = {
 						CreatedOnToolsVersion = 8.3.2;
 						DevelopmentTeam = 49D8NY9JB9;
-						LastSwiftMigration = 0830;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
 					FB33E0321EBE7E85009CA3AC = {
 						CreatedOnToolsVersion = 8.3.2;
 						DevelopmentTeam = 49D8NY9JB9;
+						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -219,7 +219,6 @@
 				FB3F3AC61ED5C0E80005EFB4 /* Protocols.swift in Sources */,
 				FB6255B91ECDD88800849037 /* SortedArray.swift in Sources */,
 				FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */,
-				FB6255B51ECB6C7800849037 /* Dispatcher.swift in Sources */,
 				FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -253,7 +252,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -261,7 +262,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -307,7 +312,9 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
@@ -315,7 +322,11 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -361,6 +372,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -381,6 +393,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.computecycles.ReallyLazySequences;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
@@ -394,6 +407,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.computecycles.ReallyLazySequencesTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -407,6 +421,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.computecycles.ReallyLazySequencesTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_SWIFT3_OBJC_INFERENCE = On;
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;

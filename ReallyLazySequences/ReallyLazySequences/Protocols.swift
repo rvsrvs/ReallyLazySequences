@@ -32,7 +32,8 @@ public protocol ReallyLazySequenceProtocol {
 // The protocol allowing chaining of sequences.  Reminiscent of LazySequence
 public protocol ChainedSequence: ReallyLazySequenceProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
-    typealias Composer = (@escaping (OutputType?) -> Continuation) -> ((PredecessorType.OutputType?) -> Continuation)
+    typealias PredecessorOutputFunction = (PredecessorType.OutputType?) -> Continuation
+    typealias Composer = (@escaping OutputFunction) -> PredecessorOutputFunction
     var predecessor: PredecessorType { get set }
     var composer: Composer { get set }
 }
@@ -41,5 +42,5 @@ public protocol ChainedSequence: ReallyLazySequenceProtocol {
 public protocol ConsumerProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
     func push(_ value: PredecessorType.InputType?) throws -> Void
-    func start() throws -> Void
 }
+

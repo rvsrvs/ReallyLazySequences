@@ -34,6 +34,14 @@ class ReallyLazySequencesTests: XCTestCase {
             .reduce(0) {(partialResult: Int, value: Int) -> Int in
                 return (partialResult + value)
             }
+            .flatMap { (value: Int) -> Producer<Int> in
+                let producer = Producer<Int> { (delivery: (_: Int?) -> Void) in
+                    ( 0 ..< 3).forEach {
+                        delivery($0 * value)
+                    }
+                }
+                return producer
+            }
             .consume { if let value = $0 { accumulatedResults.append(value) }; return { nil } }
         
         print(type(of:s))
@@ -48,6 +56,24 @@ class ReallyLazySequencesTests: XCTestCase {
             print(error.localizedDescription)
         }
         
-        XCTAssertEqual(accumulatedResults, [34])
+        XCTAssertEqual(accumulatedResults, [0,34,68])
+    }
+    
+    func testSimpleProducer() {
+        let producer = Producer<Int> { (delivery: (_: Int?) -> Void) in
+            ( 0 ..< 3).forEach {
+                delivery($0)
+            }
+        }
+        let task = producer.consume { (value: Int?) -> Continuation in
+            print(String(describing: value))
+            return { nil }
+        }
+        do {
+            try task.push(nil)
+            try task.push(nil)
+        } catch {
+            print(error)
+        }
     }
 }

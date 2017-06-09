@@ -26,7 +26,7 @@ enum DispatcherError: Error {
     }
 }
 
-func synchronized(_ token: AnyHashable, operation: (Void) -> Void) throws {
+func synchronized(_ token: AnyHashable, operation: () -> Void) throws {
     let canSync = objc_sync_enter(token)
     if canSync == Int32(OBJC_SYNC_SUCCESS) {
         operation()

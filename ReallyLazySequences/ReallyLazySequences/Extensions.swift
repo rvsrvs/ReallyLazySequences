@@ -7,7 +7,7 @@
 //
 
 // Recursively call delivery on the elements of values until each element's recursive call returns nil
-fileprivate func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation, value: Continuation? = nil) -> Continuation {
+func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation, value: Continuation? = nil) -> Continuation {
     if let value = value {
         return { deliver(values: values, delivery: delivery, value: value() as? Continuation ) }
     } else if values.count > 0 {
@@ -19,11 +19,27 @@ fileprivate func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation
     }
 }
 
-
-// Implement Sequential
+// Implement Consume
 public extension ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> Continuation) -> Consumer<Self> {
         return Consumer<Self>(predecessor: self, delivery:  delivery )
+    }
+}
+
+// Implement Composition
+public extension ReallyLazySequenceProtocol {
+    public func compose(_ output: @escaping (Self.OutputType?) -> Continuation) -> ((Self.InputType?) throws -> Void) {
+        return { (value: InputType?) -> Void in
+            guard let value = value as? OutputType? else { return }
+            var nextDelivery: Continuation? = output(value)
+            while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
+        }
+    }
+}
+
+public extension ChainedSequence {
+    public func compose(_ output: @escaping (OutputType?) -> Continuation) -> ((PredecessorType.InputType?) throws -> Void) {
+        return predecessor.compose(self.composer(output))
     }
 }
 
@@ -86,17 +102,14 @@ public extension ReallyLazySequenceProtocol {
                     while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
                     return { nil }
                 }
-                return { try? task.start(); return nil }
+                return {
+                    try? task.push(nil);
+                    return nil
+                }
             }
         }
     }
 }
 
-public extension ChainedSequence {
-    public func compose(_ output: @escaping (OutputType?) -> Continuation) -> ((PredecessorType.InputType?) throws -> Void) {
-        let composition = self.composer(output)
-        return predecessor.compose(composition)
-    }
-}
 
 
