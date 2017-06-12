@@ -27,21 +27,6 @@ public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     public typealias OutputType = T
 }
 
-// Template struct for chaining.
-public struct ReallyLazyChainedSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
 public struct Producer<T>: ReallyLazySequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = T
@@ -94,14 +79,21 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
             try _push(value)
         }
     }
+}
 
-    public func start() throws -> Void {
-        if Predecessor.InputType.self != Void.self {
-            throw ReallyLazySequenceError.nonPushable
-        } else {
-            let value: Predecessor.InputType? = .none
-            try _push(value)
-        }
+// Template struct for chaining.  All of the structs below could be ReallyLazyChainedSequences but
+// we create different structs so that the Sequence can be read from the type
+public struct ReallyLazyChainedSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
+    
+    public var predecessor: Predecessor
+    public var composer: Composer
+    
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
+        self.predecessor = predecessor
+        self.composer = composer
     }
 }
 

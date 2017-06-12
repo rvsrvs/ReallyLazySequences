@@ -35,14 +35,14 @@ class ReallyLazySequencesTests: XCTestCase {
                 return (partialResult + value)
             }
             .flatMap { (value: Int) -> Producer<Int> in
-                let producer = Producer<Int> { (delivery: (_: Int?) -> Void) in
-                    ( 0 ..< 3).forEach {
-                        delivery($0 * value)
-                    }
+                return Producer<Int> { (delivery: (_: Int?) -> Void) in
+                    ( 0 ..< 3).forEach { delivery($0 * value) }
                 }
-                return producer
             }
-            .consume { if let value = $0 { accumulatedResults.append(value) }; return { nil } }
+            .consume {
+                if let value = $0 { accumulatedResults.append(value) }
+                return { nil }
+            }
         
         print(type(of:s))
         

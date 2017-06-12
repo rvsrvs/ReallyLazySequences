@@ -62,7 +62,8 @@ public extension ReallyLazySequenceProtocol {
                     let finalValue = [partialValue]; partialValue = initialValue
                     return deliver(values: finalValue, delivery: delivery)
                 }
-                return { partialValue = combine(partialValue, input); return nil }
+                partialValue = combine(partialValue, input)
+                return { nil }
             }
         }
     }
@@ -98,14 +99,9 @@ public extension ReallyLazySequenceProtocol {
                 let producer = transform(input)
                 let task = producer.consume { (value: T?) -> Continuation in
                     guard let value = value else { return { nil } }
-                    var nextDelivery: Continuation? = delivery(value)
-                    while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
-                    return { nil }
+                    return delivery(value)
                 }
-                return {
-                    try? task.push(nil);
-                    return nil
-                }
+                return { try? task.push(nil); return nil }
             }
         }
     }
