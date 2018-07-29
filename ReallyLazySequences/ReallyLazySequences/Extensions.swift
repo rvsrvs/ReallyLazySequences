@@ -5,6 +5,7 @@
 //  Created by Van Simmons on 5/24/17.
 //  Copyright © 2017 ComputeCycles, LLC. All rights reserved.
 //
+import Foundation
 
 // Recursively call delivery on the elements of values until each element's recursive call returns nil
 func deliver<T>(values:[T], delivery: @escaping (T?) -> Continuation, value: Continuation? = nil) -> Continuation {
@@ -58,10 +59,7 @@ public extension ReallyLazySequenceProtocol {
         return Reduce<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
             var partialValue = initialValue
             return { (input: OutputType?) -> Continuation in
-                guard let input = input else {
-                    let finalValue = [partialValue]; partialValue = initialValue
-                    return deliver(values: finalValue, delivery: delivery)
-                }
+                guard let input = input else { return { delivery(partialValue) } }
                 partialValue = combine(partialValue, input)
                 return { nil }
             }
@@ -69,8 +67,7 @@ public extension ReallyLazySequenceProtocol {
     }
     
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType> {
-        return Filter<Self, OutputType>(predecessor: self) {
-            (delivery: @escaping (OutputType?) -> Continuation) -> ((OutputType?) -> Continuation) in
+        return Filter<Self, OutputType>(predecessor: self) { (delivery: @escaping (OutputType?) -> Continuation) -> ((OutputType?) -> Continuation) in
             return { (input: OutputType?) -> Continuation in
                 if input == nil || filter(input!) { return { delivery(input) } }
                 return { return nil }
@@ -78,22 +75,23 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
+    // sort holds values locally and then delivers them sequentially downstream when nil is received
     func sort(_ comparison: @escaping (OutputType, OutputType) -> Bool ) -> Sort<Self, OutputType> {
-        return Sort<Self, OutputType>(predecessor: self) {
-            (delivery: @escaping (OutputType?) -> Continuation) -> ((OutputType?) -> Continuation) in
+        return Sort<Self, OutputType>(predecessor: self) { (delivery: @escaping (OutputType?) -> Continuation) -> ((OutputType?) -> Continuation) in
             var accumulator: [OutputType] = []
             return { (input: OutputType?) -> Continuation in
                 guard let input = input else {
                     let sorted = accumulator.sorted(by: comparison); accumulator = []
                     return deliver(values: sorted, delivery: delivery)
                 }
-                return { accumulator.append(input); return nil }
+                accumulator.append(input)
+                return { return nil }
             }
         }
     }
     
-    func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMapSequence<Self, T> {
-        return FlatMapSequence<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
+    func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
+        return FlatMap<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
             return { (input: OutputType?) -> Continuation in
                 guard let input = input else { return { delivery(nil) } }
                 let producer = transform(input)
@@ -102,6 +100,19 @@ public extension ReallyLazySequenceProtocol {
                     return delivery(value)
                 }
                 return { try? task.push(nil); return nil }
+            }
+        }
+    }
+
+    public func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType> {
+        return Dispatch<Self, OutputType>(predecessor: self) { (delivery: @escaping (OutputType?) -> Continuation) -> ((OutputType?) -> Continuation) in
+            return { (input: OutputType?) -> Continuation in
+                let op = BlockOperation {
+                    var next = delivery(input)()
+                    while let current = next as? Continuation { next = current() }
+                }
+                queue.addOperation(op)
+                return { return nil }
             }
         }
     }

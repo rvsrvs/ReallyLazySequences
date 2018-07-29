@@ -8,50 +8,24 @@
 
 enum ReallyLazySequenceError: Error {
     case isComplete
-    case nonStartable
     case nonPushable
     var description: String {
         switch self {
         case .isComplete:
             return "ReallyLazySequence has already completed.  Pushes not allowed"
-        case .nonStartable:
-            return "start may only be called on Sequences with attached Producers"
         case .nonPushable:
             return "push may only be called on Sequences which are NOT already attached to producers"
         }
     }
 }
 
+//Head struct in a sequence
 public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = T
 }
 
-public struct Producer<T>: ReallyLazySequenceProtocol {
-    public typealias InputType = T
-    public typealias OutputType = T
-    public var produce: (@escaping (T?) -> Void) throws -> Void
-    
-    public init(_ produce:  @escaping ((T?) -> Void) throws -> Void) {
-        self.produce = produce
-    }
-    
-    public func compose(_ output: (@escaping (T?) -> Continuation)) -> ((T?) throws -> Void) {
-        var completed = false
-        return { (value: T?) throws -> Void in
-            guard value == nil else { throw ReallyLazySequenceError.nonPushable }
-            guard !completed else { throw ReallyLazySequenceError.isComplete }
-            completed = true
-            let wrappedOutput = { (value: T?) -> Void in
-                var nextDelivery: Continuation? = output(value)
-                while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
-                return
-            }
-            try self.produce(wrappedOutput)
-        }
-    }
-}
-
+//A sequence with an attached consumer function.  Only consumers can be pushed to
 public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
     public typealias PredecessorType = Predecessor
     
@@ -81,90 +55,27 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     }
 }
 
-// Template struct for chaining.  All of the structs below could be ReallyLazyChainedSequences but
-// we create different structs so that the Sequence can be read from the type
-public struct ReallyLazyChainedSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
+public struct Producer<T>: ReallyLazySequenceProtocol {
+    public typealias InputType = T
+    public typealias OutputType = T
+    public var produce: (@escaping (T?) -> Void) throws -> Void
     
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
+    public init(_ produce:  @escaping ((T?) -> Void) throws -> Void) {
+        self.produce = produce
     }
-}
-
-//===================================================================================
-// structs for Chaining
-public struct Map<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
     
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
-public struct Reduce<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
-public struct Filter<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
-public struct Sort<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
-public struct FlatMapSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
+    public func compose(_ output: (@escaping (T?) -> Continuation)) -> ((T?) throws -> Void) {
+        var completed = false
+        return { (value: T?) throws -> Void in
+            guard value == nil else { throw ReallyLazySequenceError.nonPushable }
+            guard !completed else { throw ReallyLazySequenceError.isComplete }
+            completed = true
+            let wrappedOutput = { (value: T?) -> Void in
+                var nextDelivery: Continuation? = output(value)
+                while nextDelivery != nil { nextDelivery = nextDelivery!() as? Continuation }
+                return
+            }
+            try self.produce(wrappedOutput)
+        }
     }
 }

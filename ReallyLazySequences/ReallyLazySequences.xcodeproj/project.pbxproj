@@ -9,10 +9,9 @@
 /* Begin PBXBuildFile section */
 		FB33E0341EBE7E85009CA3AC /* ReallyLazySequences.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB33E02A1EBE7E85009CA3AC /* ReallyLazySequences.framework */; };
 		FB33E0391EBE7E85009CA3AC /* ReallyLazySequencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */; };
-		FB33E03B1EBE7E85009CA3AC /* ReallyLazySequences.h in Headers */ = {isa = PBXBuildFile; fileRef = FB33E02D1EBE7E85009CA3AC /* ReallyLazySequences.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FB3F3AC61ED5C0E80005EFB4 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3F3AC51ED5C0E80005EFB4 /* Protocols.swift */; };
 		FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */; };
-		FB6255B91ECDD88800849037 /* SortedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6255B81ECDD88800849037 /* SortedArray.swift */; };
+		FB628AC5210C9263009A56F9 /* ChainingDeclarations.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */; };
 		FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */; };
 /* End PBXBuildFile section */
 
@@ -28,15 +27,13 @@
 
 /* Begin PBXFileReference section */
 		FB33E02A1EBE7E85009CA3AC /* ReallyLazySequences.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ReallyLazySequences.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FB33E02D1EBE7E85009CA3AC /* ReallyLazySequences.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReallyLazySequences.h; sourceTree = "<group>"; };
 		FB33E02E1EBE7E85009CA3AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB33E0331EBE7E85009CA3AC /* ReallyLazySequencesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReallyLazySequencesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReallyLazySequencesTests.swift; sourceTree = "<group>"; };
 		FB33E03A1EBE7E85009CA3AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB3F3AC51ED5C0E80005EFB4 /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		FB6255B41ECB6C7800849037 /* Dispatcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dispatcher.swift; sourceTree = "<group>"; };
-		FB6255B81ECDD88800849037 /* SortedArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortedArray.swift; sourceTree = "<group>"; };
+		FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainingDeclarations.swift; sourceTree = "<group>"; };
 		FBF5B0321ED4894600BCAFB0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReallyLazySequence.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -82,12 +79,10 @@
 		FB33E02C1EBE7E85009CA3AC /* ReallyLazySequences */ = {
 			isa = PBXGroup;
 			children = (
-				FB33E02D1EBE7E85009CA3AC /* ReallyLazySequences.h */,
 				FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */,
 				FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */,
 				FB3F3AC51ED5C0E80005EFB4 /* Protocols.swift */,
-				FB6255B41ECB6C7800849037 /* Dispatcher.swift */,
-				FB6255B81ECDD88800849037 /* SortedArray.swift */,
+				FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */,
 				FB33E02E1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequences;
@@ -109,7 +104,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FB33E03B1EBE7E85009CA3AC /* ReallyLazySequences.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,9 +211,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB3F3AC61ED5C0E80005EFB4 /* Protocols.swift in Sources */,
-				FB6255B91ECDD88800849037 /* SortedArray.swift in Sources */,
 				FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */,
 				FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */,
+				FB628AC5210C9263009A56F9 /* ChainingDeclarations.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -290,7 +284,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -344,7 +338,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -372,8 +366,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -393,8 +387,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.computecycles.ReallyLazySequences;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
