@@ -112,4 +112,29 @@ class ReallyLazySequencesTests: XCTestCase {
         
         waitForExpectations(timeout: 10.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
+    
+    func testCollect() {
+        let c = ReallyLazySequence<Int>()
+            .collect( initialValue: { [Int]() }, combine: { $0 + [$1] }, until: { $0.count > 4 } )
+            .flatMap { (value: [Int]) -> Producer<Int> in
+                return Producer<Int> { (delivery: (_: Int?) -> Void) in value.forEach { delivery($0) } }
+            }
+            .consume {
+                if let value = $0 { print(value) }
+                return { nil }
+            }
+        
+        do {
+            try c.push(1)
+            try c.push(2)
+            try c.push(3)
+            try c.push(4)
+            try c.push(5)
+            try c.push(nil)
+        } catch ReallyLazySequenceError.isComplete {
+            XCTFail("Can't push to a completed sequence")
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
 }

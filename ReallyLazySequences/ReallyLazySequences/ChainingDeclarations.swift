@@ -97,6 +97,20 @@ public struct Dispatch<Predecessor: ReallyLazySequenceProtocol, Output>: Chained
     }
 }
 
+public struct Collect<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
+    
+    public var predecessor: Predecessor
+    public var composer: Composer
+    
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
+        self.predecessor = predecessor
+        self.composer = composer
+    }
+}
+
 // Template struct for chaining.  All of the specific structs like Map, Reduce, etc
 // could be just ReallyLazyChainedSequences but
 // we create different structs so that the Sequence operations can be read directly from the type

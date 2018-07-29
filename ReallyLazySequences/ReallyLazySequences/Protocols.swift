@@ -21,6 +21,14 @@ public protocol ReallyLazySequenceProtocol {
     func compose(_ output: @escaping OutputFunction) -> InputFunction
     func consume(_ delivery: @escaping OutputFunction) -> Consumer<Self>
     
+    // Useful RLS-only functions
+    func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType>
+    func collect<T>(
+        initialValue: @escaping () -> T,
+        combine: @escaping (T, OutputType) -> T,
+        until: @escaping (T) -> Bool
+    ) -> Collect<Self, T>
+    
     // swift.Sequence replication
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
     // All returned types differ only in name
@@ -29,7 +37,6 @@ public protocol ReallyLazySequenceProtocol {
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T ) -> Reduce<Self, T>
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
     func sort(_ comparison: @escaping (OutputType, OutputType) -> Bool ) -> Sort<Self, OutputType>
-    func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType>
 }
 
 // Consumers allow new values to be pushed into a ReallyLazySequence
