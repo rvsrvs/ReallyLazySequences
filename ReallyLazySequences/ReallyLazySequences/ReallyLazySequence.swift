@@ -6,6 +6,8 @@
 //  Copyright © 2017 ComputeCycles, LLC. All rights reserved.
 //
 
+let ContinuationDone = { nil } as Continuation
+
 enum ReallyLazySequenceError: Error {
     case isComplete
     case nonPushable
@@ -58,6 +60,28 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
 public struct Producer<T>: ReallyLazySequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = T
+    public typealias ProducerConsumer = Consumer<Producer<T>>
+    
+    public class Task: TaskProtocol {
+        private(set) public var isStarted = false
+        private(set) public var isCompleted = false
+        private var consumer: ProducerConsumer!
+        
+        init(_ producer: Producer<T>, _ delivery: @escaping (OutputType?) -> Continuation) {
+            let composedDelivery = { (value: OutputType?) -> Continuation in
+                if value == nil { self.isCompleted = true }
+                return delivery(value)
+            }
+            self.consumer = producer.consume(composedDelivery)
+        }
+        
+        public func start() throws -> Void {
+            guard !isStarted else { throw ReallyLazySequenceError.nonPushable }
+            isStarted = true
+            try consumer.push(nil)
+        }
+    }
+    
     public var produce: (@escaping (T?) -> Void) throws -> Void
     
     public init(_ produce:  @escaping ((T?) -> Void) throws -> Void) {
@@ -78,4 +102,9 @@ public struct Producer<T>: ReallyLazySequenceProtocol {
             try self.produce(wrappedOutput)
         }
     }
+    
+    public func task(_ delivery: @escaping (OutputType?) -> Continuation) -> TaskProtocol {
+        return Task(self, delivery)
+    }
 }
+

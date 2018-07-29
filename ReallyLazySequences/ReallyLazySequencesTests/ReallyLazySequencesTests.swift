@@ -29,14 +29,10 @@ class ReallyLazySequencesTests: XCTestCase {
             .sort(<)
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +) 
-            .flatMap { (value: Int) -> Producer<Int> in
-                return Producer<Int> { (delivery: (_: Int?) -> Void) in
-                    ( 0 ..< 3).forEach { delivery($0 * value) }
-                }
-            }
+            .flatMap { (value) -> Producer<Int> in Producer { delivery in ( 0 ..< 3).forEach { delivery($0 * value) } } }
             .consume {
                 if let value = $0 { accumulatedResults.append(value) }
-                return { nil }
+                return ContinuationDone
             }
 
         XCTAssertNotNil(c as Consumer<FlatMap<Reduce<Map<Sort<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Double>, Int>, Int>, Int>>,
@@ -56,18 +52,11 @@ class ReallyLazySequencesTests: XCTestCase {
     }
     
     func testSimpleProducer() {
-        let producer = Producer<Int> { (delivery: (_: Int?) -> Void) in
-            ( 0 ..< 3).forEach {
-                delivery($0)
-            }
-        }
-        let task = producer.consume { (value: Int?) -> Continuation in
-            print(String(describing: value))
-            return { nil }
-        }
+        let task = Producer<Int> { delivery in ( 0 ..< 3).forEach { delivery($0) } }
+            .task { _ in return ContinuationDone }
+        
         do {
-            try task.push(nil)
-            try task.push(nil)
+            try task.start()
         } catch {
             print(error)
         }
@@ -87,12 +76,10 @@ class ReallyLazySequencesTests: XCTestCase {
             .dispatch(OperationQueue.main)
             .consume {
                 XCTAssertEqual(OperationQueue.current, OperationQueue.main)
-                guard let value = $0 else { return { nil } }
+                guard let value = $0 else { return ContinuationDone }
                 XCTAssertNotEqual(value, 11.0)
-                if value == 3.0 {
-                    expectation.fulfill()
-                }
-                return { nil }
+                if value == 3.0 { expectation.fulfill() }
+                return ContinuationDone
             }
         
         XCTAssertNotNil(c as Consumer<Dispatch<Map<Dispatch<Filter<ReallyLazySequence<Int>, Int>, Int>, Double>, Double>>,
@@ -115,14 +102,14 @@ class ReallyLazySequencesTests: XCTestCase {
     
     func testCollect() {
         let c = ReallyLazySequence<Int>()
-            .collect( initialValue: { [Int]() }, combine: { $0 + [$1] }, until: { $0.count > 4 } )
-            .flatMap { (value: [Int]) -> Producer<Int> in
-                return Producer<Int> { (delivery: (_: Int?) -> Void) in value.forEach { delivery($0) } }
-            }
+            .collect(initialValue: [Int](), combine: { $0 + [$1] }, until: { $0.count > 4 })
+            .flatMap { value in Producer { delivery in value.forEach { delivery($0) } } }
             .consume {
                 if let value = $0 { print(value) }
-                return { nil }
+                return ContinuationDone
             }
+        
+        XCTAssertNotNil(c as Consumer<FlatMap<Collect<ReallyLazySequence<Int>, Array<Int>>, Int>>, "Wrong class")
         
         do {
             try c.push(1)
@@ -130,6 +117,11 @@ class ReallyLazySequencesTests: XCTestCase {
             try c.push(3)
             try c.push(4)
             try c.push(5)
+            try c.push(10)
+            try c.push(20)
+            try c.push(30)
+            try c.push(40)
+            try c.push(50)
             try c.push(nil)
         } catch ReallyLazySequenceError.isComplete {
             XCTFail("Can't push to a completed sequence")

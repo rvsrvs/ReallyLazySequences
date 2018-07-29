@@ -24,7 +24,7 @@ public protocol ReallyLazySequenceProtocol {
     // Useful RLS-only functions
     func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType>
     func collect<T>(
-        initialValue: @escaping () -> T,
+        initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) -> T,
         until: @escaping (T) -> Bool
     ) -> Collect<Self, T>
@@ -43,6 +43,12 @@ public protocol ReallyLazySequenceProtocol {
 public protocol ConsumerProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
     func push(_ value: PredecessorType.InputType?) throws -> Void
+}
+
+public protocol TaskProtocol {
+    var isStarted: Bool { get }
+    var isCompleted: Bool { get }
+    func start() throws -> Void
 }
 
 // The protocol allowing chaining of sequences.  Reminiscent of LazySequence

@@ -61,7 +61,7 @@ public extension ReallyLazySequenceProtocol {
             return { (input: OutputType?) -> Continuation in
                 guard let input = input else { return { delivery(partialValue) } }
                 partialValue = combine(partialValue, input)
-                return { nil }
+                return ContinuationDone
             }
         }
     }
@@ -70,7 +70,7 @@ public extension ReallyLazySequenceProtocol {
         return Filter<Self, OutputType>(predecessor: self) { (delivery: @escaping (OutputType?) -> Continuation) -> ((OutputType?) -> Continuation) in
             return { (input: OutputType?) -> Continuation in
                 if input == nil || filter(input!) { return { delivery(input) } }
-                return { return nil }
+                return ContinuationDone
             }
         }
     }
@@ -85,7 +85,7 @@ public extension ReallyLazySequenceProtocol {
                     return deliver(values: sorted, delivery: delivery)
                 }
                 accumulator.append(input)
-                return { return nil }
+                return ContinuationDone
             }
         }
     }
@@ -96,7 +96,7 @@ public extension ReallyLazySequenceProtocol {
                 guard let input = input else { return { delivery(nil) } }
                 let producer = transform(input)
                 let task = producer.consume { (value: T?) -> Continuation in
-                    guard let value = value else { return { nil } }
+                    guard let value = value else { return ContinuationDone }
                     return delivery(value)
                 }
                 return { try? task.push(nil); return nil }
@@ -112,13 +112,13 @@ public extension ReallyLazySequenceProtocol {
                     while let current = next as? Continuation { next = current() }
                 }
                 queue.addOperation(op)
-                return { return nil }
+                return ContinuationDone
             }
         }
     }
     
     public func collect<T>(
-        initialValue: @escaping () -> T,
+        initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) -> T,
         until: @escaping (T) -> Bool
     ) -> Collect<Self, T> {
@@ -134,7 +134,7 @@ public extension ReallyLazySequenceProtocol {
                     return { delivery(partialValue) }
                 }
                 nextPartialValue = nil
-                return { nil }
+                return ContinuationDone
             }
         }
     }
