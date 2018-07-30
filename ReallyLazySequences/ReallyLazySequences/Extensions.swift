@@ -27,6 +27,9 @@ public extension ReallyLazySequenceProtocol {
     }
 }
 
+// ChainedSequences simply compose their composition with all successesors with their predecessor
+// This recurses all the way back to the head sequence where it terminates because the head is NOT
+// a ChainedSequence
 public extension ChainedSequence {
     public func compose(_ output: @escaping OutputFunction) -> ((PredecessorType.InputType?) throws -> Void) {
         return predecessor.compose(self.composer(output))
@@ -34,7 +37,13 @@ public extension ChainedSequence {
 }
 
 // Implement Sequencing
+// Each of the methods below composes a function from 3 different elements
+// 1. Its predecessors composed function
+// 2. It's own associated function which takes the predecessors output type and operates on it to produce its own output type
+// 3. a particular function which is specific to the action being taken
+// Number 3 is what is being passed in to the initializer of the specific type in each case
 public extension ReallyLazySequenceProtocol {
+    // Map sequential values of one type to a value of the same or different type
     public func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T> {
         return Map<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> (OutputFunction) in
             return { (input: OutputType?) -> Continuation in
@@ -44,6 +53,8 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
+    // A generalized form of reduce which allows collection of values until a condition is reached
+    // Collected values are then forwarded as the collecting type to the successor
     public func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) -> T,
@@ -53,7 +64,6 @@ public extension ReallyLazySequenceProtocol {
             var nextPartialValue: T?
             var partialValue = initialValue()
             return { (input: OutputType?) -> Continuation in
-                if let newPartialValue = nextPartialValue { partialValue = newPartialValue }
                 guard let input = input else {
                     return {
                         var next = delivery(partialValue)()
@@ -63,6 +73,7 @@ public extension ReallyLazySequenceProtocol {
                         return ContinuationDone
                     }
                 }
+                if let newPartialValue = nextPartialValue { partialValue = newPartialValue }
                 partialValue = combine(partialValue, input)
                 if until(partialValue, input) {
                     nextPartialValue = initialValue()
@@ -78,6 +89,7 @@ public extension ReallyLazySequenceProtocol {
         return collect(initialValue: initialValue, combine: combine, until: { $1 == nil })
     }
 
+    // filter values that do not meet a specified condition
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType> {
         return Filter<Self, OutputType>(predecessor: self) { (delivery: @escaping OutputFunction) -> (OutputFunction) in
             return { (input: OutputType?) -> Continuation in
@@ -87,6 +99,7 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
+    // create a sequence of values from a single value
     func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
         return FlatMap<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> (OutputFunction) in
             return { (input: OutputType?) -> Continuation in
@@ -101,6 +114,7 @@ public extension ReallyLazySequenceProtocol {
         }
     }
 
+    // Perform the rest of the push on another dispatch queue
     public func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType> {
         return Dispatch<Self, OutputType>(predecessor: self) { (delivery: @escaping OutputFunction) -> (OutputFunction) in
             return { (input: OutputType?) -> Continuation in

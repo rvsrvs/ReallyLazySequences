@@ -21,7 +21,7 @@ public protocol ReallyLazySequenceProtocol {
     func compose(_ output: @escaping OutputFunction) -> InputFunction
     func consume(_ delivery: @escaping OutputFunction) -> Consumer<Self>
     
-    // Useful RLS-only functions
+    // Useful RLS-only functions, not related to Swift.Sequence
     func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType>
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
@@ -38,12 +38,14 @@ public protocol ReallyLazySequenceProtocol {
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
 }
 
-// Consumers allow new values to be pushed into a ReallyLazySequence
+// Consumers allow new values to be pushed into a ReallyLazySequence and processes through
+// the composed chain
 public protocol ConsumerProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
     func push(_ value: PredecessorType.InputType?) throws -> Void
 }
 
+// Tasks are Producers connected to Consumers which can be started and run independently
 public protocol TaskProtocol {
     var isStarted: Bool { get }
     var isCompleted: Bool { get }
@@ -52,7 +54,7 @@ public protocol TaskProtocol {
 
 // The protocol allowing chaining of sequences.  Reminiscent of LazySequence
 // ChainedSequences compose their predecessor's action (map, collect, flatmap, filter)
-// with their own when asked to do so by a consumer.  Consumer retain ONLY the composed
+// with their own when asked to do so by a consumer.  Consumer retains ONLY the composed
 // function and not the actual sequence object, though Consumer types are genericized
 // with the chain of types leading up to consumption
 public protocol ChainedSequence: ReallyLazySequenceProtocol {
