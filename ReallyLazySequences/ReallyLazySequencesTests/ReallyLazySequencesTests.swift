@@ -26,16 +26,18 @@ class ReallyLazySequencesTests: XCTestCase {
             .filter { $0 < 10 }
             .map { Double($0) }
             .map { $0 * 2 }
-            .sort(<)
+            .reduce([Double]()) { $0 + [$1] }
+            .map { return $0.sorted() }
+            .flatMap { values -> Producer<Double> in return Producer { delivery in values.forEach { delivery($0) } } }
             .map { (value: Double) -> Int in Int(value) }
-            .reduce(0, +) 
+            .reduce(0, +)
             .flatMap { (value) -> Producer<Int> in Producer { delivery in ( 0 ..< 3).forEach { delivery($0 * value) } } }
             .consume {
                 if let value = $0 { accumulatedResults.append(value) }
                 return ContinuationDone
             }
-
-        XCTAssertNotNil(c as Consumer<FlatMap<Reduce<Map<Sort<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Double>, Int>, Int>, Int>>,
+        
+        XCTAssertNotNil(c as Consumer<FlatMap<Reduce<Map<FlatMap<Map<Reduce<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Array<Double>>, Array<Double>>, Double>, Int>, Int>, Int>>,
                         "Consumer c is wrong type!")
         
         do {
@@ -108,12 +110,9 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { value in Producer { delivery in value.forEach { delivery($0) } } }
-            .consume {
-                if let value = $0 { print(value) }
-                return ContinuationDone
-            }
+            .consume { _ in ContinuationDone }
         
-        XCTAssertNotNil(c as Consumer<FlatMap<Collect<ReallyLazySequence<Int>, Array<Int>>, Int>>, "Wrong class")
+        XCTAssertNotNil(c as Consumer<FlatMap<Reduce<ReallyLazySequence<Int>, Array<Int>>, Int>>, "Wrong class")
         
         do {
             try c.push(1)

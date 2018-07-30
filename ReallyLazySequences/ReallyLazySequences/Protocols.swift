@@ -27,16 +27,15 @@ public protocol ReallyLazySequenceProtocol {
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) -> T,
         until: @escaping (T, OutputType?) -> Bool
-    ) -> Collect<Self, T>
-    
+    ) -> Reduce<Self, T>
+
     // swift.Sequence replication
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
     // All returned types differ only in name
     func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T>
+    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T) -> Reduce<Self, T>
     func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T>
-    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T ) -> Reduce<Self, T>
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
-    func sort(_ comparison: @escaping (OutputType, OutputType) -> Bool ) -> Sort<Self, OutputType>
 }
 
 // Consumers allow new values to be pushed into a ReallyLazySequence
@@ -52,6 +51,10 @@ public protocol TaskProtocol {
 }
 
 // The protocol allowing chaining of sequences.  Reminiscent of LazySequence
+// ChainedSequences compose their predecessor's action (map, collect, flatmap, filter)
+// with their own when asked to do so by a consumer.  Consumer retain ONLY the composed
+// function and not the actual sequence object, though Consumer types are genericized
+// with the chain of types leading up to consumption
 public protocol ChainedSequence: ReallyLazySequenceProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
     typealias PredecessorOutputFunction = (PredecessorType.OutputType?) -> Continuation

@@ -27,7 +27,8 @@ public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     public typealias OutputType = T
 }
 
-//A sequence with an attached consumer function.  Only consumers can be pushed to
+// A sequence with an attached consumer function.  Only consumers can be pushed to
+// Once consumed an RLS can no longer be chained.  i.e. consumers are NOT RLS's
 public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
     public typealias PredecessorType = Predecessor
     
@@ -64,7 +65,7 @@ public struct Producer<T>: ReallyLazySequenceProtocol {
         private(set) public var isCompleted = false
         private var consumer: ProducerConsumer!
         
-        init(_ producer: Producer<T>, _ delivery: @escaping (OutputType?) -> Continuation) {
+        init(_ producer: Producer<T>, _ delivery: @escaping OutputFunction) {
             let composedDelivery = { (value: OutputType?) -> Continuation in
                 if value == nil { self.isCompleted = true }
                 return delivery(value)
@@ -100,7 +101,7 @@ public struct Producer<T>: ReallyLazySequenceProtocol {
         }
     }
     
-    public func task(_ delivery: @escaping (OutputType?) -> Continuation) -> TaskProtocol {
+    public func task(_ delivery: @escaping OutputFunction) -> TaskProtocol {
         return Task(self, delivery)
     }
 }

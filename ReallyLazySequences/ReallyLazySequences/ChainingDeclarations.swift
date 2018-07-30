@@ -54,20 +54,6 @@ public struct Filter<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSe
     }
 }
 
-public struct Sort<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
 public struct FlatMap<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
@@ -83,20 +69,6 @@ public struct FlatMap<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedS
 }
 
 public struct Dispatch<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
-public struct Collect<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
