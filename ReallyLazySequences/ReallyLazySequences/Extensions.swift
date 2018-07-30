@@ -120,16 +120,24 @@ public extension ReallyLazySequenceProtocol {
     public func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) -> T,
-        until: @escaping (T) -> Bool
+        until: @escaping (T, OutputType?) -> Bool = { $1 == nil }
     ) -> Collect<Self, T> {
         return Collect<Self, T>(predecessor: self) { (delivery: @escaping (T?) -> Continuation) -> ((OutputType?) -> Continuation) in
             var nextPartialValue: T?
             var partialValue = initialValue()
             return { (input: OutputType?) -> Continuation in
                 if let newPartialValue = nextPartialValue { partialValue = newPartialValue }
-                guard let input = input else { return deliver(values: [partialValue], delivery: delivery) }
+                guard let input = input else {
+                    return {
+                        var next = delivery(partialValue)()
+                        while let current = next as? Continuation { next = current() }
+                        next = delivery(nil)()
+                        while let current = next as? Continuation { next = current() }
+                        return ContinuationDone
+                    }
+                }
                 partialValue = combine(partialValue, input)
-                if until(partialValue) {
+                if until(partialValue, input) {
                     nextPartialValue = initialValue()
                     return { delivery(partialValue) }
                 }

@@ -10,7 +10,7 @@ import Foundation
 public typealias Continuation = () -> Any?
 
 public protocol ReallyLazySequenceProtocol {
-    associatedtype InputType  // The type which can be input for a given RLS
+    associatedtype InputType  // The _initial_ initial type for the head for a given RLS chain
     associatedtype OutputType // The type which is output from a given RLS
     
     typealias InputFunction  = (InputType?) throws -> Void    // a function to allow input to an RLS
@@ -26,7 +26,7 @@ public protocol ReallyLazySequenceProtocol {
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) -> T,
-        until: @escaping (T) -> Bool
+        until: @escaping (T, OutputType?) -> Bool
     ) -> Collect<Self, T>
     
     // swift.Sequence replication

@@ -102,7 +102,11 @@ class ReallyLazySequencesTests: XCTestCase {
     
     func testCollect() {
         let c = ReallyLazySequence<Int>()
-            .collect(initialValue: [Int](), combine: { $0 + [$1] }, until: { $0.count > 4 })
+            .collect(
+                initialValue: [Int](),
+                combine: { (partialValue, input) -> [Int] in return partialValue + [input] },
+                until: { (partialValue, input) -> Bool in partialValue.count > 4 }
+            )
             .flatMap { value in Producer { delivery in value.forEach { delivery($0) } } }
             .consume {
                 if let value = $0 { print(value) }

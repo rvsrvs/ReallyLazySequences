@@ -8,9 +8,8 @@
 
 //===================================================================================
 // structs for Chaining.  These only make it easier to read the types of an RLS
-// using type(of:).  I suspect that the introduction of higher kinded types would
-// make this not require all the cut'n'paste.
-// Swift needs a way for me to do this without boiler plate
+// using type(of:).  The introduction of higher kinded types (HKTs) in Swift would
+// make this not require all the boilerplate. 
 //===================================================================================
 
 public struct Map<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
@@ -98,26 +97,6 @@ public struct Dispatch<Predecessor: ReallyLazySequenceProtocol, Output>: Chained
 }
 
 public struct Collect<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-    }
-}
-
-// Template struct for chaining.  All of the specific structs like Map, Reduce, etc
-// could be just ReallyLazyChainedSequences but
-// we create different structs so that the Sequence operations can be read directly from the type
-// Map, Reduce, et al, look EXACTLY like this definition only with a different name
-// This struct would only be used if it is decided that reading those types is not valueable
-// which is unlikely
-public struct ReallyLazyChainedSequence<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output

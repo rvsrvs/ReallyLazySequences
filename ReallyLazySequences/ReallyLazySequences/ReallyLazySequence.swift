@@ -49,11 +49,8 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     }
     
     public func push(_ value: Predecessor.InputType?) throws -> Void {
-        if Predecessor.InputType.self == Void.self {
-            throw ReallyLazySequenceError.nonPushable
-        } else {
-            try _push(value)
-        }
+        guard Predecessor.InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
+        try _push(value)
     }
 }
 
