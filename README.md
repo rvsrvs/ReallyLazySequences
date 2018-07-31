@@ -6,7 +6,7 @@ Asynchronous Sequences for Swift
 1. Each Sequence when properly initialized accepts is values one at a time, asynchronously
 1. Every swift.Sequence function is implemented _as is_, only with a possibly different return value and executed asynchronously on only one object at a time
 1. All data structures are structs, not classes
-1. All structs have no methods other than init. Sequence functions _all_ occur in protocol extensions.
+1. All RLS structs have no methods other than init. Sequence functions _all_ occur in protocol extensions.
 1. Everything is asynchronous-capable and capable of thread-safety when specified rules are followed
 1. You should never see a 100 level deep stack trace (implies use of Continuations), step of the sequence chain is executed by the head independently
 1. The order of evaluation for each sequence can be read from the nested type information
