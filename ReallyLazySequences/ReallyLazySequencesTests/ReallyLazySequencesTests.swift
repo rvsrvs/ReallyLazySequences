@@ -32,10 +32,7 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
             .flatMap { (value) -> Producer<Int> in Producer { delivery in ( 0 ..< 3).forEach { delivery($0 * value) } } }
-            .consume {
-                if let value = $0 { accumulatedResults.append(value) }
-                return ContinuationDone
-            }
+            .consume { if let value = $0 { accumulatedResults.append(value) } }
         
         XCTAssertNotNil(c as Consumer<FlatMap<Reduce<Map<FlatMap<Map<Reduce<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Array<Double>>, Array<Double>>, Double>, Int>, Int>, Int>>,
                         "Consumer c is wrong type!")
@@ -55,7 +52,7 @@ class ReallyLazySequencesTests: XCTestCase {
     
     func testSimpleProducer() {
         let task = Producer<Int> { delivery in ( 0 ..< 3).forEach { delivery($0) } }
-            .task { _ in return ContinuationDone }
+            .task { _ in return }
         
         do {
             try task.start()
@@ -78,10 +75,9 @@ class ReallyLazySequencesTests: XCTestCase {
             .dispatch(OperationQueue.main)
             .consume {
                 XCTAssertEqual(OperationQueue.current, OperationQueue.main)
-                guard let value = $0 else { return ContinuationDone }
+                guard let value = $0 else { return }
                 XCTAssertNotEqual(value, 11.0)
                 if value == 3.0 { expectation.fulfill() }
-                return ContinuationDone
             }
         
         XCTAssertNotNil(c as Consumer<Dispatch<Map<Dispatch<Filter<ReallyLazySequence<Int>, Int>, Int>, Double>, Double>>,
@@ -110,7 +106,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { value in Producer { delivery in value.forEach { delivery($0) } } }
-            .consume { _ in ContinuationDone }
+            .consume { _ in return }
         
         XCTAssertNotNil(c as Consumer<FlatMap<Reduce<ReallyLazySequence<Int>, Array<Int>>, Int>>, "Wrong class")
         

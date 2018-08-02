@@ -11,9 +11,10 @@
 		FB33E0391EBE7E85009CA3AC /* ReallyLazySequencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */; };
 		FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */; };
 		FB628AC5210C9263009A56F9 /* ChainingDeclarations.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */; };
-		FB628AF521109879009A56F9 /* Continuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF421109879009A56F9 /* Continuation.swift */; };
 		FB628AF721109CC6009A56F9 /* Consumer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF621109CC6009A56F9 /* Consumer.swift */; };
 		FB628AF921109CFF009A56F9 /* Producer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF821109CFF009A56F9 /* Producer.swift */; };
+		FB628AFC21110420009A56F9 /* Continuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AFB21110420009A56F9 /* Continuation.swift */; };
+		FB680F46211154350089A710 /* RLSNetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB680F45211154350089A710 /* RLSNetworkingTests.swift */; };
 		FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */; };
 /* End PBXBuildFile section */
 
@@ -35,9 +36,11 @@
 		FB33E03A1EBE7E85009CA3AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainingDeclarations.swift; sourceTree = "<group>"; };
-		FB628AF421109879009A56F9 /* Continuation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Continuation.swift; sourceTree = SOURCE_ROOT; };
 		FB628AF621109CC6009A56F9 /* Consumer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Consumer.swift; sourceTree = "<group>"; };
 		FB628AF821109CFF009A56F9 /* Producer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Producer.swift; sourceTree = "<group>"; };
+		FB628AFA211103D5009A56F9 /* ReallyLazySequences.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; name = ReallyLazySequences.playground; path = ../ReallyLazySequences.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		FB628AFB21110420009A56F9 /* Continuation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Continuation.swift; sourceTree = "<group>"; };
+		FB680F45211154350089A710 /* RLSNetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RLSNetworkingTests.swift; sourceTree = "<group>"; };
 		FBF5B0321ED4894600BCAFB0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReallyLazySequence.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -65,6 +68,7 @@
 			isa = PBXGroup;
 			children = (
 				FBF5B0321ED4894600BCAFB0 /* README.md */,
+				FB628AFA211103D5009A56F9 /* ReallyLazySequences.playground */,
 				FB33E02C1EBE7E85009CA3AC /* ReallyLazySequences */,
 				FB33E0371EBE7E85009CA3AC /* ReallyLazySequencesTests */,
 				FB33E02B1EBE7E85009CA3AC /* Products */,
@@ -83,7 +87,7 @@
 		FB33E02C1EBE7E85009CA3AC /* ReallyLazySequences */ = {
 			isa = PBXGroup;
 			children = (
-				FB628AF421109879009A56F9 /* Continuation.swift */,
+				FB628AFB21110420009A56F9 /* Continuation.swift */,
 				FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */,
 				FB628AF621109CC6009A56F9 /* Consumer.swift */,
 				FB628AF821109CFF009A56F9 /* Producer.swift */,
@@ -98,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */,
+				FB680F45211154350089A710 /* RLSNetworkingTests.swift */,
 				FB33E03A1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequencesTests;
@@ -159,7 +164,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 1000;
 				ORGANIZATIONNAME = "ComputeCycles, LLC";
 				TargetAttributes = {
 					FB33E0291EBE7E85009CA3AC = {
@@ -216,12 +221,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB628AFC21110420009A56F9 /* Continuation.swift in Sources */,
 				FB628AF921109CFF009A56F9 /* Producer.swift in Sources */,
 				FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */,
 				FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */,
 				FB628AF721109CC6009A56F9 /* Consumer.swift in Sources */,
 				FB628AC5210C9263009A56F9 /* ChainingDeclarations.swift in Sources */,
-				FB628AF521109879009A56F9 /* Continuation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB33E0391EBE7E85009CA3AC /* ReallyLazySequencesTests.swift in Sources */,
+				FB680F46211154350089A710 /* RLSNetworkingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +264,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -265,6 +272,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -318,6 +326,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -325,6 +334,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;

@@ -22,8 +22,8 @@ public struct Producer<T>: ReallyLazySequenceProtocol {
         private(set) public var isCompleted = false
         private var consumer: ProducerConsumer!
         
-        init(_ producer: Producer<T>, _ delivery: @escaping OutputFunction) {
-            let composedDelivery = { (value: OutputType?) -> Continuation in
+        init(_ producer: Producer<T>, _ delivery: @escaping ConsumerFunction) {
+            let composedDelivery = { (value: OutputType?) -> Void in
                 if value == nil { self.isCompleted = true }
                 return delivery(value)
             }
@@ -39,21 +39,21 @@ public struct Producer<T>: ReallyLazySequenceProtocol {
     
     public var produce: (@escaping (T?) -> Void) throws -> Void
     
-    public init(_ produce:  @escaping ((T?) -> Void) throws -> Void) {
+    public init(_ produce:  @escaping (@escaping (T?) -> Void) throws -> Void) {
         self.produce = produce
     }
     
     public func compose(_ output: (@escaping (T?) -> Continuation)) -> ((T?) throws -> Void) {
         var completed = false
-        return { (value: T?) throws -> Void in
+        return { value in
             guard value == nil else { throw ReallyLazySequenceError.nonPushable }
             guard !completed else { throw ReallyLazySequenceError.isComplete }
-            completed = true
             try self.produce { drive(output($0)) }
+            completed = true
         }
     }
     
-    public func task(_ delivery: @escaping OutputFunction) -> TaskProtocol {
+    public func task(_ delivery: @escaping ConsumerFunction) -> TaskProtocol {
         return Task(self, delivery)
     }
 }

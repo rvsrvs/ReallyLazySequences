@@ -9,7 +9,7 @@ import Foundation
 
 // Implement Consume
 public extension ReallyLazySequenceProtocol {
-    func consume(_ delivery: @escaping (Self.OutputType?) -> Continuation) -> Consumer<Self> {
+    func consume(_ delivery: @escaping (Self.OutputType?) -> Void) -> Consumer<Self> {
         return Consumer<Self>(predecessor: self, delivery:  delivery )
     }
 }
@@ -84,7 +84,10 @@ public extension ReallyLazySequenceProtocol {
             return { input in
                 guard let input = input else { return { delivery(nil) } }
                 try? transform(input)
-                    .task { value in value != nil ? delivery(value) : ContinuationDone }
+                    .task { value in
+                        guard let value = value else { return }
+                        drive(delivery(value))
+                    }
                     .start()
                 return ContinuationDone
             }

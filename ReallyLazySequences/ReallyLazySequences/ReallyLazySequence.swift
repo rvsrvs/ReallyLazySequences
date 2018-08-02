@@ -7,7 +7,7 @@
 //
 import Foundation
 
-enum ReallyLazySequenceError: Error {
+public enum ReallyLazySequenceError: Error {
     case isComplete
     case nonPushable
     var description: String {
@@ -24,15 +24,19 @@ public protocol ReallyLazySequenceProtocol {
     associatedtype InputType  // The _initial_ initial type for the head for a given RLS chain
     associatedtype OutputType // The type which is output from a given RLS
     
-    typealias InputFunction  = (InputType?) throws -> Void    // a function to allow input to an RLS
-    typealias OutputFunction = (OutputType?) -> Continuation  // a function which consumes the output of an RLS
-    
+    // a function to allow input to an RLS
+    typealias InputFunction  = (InputType?) throws -> Void
+    // a function which consumes the output of an RLS and returns a function to execute the successor RLS
+    typealias OutputFunction = (OutputType?) -> Continuation
+    typealias ConsumerFunction = (OutputType?) -> Void
+
     // To be used, ReallyLazySequences must be first consumed.
-    // Consumation uses compose to create a function which accepts input of InputType
+    // consume uses compose to create a function which accepts input of InputType
     // and outputs OutputType.  The main purpose of an RLS is to compose
-    // its consumption function for a consumer.
+    // its function for a consumer.
+    // All RLS successor chains, to be used, eventually terminate in a Consumer
     func compose(_ output: @escaping OutputFunction) -> InputFunction
-    func consume(_ delivery: @escaping OutputFunction) -> Consumer<Self>
+    func consume(_ delivery: @escaping ConsumerFunction) -> Consumer<Self>
     
     /*
      Useful RLS-only functions, not related to Swift.Sequence
@@ -42,7 +46,7 @@ public protocol ReallyLazySequenceProtocol {
     // unlike Swift.Sequence, downstream operations may occur on separate queues
     func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType>
     
-    // Batch up values until condition is met and then release the values
+    // Batch up values until a condition is met and then release the values
     // This is a generalized form of reduce
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
@@ -80,5 +84,6 @@ public protocol ChainedSequence: ReallyLazySequenceProtocol {
 public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = T
+    public init() { }
 }
 
