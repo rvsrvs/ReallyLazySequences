@@ -1,5 +1,23 @@
 # ReallyLazySequences
-Asynchronous Sequences for Swift
+Asynchronous Sequences for Swift.  
+
+I wanted to call this LazySequence, but that was already taken, hence the name.
+
+The idea is to create a new protocol which is a slightly larger superset of the Swift.Sequence protocol, but which allows values to be pushed into the sequence asynchronously rather than requiring them all to be present ab initio when calling things like map, flatMap, filter, et al. 
+
+i.e. Instead of synchronously _returning_ the result of a map or reduce command to a caller, RLS's _deliver_ a stream of values to a downstream consumer _asynchronously_ as a result of values being pushed into the head of the sequence _asynchronously_.  This has important implications for implementation, but it should still allow an RLS to do ANY operation that can be performed on a Swift.Sequence plus many more.
+
+This approach cannot be implemented using the regular Swift.Sequence because, for example, map in Swift.Sequence returns an array and in the asynchronous case we want it to return another asynchronous Sequence.  So we modify Swift.Sequence.map to return an object which implements ReallyLazySequenceProtocol instead.  Here are the declarations of SwiftSequence.map and flatMap for example:
+
+_func map<T>(_ transform: (Self.Element) throws -> T) rethrows -> [T]_
+_func flatMap<SegmentOfResult>(_ transform: (Self.Element) throws -> SegmentOfResult) rethrows -> [SegmentOfResult.Element] where SegmentOfResult : Sequence_
+
+here's the equivalent RLS declaration:
+
+_func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T>_
+_func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T>_
+
+Note how much simpler, flatMap in particular is, even though it accomplishes the same thing.  Also note that in both cases, the Swift.Sequence function acts on any object implementing the Sequence protocol, but returns an Array, i.e. a concrete implementation of the protocol
 
 ### Rules
 
