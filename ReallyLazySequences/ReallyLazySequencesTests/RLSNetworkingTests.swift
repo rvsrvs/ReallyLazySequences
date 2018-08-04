@@ -32,18 +32,16 @@ class RLSNetworkingTests: XCTestCase {
                 guard let response = result.response as? HTTPURLResponse, result.netError == nil else {
                     return .failure(result.netError!.localizedDescription)
                 }
-                guard response.statusCode == 200 else {
-                    return .failure("\(response.description)")
+                guard response.statusCode >= 200 && response.statusCode < 300 else {
+                    return .failure("Invalid response: \(response.description)")
                 }
                 guard let data = result.data  else {
-                    return .failure("valid response but no data")
+                    return .failure("Valid response but no data")
                 }
                 return .success(data)
             }
             .map { $0.successful }
-            .filter { $0 != nil }
-            .map { $0! }
-            .map { (try? JSONDecoder().decode([Configuration].self, from: $0)) ?? [Configuration]() }
+            .compactMap { (try? JSONDecoder().decode([Configuration].self, from: $0)) ?? [Configuration]()  }
             .consume {
                 guard let config = $0 else { return }
                 print(config)

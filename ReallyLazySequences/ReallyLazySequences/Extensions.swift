@@ -48,6 +48,16 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
+    public func compactMap<T, U>(_ transform: @escaping (T) -> U ) -> CompactMap<Self, U> where OutputType == T? {
+        return CompactMap<Self, U>(predecessor: self) { delivery in
+            return { optionalOptionalInput in
+                guard let optionalInput = optionalOptionalInput else { return delivery(nil) }
+                guard let input = optionalInput else { return ContinuationDone }
+                return { delivery(transform(input)) }
+            }
+        }
+    }
+
     // A generalized form of reduce which allows collection of values until a condition is reached
     // Collected values are then forwarded as the collecting type to the successor when the until condition is met
     // this function allows the initial value to be reset before receiving input of nil

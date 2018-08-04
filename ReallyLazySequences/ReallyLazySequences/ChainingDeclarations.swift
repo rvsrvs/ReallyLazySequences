@@ -68,6 +68,20 @@ public struct FlatMap<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedS
     }
 }
 
+public struct CompactMap<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+    public typealias PredecessorType = Predecessor
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
+    
+    public var predecessor: Predecessor
+    public var composer: Composer
+    
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
+        self.predecessor = predecessor
+        self.composer = composer
+    }
+}
+
 public struct Dispatch<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
