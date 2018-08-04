@@ -66,7 +66,33 @@ public extension ReallyLazySequenceProtocol {
             }
         }
     }
+    
+    // create a sequence of values from a single value
+    func flatMap<T>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
+        return FlatMap<Self, T>(predecessor: self) { delivery in
+            return { input in
+                guard let input = input else { return { delivery(nil) } }
+                let task = transform(input)
+                    .task { value in
+                        guard let value = value else { return }
+                        drive(delivery(value))
+                    }
+                if let queue = queue {
+                    queue.addOperation { try? task.start() }
+                } else {
+                    try? task.start()
+                }
+                return ContinuationDone
 
+            }
+        }
+    }
+
+    // create a sequence of values from a single value
+    func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
+        return flatMap(queue: nil, transform)
+    }
+    
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T) -> Reduce<Self, T> {
         return collect(initialValue: initialValue, combine: combine, until: { $1 == nil })
     }
@@ -78,22 +104,6 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
-    // create a sequence of values from a single value
-    func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
-        return FlatMap<Self, T>(predecessor: self) { delivery in
-            return { input in
-                guard let input = input else { return { delivery(nil) } }
-                try? transform(input)
-                    .task { value in
-                        guard let value = value else { return }
-                        drive(delivery(value))
-                    }
-                    .start()
-                return ContinuationDone
-            }
-        }
-    }
-
     // Perform the rest of the push on another dispatch queue
     public func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType> {
         return Dispatch<Self, OutputType>(predecessor: self) { delivery in
