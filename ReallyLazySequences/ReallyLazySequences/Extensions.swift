@@ -93,7 +93,6 @@ public extension ReallyLazySequenceProtocol {
                     try? task.start()
                 }
                 return ContinuationDone
-
             }
         }
     }
