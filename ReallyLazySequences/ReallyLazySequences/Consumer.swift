@@ -12,7 +12,14 @@
 // Once consumed an RLS can no longer be chained.
 // Consumers can only be initialized and pushed to.
 // i.e. consumers are NOT RLS's
-public struct Consumer<Predecessor: ReallyLazySequenceProtocol> {
+
+public protocol ConsumerProtocol {
+    associatedtype InputType
+    func push(_ value: InputType?) throws -> Void
+}
+
+public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
+    public typealias InputType = Predecessor.InputType
     public let predecessor: Predecessor
     // NB Predecessor.InputType is the type of the head of the sequence,
     // NOT the specific output type for the Predecessor's Predecessor

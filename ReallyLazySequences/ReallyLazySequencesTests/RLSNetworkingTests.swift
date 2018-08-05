@@ -9,8 +9,6 @@
 import XCTest
 @testable import ReallyLazySequences
 
-typealias FetchResult = (data: Data?, response: URLResponse?, netError: Error?)
-
 class RLSNetworkingTests: XCTestCase {
 
     override func setUp() {
@@ -28,7 +26,7 @@ class RLSNetworkingTests: XCTestCase {
         
         let task = DataFetcher(session: session, url: url)
             .listener
-            .map { (result: FetchResult) -> DataFetcher.NetworkAccessResult in
+            .map { (result: DataFetchValue) -> Result<Data> in
                 guard let response = result.response as? HTTPURLResponse, result.netError == nil else {
                     return .failure(result.netError!.localizedDescription)
                 }
@@ -40,12 +38,31 @@ class RLSNetworkingTests: XCTestCase {
                 }
                 return .success(data)
             }
-            .map { $0.successful }
-            .compactMap { (try? JSONDecoder().decode([Configuration].self, from: $0)) ?? [Configuration]()  }
+            .map { (fetchResult: Result<Data>) -> Result<[Configuration]> in
+                switch fetchResult {
+                case .success(let data):
+                    do {
+                        let configuration = try JSONDecoder().decode([Configuration].self, from: data)
+                        return .success(configuration)
+                    } catch {
+                        return .failure(error.localizedDescription)
+                    }
+                case .failure(let message):
+                    return .failure(message)
+                }
+            }
             .consume {
-                guard let config = $0 else { return }
-                print(config)
-                expectation.fulfill()
+                guard let result = $0 else {
+                    print("End of Sequence")
+                    expectation.fulfill()
+                    return
+                }
+                switch result {
+                case .success(let config):
+                    print(config)
+                case .failure(let message):
+                    print(message)
+                }
             }
         
         do {
@@ -54,31 +71,34 @@ class RLSNetworkingTests: XCTestCase {
             print(error)
         }
         
-        waitForExpectations(timeout: 10.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
 }
 
-struct DataFetcher {
-    enum NetworkAccessResult {
-        case success(Data)
-        case failure(String)
-        
-        var successful: Data? {
-            switch self {
-            case .success(let data): return data
-            case .failure: return nil
-            }
+enum Result<T> {
+    case success(T)
+    case failure(String)
+    
+    var successful: T? {
+        switch self {
+        case .success(let value): return value
+        case .failure: return nil
         }
     }
+}
 
+typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
+
+struct DataFetcher {
     var session: URLSession
     var url: URL
     
-    var listener:  Producer<FetchResult> {
-        return Producer<FetchResult> { delivery in
+    var listener:  Producer<DataFetchValue> {
+        return Producer<DataFetchValue> { delivery in
             self.session.dataTask(with: self.url) { (data: Data?, response: URLResponse?, netError: Error?) in
                 let response = (data: data, response: response, netError: netError)
                 delivery(response)
+                delivery(nil)
             }
             .resume()
         }
