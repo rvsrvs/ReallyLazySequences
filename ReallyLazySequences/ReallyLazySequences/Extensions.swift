@@ -14,6 +14,11 @@ public extension ReallyLazySequenceProtocol {
     }
 }
 
+public extension ReallyLazySequenceProtocol {
+    func listen(_ delivery: @escaping (Self.OutputType?) -> Void) -> Void {
+    }
+}
+
 // Implement Composition
 public extension ReallyLazySequenceProtocol {
     //NB This only gets called when we are NOT a ChainedSequence, i.e. we are the root RLS in a chain

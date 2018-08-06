@@ -10,12 +10,16 @@ import Foundation
 public enum ReallyLazySequenceError: Error {
     case isComplete
     case nonPushable
+    case listenerCompleted
+    
     var description: String {
         switch self {
         case .isComplete:
             return "ReallyLazySequence has already completed.  Pushes not allowed"
         case .nonPushable:
             return "push may only be called on Sequences which are NOT already attached to producers"
+        case .listenerCompleted:
+            return "listener is complete"
         }
     }
 }
@@ -37,6 +41,7 @@ public protocol ReallyLazySequenceProtocol {
     // All RLS successor chains, to be used, eventually terminate in a Consumer
     func compose(_ output: @escaping OutputFunction) -> InputFunction
     func consume(_ delivery: @escaping ConsumerFunction) -> Consumer<Self>
+    func listen(_ delivery: @escaping ConsumerFunction) -> Void
     
     /*
      Useful RLS-only functions, not related to Swift.Sequence
