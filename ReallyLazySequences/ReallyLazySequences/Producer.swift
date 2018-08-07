@@ -5,11 +5,56 @@
 //  Created by Van Simmons on 7/31/18.
 //  Copyright © 2018 ComputeCycles, LLC. All rights reserved.
 //
+import Foundation
 
 public protocol TaskProtocol {
     var isStarted: Bool { get }
     var isCompleted: Bool { get }
     func start() throws -> Void
+}
+
+public class ListenableProducer<T>: Listenable {
+    
+    private var listeners = [UUID: Listener<T>]()
+
+    public var produce: (@escaping (T?) -> Void) throws -> Void
+
+    public init(_ produce:  @escaping (@escaping (T?) -> Void) throws -> Void) {
+        self.produce = produce
+    }
+
+    private func notifyListeners(value: T?)  {
+        listeners.values.forEach { listener in
+            guard let value = value else { remove(listener: listener); return }
+            do {
+                if try listener.push(value) == .terminate { remove(listener: listener) }
+            } catch {
+                remove(listener: listener)
+            }
+        }
+    }
+
+    public func start() throws {
+        do {
+            try self.produce(notifyListeners(value:))
+        } catch {
+            throw error
+        }
+    }
+    
+    private func add(listener: Listener<T>) {
+        listeners[listener.identifier] = listener
+    }
+    
+    private func remove(listener: Listener<T>) {
+        listeners.removeValue(forKey: listener.identifier)
+    }
+    
+    public func listener() -> ListenableSequence<T> {
+        return ListenableSequence<T> { (listener: Listener<T>) in
+            self.add(listener: listener)
+        }
+    }
 }
 
 public struct Producer<T>: ReallyLazySequenceProtocol {

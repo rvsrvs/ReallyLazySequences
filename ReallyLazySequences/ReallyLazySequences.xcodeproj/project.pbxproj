@@ -14,9 +14,10 @@
 		FB628AF721109CC6009A56F9 /* Consumer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF621109CC6009A56F9 /* Consumer.swift */; };
 		FB628AF921109CFF009A56F9 /* Producer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF821109CFF009A56F9 /* Producer.swift */; };
 		FB628AFC21110420009A56F9 /* Continuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AFB21110420009A56F9 /* Continuation.swift */; };
-		FB680F46211154350089A710 /* RLSNetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB680F45211154350089A710 /* RLSNetworkingTests.swift */; };
+		FB680F46211154350089A710 /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB680F45211154350089A710 /* NetworkingTests.swift */; };
 		FBCA36A82115FA0E00984A5B /* Zip.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36A72115FA0E00984A5B /* Zip.swift */; };
 		FBCA36AC2117A83400984A5B /* Listener.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36AB2117A83400984A5B /* Listener.swift */; };
+		FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6133211940C2001C0BE3 /* ListenerTests.swift */; };
 		FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,9 +43,10 @@
 		FB628AF821109CFF009A56F9 /* Producer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Producer.swift; sourceTree = "<group>"; };
 		FB628AFA211103D5009A56F9 /* ReallyLazySequences.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; name = ReallyLazySequences.playground; path = ../ReallyLazySequences.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		FB628AFB21110420009A56F9 /* Continuation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Continuation.swift; sourceTree = "<group>"; };
-		FB680F45211154350089A710 /* RLSNetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RLSNetworkingTests.swift; sourceTree = "<group>"; };
+		FB680F45211154350089A710 /* NetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
 		FBCA36A72115FA0E00984A5B /* Zip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zip.swift; sourceTree = "<group>"; };
 		FBCA36AB2117A83400984A5B /* Listener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listener.swift; sourceTree = "<group>"; };
+		FBDD6133211940C2001C0BE3 /* ListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerTests.swift; sourceTree = "<group>"; };
 		FBF5B0321ED4894600BCAFB0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReallyLazySequence.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -108,7 +110,8 @@
 			isa = PBXGroup;
 			children = (
 				FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */,
-				FB680F45211154350089A710 /* RLSNetworkingTests.swift */,
+				FB680F45211154350089A710 /* NetworkingTests.swift */,
+				FBDD6133211940C2001C0BE3 /* ListenerTests.swift */,
 				FB33E03A1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequencesTests;
@@ -242,8 +245,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */,
 				FB33E0391EBE7E85009CA3AC /* ReallyLazySequencesTests.swift in Sources */,
-				FB680F46211154350089A710 /* RLSNetworkingTests.swift in Sources */,
+				FB680F46211154350089A710 /* NetworkingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -16,7 +16,7 @@ public enum ListenerResult {
 
 public protocol Listenable {
     associatedtype ValueType
-    func listenable() -> ListenerComposer<ValueType>
+    func listener() -> ListenableSequence<ValueType>
 }
 
 public protocol ListenerProtocol {
@@ -26,7 +26,6 @@ public protocol ListenerProtocol {
 }
 
 public struct Listener<T>: ListenerProtocol, Equatable {
-    
     public static func == (lhs: Listener<T>, rhs: Listener<T>) -> Bool {
         return lhs.identifier == rhs.identifier
     }
@@ -41,11 +40,12 @@ public struct Listener<T>: ListenerProtocol, Equatable {
     }
     
     public func push(_ value: T) throws -> ListenerResult {
-        return .terminate
+        drive(delivery(value))
+        return .continue
     }
 }
 
-public struct ListenerComposer<T>: ReallyLazySequenceProtocol {
+public struct ListenableSequence<T>: ReallyLazySequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = T
     
@@ -70,9 +70,7 @@ public class ListenableValue<T>: Listenable {
         didSet {
             listeners.values.forEach { listener in
                 do {
-                    if try listener.push(value) == .terminate {
-                        remove(listener: listener)
-                    }
+                    if try listener.push(value) == .terminate { remove(listener: listener) }
                 } catch {
                     remove(listener: listener)
                 }
@@ -92,8 +90,8 @@ public class ListenableValue<T>: Listenable {
         listeners.removeValue(forKey: listener.identifier)
     }
     
-    public func listenable() -> ListenerComposer<T> {
-        return ListenerComposer<T> { (listener: Listener<T>) in
+    public func listener() -> ListenableSequence<T> {
+        return ListenableSequence<T> { (listener: Listener<T>) in
             self.add(listener: listener)
         }
     }

@@ -12,9 +12,6 @@ public extension ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> Void) -> Consumer<Self> {
         return Consumer<Self>(predecessor: self, delivery:  delivery )
     }
-}
-
-public extension ReallyLazySequenceProtocol {
     func listen(_ delivery: @escaping (Self.OutputType?) -> Void) -> Void {
     }
 }
@@ -35,6 +32,13 @@ public extension ReallyLazySequenceProtocol {
 public extension ChainedSequence {
     public func compose(_ output: @escaping OutputFunction) -> ((PredecessorType.InputType?) throws -> Void) {
         return predecessor.compose(composer(output))
+    }
+    public func listen(_ output: @escaping (OutputType?) -> Void) {
+        let deliveryWrapper = { (value: OutputType?) -> Continuation in
+            output(value)
+            return ContinuationDone
+        }
+        let _ = predecessor.compose(composer(deliveryWrapper))
     }
 }
 
