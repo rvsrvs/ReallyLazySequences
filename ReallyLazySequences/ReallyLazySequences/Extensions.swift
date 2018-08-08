@@ -21,7 +21,7 @@ public extension ReallyLazySequenceProtocol {
     //NB This only gets called when we are NOT a ChainedSequence, i.e. we are the root RLS in a chain
     // Hence the guard let below succeeds as a conversion to our output since on the actual RLS struct
     // InputType == OutputType
-    public func compose(_ output: @escaping OutputFunction) -> InputFunction {
+    public func compose(_ output: @escaping ContinuableOutputDelivery) -> InputDelivery {
         return { guard let value = $0 as? OutputType? else { return }; drive(output(value)) }
     }
 }
@@ -30,7 +30,7 @@ public extension ReallyLazySequenceProtocol {
 // This recurses all the way back to the head sequence where it terminates because the head is NOT
 // a ChainedSequence
 public extension ChainedSequence {
-    public func compose(_ output: @escaping OutputFunction) -> ((PredecessorType.InputType?) throws -> Void) {
+    public func compose(_ output: @escaping ContinuableOutputDelivery) -> ((PredecessorType.InputType?) throws -> Void) {
         return predecessor.compose(composer(output))
     }
     public func listen(_ output: @escaping (OutputType?) -> Void) {

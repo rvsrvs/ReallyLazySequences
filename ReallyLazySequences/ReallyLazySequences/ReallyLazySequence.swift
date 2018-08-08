@@ -11,6 +11,7 @@ public enum ReallyLazySequenceError: Error {
     case isComplete
     case nonPushable
     case listenerCompleted
+    case noListeners
     
     var description: String {
         switch self {
@@ -19,7 +20,9 @@ public enum ReallyLazySequenceError: Error {
         case .nonPushable:
             return "push may only be called on Sequences which are NOT already attached to producers"
         case .listenerCompleted:
-            return "listener is complete"
+            return "Listener is complete"
+        case .noListeners:
+            return "No listeners available for producer to produce into"
         }
     }
 }
@@ -29,19 +32,19 @@ public protocol ReallyLazySequenceProtocol {
     associatedtype OutputType // The type which is output from a given RLS
     
     // a function to allow input to an RLS
-    typealias InputFunction  = (InputType?) throws -> Void
+    typealias InputDelivery  = (InputType?) throws -> Void
     // a function which consumes the output of an RLS and returns a function to execute the successor RLS
-    typealias OutputFunction = (OutputType?) -> Continuation
-    typealias ConsumerFunction = (OutputType?) -> Void
+    typealias ContinuableOutputDelivery = (OutputType?) -> Continuation
+    typealias TerminalOutputDelivery = (OutputType?) -> Void
 
     // To be used, ReallyLazySequences must be first consumed.
     // consume uses compose to create a function which accepts input of InputType
     // and outputs OutputType.  The main purpose of an RLS is to compose
     // its function for a consumer.
     // All RLS successor chains, to be used, eventually terminate in a Consumer
-    func compose(_ output: @escaping OutputFunction) -> InputFunction
-    func consume(_ delivery: @escaping ConsumerFunction) -> Consumer<Self>
-    func listen(_ delivery: @escaping ConsumerFunction) -> Void
+    func compose(_ output: @escaping ContinuableOutputDelivery) -> InputDelivery
+    func consume(_ delivery: @escaping TerminalOutputDelivery) -> Consumer<Self>
+    func listen(_ delivery: @escaping TerminalOutputDelivery) -> Void
     
     /*
      Useful RLS-only functions, not related to Swift.Sequence
@@ -81,7 +84,7 @@ public protocol ReallyLazySequenceProtocol {
 public protocol ChainedSequence: ReallyLazySequenceProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
     typealias PredecessorOutputFunction = (PredecessorType.OutputType?) -> Continuation
-    typealias Composer = (@escaping OutputFunction) -> PredecessorOutputFunction
+    typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorOutputFunction
     var predecessor: PredecessorType { get set }
     var composer: Composer { get set }
     init(predecessor: PredecessorType, composer: @escaping Composer)

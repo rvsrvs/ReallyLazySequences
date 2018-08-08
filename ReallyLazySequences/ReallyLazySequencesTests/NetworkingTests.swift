@@ -20,88 +20,44 @@ class NetworkingTests: XCTestCase {
     }
 
     func testNetworkProcessing() {
-        let expectation = self.expectation(description: "Complete RLS processing")
+        let firstExpectation = self.expectation(description: "First Listener")
+        let secondExpectation = self.expectation(description: "Second Listener")
+
         guard let url = URL(string: ConfigurationURL) else { return }
-        let session = FetcherSupport().session()
         
-        let task = DataFetcher(session: session, url: url)
-            .listener
-            .map { (result: DataFetchValue) -> Result<Data> in
-                guard let response = result.response as? HTTPURLResponse, result.netError == nil else {
-                    return .failure(result.netError!.localizedDescription)
-                }
-                guard response.statusCode >= 200 && response.statusCode < 300 else {
-                    return .failure("Invalid response: \(response.description)")
-                }
-                guard let data = result.data  else {
-                    return .failure("Valid response but no data")
-                }
-                return .success(data)
-            }
-            .map { (fetchResult: Result<Data>) -> Result<[Configuration]> in
-                switch fetchResult {
-                case .success(let data):
-                    do {
-                        let configuration = try JSONDecoder().decode([Configuration].self, from: data)
-                        return .success(configuration)
-                    } catch {
-                        return .failure(error.localizedDescription)
-                    }
-                case .failure(let message):
-                    return .failure(message)
-                }
-            }
-            .consume {
-                guard let result = $0 else {
-                    print("End of Sequence")
-                    expectation.fulfill()
-                    return
-                }
+        let producer = URLDataProducer(url: url, session: FetcherSupport().session())
+        
+        producer
+            .jsonListener(decodingType: [Configuration].self)
+            .listen {
+                guard let result = $0 else { return }
                 switch result {
-                case .success(let config):
-                    print(config)
-                case .failure(let message):
-                    print(message)
+                case .success:
+                    firstExpectation.fulfill()
+                case .failure(let error):
+                    XCTFail(error.localizedDescription)
                 }
             }
         
+        producer
+            .jsonListener(decodingType: [Configuration].self)
+            .listen {
+                guard let result = $0 else { return }
+                switch result {
+                case .success:
+                    secondExpectation.fulfill()
+                case .failure(let error):
+                    XCTFail(error.localizedDescription)
+                }
+        }
+
         do {
-            try task.push(nil)
+            try producer.produce()
         } catch {
-            print(error)
+            XCTFail(error.localizedDescription)
         }
         
         waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
-    }
-}
-
-enum Result<T> {
-    case success(T)
-    case failure(String)
-    
-    var successful: T? {
-        switch self {
-        case .success(let value): return value
-        case .failure: return nil
-        }
-    }
-}
-
-typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
-
-struct DataFetcher {
-    var session: URLSession
-    var url: URL
-    
-    var listener:  Producer<DataFetchValue> {
-        return Producer<DataFetchValue> { delivery in
-            self.session.dataTask(with: self.url) { (data: Data?, response: URLResponse?, netError: Error?) in
-                let response = (data: data, response: response, netError: netError)
-                delivery(response)
-                delivery(nil)
-            }
-            .resume()
-        }
     }
 }
 

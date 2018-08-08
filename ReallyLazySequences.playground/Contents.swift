@@ -1,5 +1,6 @@
 
 import ReallyLazySequences
+import Foundation
 
 let s = ReallyLazySequence<Int>()
     .filter { $0 < 10 }
@@ -12,4 +13,8 @@ let s = ReallyLazySequence<Int>()
 print(type(of:s))
 
 try s.push(2)
+
+typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
+
+type(of: Int.self)
 

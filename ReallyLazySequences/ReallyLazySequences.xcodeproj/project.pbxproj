@@ -18,6 +18,8 @@
 		FBCA36A82115FA0E00984A5B /* Zip.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36A72115FA0E00984A5B /* Zip.swift */; };
 		FBCA36AC2117A83400984A5B /* Listener.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36AB2117A83400984A5B /* Listener.swift */; };
 		FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6133211940C2001C0BE3 /* ListenerTests.swift */; };
+		FBDD61362119C6E4001C0BE3 /* ProducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */; };
+		FBDD6138211B0652001C0BE3 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6137211B0652001C0BE3 /* Networking.swift */; };
 		FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */; };
 /* End PBXBuildFile section */
 
@@ -47,6 +49,8 @@
 		FBCA36A72115FA0E00984A5B /* Zip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zip.swift; sourceTree = "<group>"; };
 		FBCA36AB2117A83400984A5B /* Listener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listener.swift; sourceTree = "<group>"; };
 		FBDD6133211940C2001C0BE3 /* ListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerTests.swift; sourceTree = "<group>"; };
+		FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProducerTests.swift; sourceTree = "<group>"; };
+		FBDD6137211B0652001C0BE3 /* Networking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		FBF5B0321ED4894600BCAFB0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReallyLazySequence.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -93,14 +97,15 @@
 		FB33E02C1EBE7E85009CA3AC /* ReallyLazySequences */ = {
 			isa = PBXGroup;
 			children = (
-				FB628AFB21110420009A56F9 /* Continuation.swift */,
 				FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */,
+				FB628AFB21110420009A56F9 /* Continuation.swift */,
 				FB628AF621109CC6009A56F9 /* Consumer.swift */,
 				FB628AF821109CFF009A56F9 /* Producer.swift */,
 				FBCA36A72115FA0E00984A5B /* Zip.swift */,
 				FBCA36AB2117A83400984A5B /* Listener.swift */,
 				FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */,
 				FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */,
+				FBDD6137211B0652001C0BE3 /* Networking.swift */,
 				FB33E02E1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequences;
@@ -112,6 +117,7 @@
 				FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */,
 				FB680F45211154350089A710 /* NetworkingTests.swift */,
 				FBDD6133211940C2001C0BE3 /* ListenerTests.swift */,
+				FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */,
 				FB33E03A1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequencesTests;
@@ -233,6 +239,7 @@
 				FB628AFC21110420009A56F9 /* Continuation.swift in Sources */,
 				FBCA36AC2117A83400984A5B /* Listener.swift in Sources */,
 				FB628AF921109CFF009A56F9 /* Producer.swift in Sources */,
+				FBDD6138211B0652001C0BE3 /* Networking.swift in Sources */,
 				FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */,
 				FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */,
 				FBCA36A82115FA0E00984A5B /* Zip.swift in Sources */,
@@ -246,6 +253,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */,
+				FBDD61362119C6E4001C0BE3 /* ProducerTests.swift in Sources */,
 				FB33E0391EBE7E85009CA3AC /* ReallyLazySequencesTests.swift in Sources */,
 				FB680F46211154350089A710 /* NetworkingTests.swift in Sources */,
 			);

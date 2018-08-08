@@ -13,49 +13,7 @@ public protocol TaskProtocol {
     func start() throws -> Void
 }
 
-public class ListenableProducer<T>: Listenable {
-    
-    private var listeners = [UUID: Listener<T>]()
 
-    public var produce: (@escaping (T?) -> Void) throws -> Void
-
-    public init(_ produce:  @escaping (@escaping (T?) -> Void) throws -> Void) {
-        self.produce = produce
-    }
-
-    private func notifyListeners(value: T?)  {
-        listeners.values.forEach { listener in
-            guard let value = value else { remove(listener: listener); return }
-            do {
-                if try listener.push(value) == .terminate { remove(listener: listener) }
-            } catch {
-                remove(listener: listener)
-            }
-        }
-    }
-
-    public func start() throws {
-        do {
-            try self.produce(notifyListeners(value:))
-        } catch {
-            throw error
-        }
-    }
-    
-    private func add(listener: Listener<T>) {
-        listeners[listener.identifier] = listener
-    }
-    
-    private func remove(listener: Listener<T>) {
-        listeners.removeValue(forKey: listener.identifier)
-    }
-    
-    public func listener() -> ListenableSequence<T> {
-        return ListenableSequence<T> { (listener: Listener<T>) in
-            self.add(listener: listener)
-        }
-    }
-}
 
 public struct Producer<T>: ReallyLazySequenceProtocol {
     public typealias InputType = T
@@ -67,7 +25,7 @@ public struct Producer<T>: ReallyLazySequenceProtocol {
         private(set) public var isCompleted = false
         private var consumer: ProducerConsumer!
         
-        init(_ producer: Producer<T>, _ delivery: @escaping ConsumerFunction) {
+        init(_ producer: Producer<T>, _ delivery: @escaping TerminalOutputDelivery) {
             let composedDelivery = { (value: OutputType?) -> Void in
                 if value == nil { self.isCompleted = true }
                 return delivery(value)
@@ -88,7 +46,7 @@ public struct Producer<T>: ReallyLazySequenceProtocol {
         self.produce = produce
     }
     
-    public func compose(_ output: (@escaping (T?) -> Continuation)) -> ((T?) throws -> Void) {
+    public func compose(_ output: (@escaping ContinuableOutputDelivery)) -> ((T?) throws -> Void) {
         var completed = false
         return { value in
             guard value == nil else { throw ReallyLazySequenceError.nonPushable }
@@ -98,7 +56,7 @@ public struct Producer<T>: ReallyLazySequenceProtocol {
         }
     }
     
-    public func task(_ delivery: @escaping ConsumerFunction) -> TaskProtocol {
+    public func task(_ delivery: @escaping TerminalOutputDelivery) -> TaskProtocol {
         return Task(self, delivery)
     }
 }

@@ -1,15 +1,15 @@
 //
-//  ListenerTests.swift
+//  ProducerTests.swift
 //  ReallyLazySequencesTests
 //
-//  Created by Van Simmons on 8/6/18.
+//  Created by Van Simmons on 8/7/18.
 //  Copyright © 2018 ComputeCycles, LLC. All rights reserved.
 //
 
 import XCTest
 @testable import ReallyLazySequences
 
-class ListenerTests: XCTestCase {
+class ProducerTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
@@ -21,29 +21,31 @@ class ListenerTests: XCTestCase {
         super.tearDown()
     }
     
-    func testListenableValue() {
+    func testListenableProducer() {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
-
-        let testValue = ListenableValue<Int>(2)
         
-        testValue
+        let testProducer = ListenableProducer<Int>(initialValue: 2) { value in
+            (0 ... 5).forEach { value.value = $0 }
+        }
+        
+        testProducer
             .listener()
             .map {  $0 * 2 }
             .listen {
-                guard $0 != nil else { XCTFail(); return }
+                guard $0 == 10 else { return }
                 doubler.fulfill()
             }
         
-        testValue
+        testProducer
             .listener()
             .map {  $0 * 4 }
             .listen {
-                guard $0 != nil else { XCTFail(); return }
+                guard $0 == 20 else { return }
                 quadrupler.fulfill()
             }
         
-        testValue.value = 4
-        waitForExpectations(timeout: 2.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        try? testProducer.produce()
+        waitForExpectations(timeout: 30.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
 }
