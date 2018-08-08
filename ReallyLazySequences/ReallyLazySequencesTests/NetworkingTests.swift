@@ -29,6 +29,7 @@ class NetworkingTests: XCTestCase {
         
         producer
             .jsonListener(decodingType: [Configuration].self)
+            .dispatch(OperationQueue.main)
             .listen {
                 guard let result = $0 else { return }
                 switch result {

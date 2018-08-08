@@ -33,7 +33,7 @@ public struct URLDataProducer: Listenable {
         self.url = url
         self.value = ListenableValue<DataFetchValue>((nil, nil, nil))
         self.producer = { (value) in
-            session.dataTask(with: url) { value.value = ($0, $1, $2) } .resume()
+            session.dataTask(with: url) { value.value = ($0, $1, $2); value.terminate() } .resume()
         }
     }
     

@@ -29,12 +29,12 @@ class ReallyLazySequencesTests: XCTestCase {
             .reduce([Double]()) { $0 + [$1] }
             .map { return $0.sorted() }
             .flatMap { (collected: [Double]) -> Producer<Double> in
-                Producer<Double>(initialValue: 0) { value in collected.forEach { value.value = $0 }; value.terminate() }
+                Producer<Double> { deliver, terminate in collected.forEach { deliver($0) }; terminate() }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
             .flatMap { (collected: Int) -> Producer<Int> in
-                Producer<Int>(initialValue: 0) { value in (0 ..< 3).forEach { value.value = $0 * collected }; value.terminate() }
+                Producer<Int> { (deliver, terminate) in (0 ..< 3).forEach { deliver($0 * collected) }; terminate() }
             }
             .consume { if let value = $0 { accumulatedResults.append(value) } }
         
@@ -57,9 +57,9 @@ class ReallyLazySequencesTests: XCTestCase {
     func testSimpleProducer() {
         let firstExpectation = self.expectation(description: "First Listener")
         
-        let producer = Producer<Int>(initialValue: 0) { value in
-            (0 ..< 3).forEach { value.value = $0 }
-            value.terminate()
+        let producer = Producer<Int> { (deliver, terminate) in
+            (0 ..< 3).forEach { deliver($0) }
+            terminate()
         }
         
         producer
@@ -125,8 +125,9 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) in
-                Producer<Int>(initialValue: 0) {
-                    value in collected.forEach { value.value = $0 }
+                Producer<Int> { deliver, terminate in
+                    collected.forEach {deliver($0) }
+                    terminate()
                 }
             }
             .consume {
