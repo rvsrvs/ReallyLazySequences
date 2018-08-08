@@ -8,12 +8,6 @@
 
 import Foundation
 
-public enum ListenerResult {
-    case `continue`
-    case terminate
-    case error
-}
-
 public protocol Listenable {
     associatedtype ListenableType
     associatedtype ListenableSequenceType: ReallyLazySequenceProtocol where ListenableSequenceType.InputType == ListenableType
@@ -23,7 +17,8 @@ public protocol Listenable {
 public protocol ListenerProtocol {
     associatedtype InputType
     var identifier: UUID { get }
-    func push(_ value: InputType) throws -> ListenerResult
+    func push(_ value: InputType) throws
+    func terminate()
 }
 
 public struct Listener<T>: ListenerProtocol, Equatable {
@@ -40,9 +35,12 @@ public struct Listener<T>: ListenerProtocol, Equatable {
         self.delivery = delivery
     }
     
-    public func push(_ value: T) throws -> ListenerResult {
+    public func push(_ value: T) throws {
         drive(delivery(value))
-        return .continue
+    }
+    
+    public func terminate() {
+        drive(delivery(nil))
     }
 }
 
@@ -60,6 +58,14 @@ public struct ListenableSequence<T>: ReallyLazySequenceProtocol {
         let listener = Listener<T>(delivery: output)
         compositionHandler(listener)
         return { _ in throw ReallyLazySequenceError.nonPushable }
+    }
+    
+    public func listen(_ delivery: @escaping (OutputType?) -> Void) {
+        let deliveryWrapper = { (value: OutputType?) -> Continuation in
+            delivery(value)
+            return ContinuationDone
+        }
+        let _ = compose(deliveryWrapper)
     }
 }
 
@@ -81,8 +87,15 @@ public class ListenableValue<T>: Listenable {
     
     private func push(_ value: T) {
         listeners.values.forEach { listener in
-            do { if try listener.push(value) == .terminate { remove(listener: listener) } }
+            do { try listener.push(value) }
             catch { remove(listener: listener) }
+        }
+    }
+    
+    func terminate() {
+        listeners.values.forEach { listener in
+            listener.terminate()
+            remove(listener: listener)
         }
     }
     
@@ -98,32 +111,5 @@ public class ListenableValue<T>: Listenable {
         return ListenableSequence<T> { (listener: Listener<T>) in
             self.add(listener: listener)
         }
-    }
-}
-
-public protocol ValueProducer {
-    associatedtype ProducedType
-    var value: ListenableValue<ProducedType> { get }
-    func produce() throws
-}
-
-public struct ListenableProducer<T>: Listenable {
-    public typealias ListenableType = T
-    public typealias ListenableSequenceType = ListenableSequence<T>
-    var value: ListenableValue<T>
-    var producer: (ListenableValue<T>) -> Void
-    
-    public init(initialValue: T, produceWith producer: @escaping (ListenableValue<T>) -> Void) {
-        self.value = ListenableValue<T>(initialValue)
-        self.producer = producer
-    }
-    
-    public func produce() throws {
-        guard value.listeners.count > 0 else { throw ReallyLazySequenceError.noListeners }
-        producer(value)
-    }
-    
-    public func listener() -> ListenableSequence<T> {
-        return value.listener()
     }
 }

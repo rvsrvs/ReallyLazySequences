@@ -12,8 +12,8 @@ public extension ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> Void) -> Consumer<Self> {
         return Consumer<Self>(predecessor: self, delivery:  delivery )
     }
-    func listen(_ delivery: @escaping (Self.OutputType?) -> Void) -> Void {
-    }
+    
+    public func listen(_ delivery: @escaping (OutputType?) -> Void) {  }
 }
 
 // Implement Composition
@@ -33,9 +33,9 @@ public extension ChainedSequence {
     public func compose(_ output: @escaping ContinuableOutputDelivery) -> ((PredecessorType.InputType?) throws -> Void) {
         return predecessor.compose(composer(output))
     }
-    public func listen(_ output: @escaping (OutputType?) -> Void) {
+    public func listen(_ delivery: @escaping (OutputType?) -> Void) {
         let deliveryWrapper = { (value: OutputType?) -> Continuation in
-            output(value)
+            delivery(value)
             return ContinuationDone
         }
         let _ = predecessor.compose(composer(deliveryWrapper))
@@ -98,15 +98,17 @@ public extension ReallyLazySequenceProtocol {
         return FlatMap<Self, T>(predecessor: self) { delivery in
             return { input in
                 guard let input = input else { return { delivery(nil) } }
-                let task = transform(input)
-                    .task { value in
+                let producer = transform(input)
+                producer
+                    .listener()
+                    .listen { value in
                         guard let value = value else { return }
                         drive(delivery(value))
                     }
                 if let queue = queue {
-                    queue.addOperation { try? task.start() }
+                    queue.addOperation { try? producer.produce() }
                 } else {
-                    try? task.start()
+                    try? producer.produce()
                 }
                 return ContinuationDone
             }

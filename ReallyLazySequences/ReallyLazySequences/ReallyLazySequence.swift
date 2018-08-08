@@ -69,9 +69,8 @@ public protocol ReallyLazySequenceProtocol {
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
     // All returned types differ only in name
     func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T>
-    //func compactMap<T, U>(_ transform: @escaping (T) -> U ) -> CompactMap<Self, U> where OutputType == T?
+    func compactMap<T, U>(_ transform: @escaping (T) -> U ) -> CompactMap<Self, U> where OutputType == T?
     func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T>
-
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T) -> Reduce<Self, T>
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
 }

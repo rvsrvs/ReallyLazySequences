@@ -25,7 +25,7 @@ class ProducerTests: XCTestCase {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let testProducer = ListenableProducer<Int>(initialValue: 2) { value in
+        let testProducer = Producer<Int>(initialValue: 2) { value in
             (0 ... 5).forEach { value.value = $0 }
         }
         

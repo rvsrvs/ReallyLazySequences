@@ -28,14 +28,18 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { $0 * 2 }
             .reduce([Double]()) { $0 + [$1] }
             .map { return $0.sorted() }
-            .flatMap { values -> Producer<Double> in return Producer { delivery in values.forEach { delivery($0) } } }
+            .flatMap { (collected: [Double]) -> Producer<Double> in
+                Producer<Double>(initialValue: 0) { value in collected.forEach { value.value = $0 }; value.terminate() }
+            }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
-            .flatMap { (value) -> Producer<Int> in Producer { delivery in ( 0 ..< 3).forEach { delivery($0 * value) } } }
+            .flatMap { (collected: Int) -> Producer<Int> in
+                Producer<Int>(initialValue: 0) { value in (0 ..< 3).forEach { value.value = $0 * collected }; value.terminate() }
+            }
             .consume { if let value = $0 { accumulatedResults.append(value) } }
         
         XCTAssertNotNil(c as Consumer<FlatMap<Reduce<Map<FlatMap<Map<Reduce<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Array<Double>>, Array<Double>>, Double>, Int>, Int>, Int>>,
-                        "Consumer c is wrong type!")
+                    "Consumer c is wrong type!")
         
         do {
             for _ in 0 ..< 100000 { try c.push(200) }
@@ -51,14 +55,28 @@ class ReallyLazySequencesTests: XCTestCase {
     }
     
     func testSimpleProducer() {
-        let task = Producer<Int> { delivery in ( 0 ..< 3).forEach { delivery($0) } }
-            .task { _ in return }
+        let firstExpectation = self.expectation(description: "First Listener")
+        
+        let producer = Producer<Int>(initialValue: 0) { value in
+            (0 ..< 3).forEach { value.value = $0 }
+            value.terminate()
+        }
+        
+        producer
+            .listener()
+            .listen {
+                guard $0 != nil else {
+                    firstExpectation.fulfill()
+                    return
+                }
+            }
         
         do {
-            try task.start()
+            try producer.produce()
         } catch {
-            print(error)
+            XCTFail(error.localizedDescription)
         }
+        waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
     
     func testDispatch() {
@@ -99,14 +117,24 @@ class ReallyLazySequencesTests: XCTestCase {
     }
     
     func testCollect() {
+        let expectation = self.expectation(description: "Complete RLS processing")
         let c = ReallyLazySequence<Int>()
             .collect(
                 initialValue: [Int](),
                 combine: { (partialValue, input) -> [Int] in return partialValue + [input] },
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
-            .flatMap { value in Producer { delivery in value.forEach { delivery($0) } } }
-            .consume { _ in return }
+            .flatMap { (collected: [Int]) in
+                Producer<Int>(initialValue: 0) {
+                    value in collected.forEach { value.value = $0 }
+                }
+            }
+            .consume {
+                guard $0 != nil else {
+                    expectation.fulfill()
+                    return
+                }
+            }
         
         XCTAssertNotNil(c as Consumer<FlatMap<Reduce<ReallyLazySequence<Int>, Array<Int>>, Int>>, "Wrong class")
         
@@ -127,5 +155,6 @@ class ReallyLazySequencesTests: XCTestCase {
         } catch {
             XCTFail(error.localizedDescription)
         }
+        waitForExpectations(timeout: 10.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
 }
