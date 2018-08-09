@@ -20,32 +20,29 @@ public enum Result<T> {
     }
 }
 
-public typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
-
-public struct URLDataProducer: Listenable {
+public class URLDataProducer: ProducerProtocol {
+    public typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
     public typealias ListenableType = DataFetchValue
     public typealias ListenableSequenceType = ListenableSequence<DataFetchValue>
-    var value: ListenableValue<DataFetchValue>
-    var producer: (ListenableValue<DataFetchValue>) -> Void
-    var url: URL
+    public var listeners = [UUID: Listener<DataFetchValue>]()
+    public var producer: (@escaping (URLDataProducer.DataFetchValue?) -> Void) -> Void
+
+    var url: URL!
     
-    init(url: URL, session: URLSession) {
+    public required init(producer: @escaping ((URLDataProducer.DataFetchValue?) -> Void) -> Void) {
+        self.producer = producer
+    }
+
+    convenience init(url: URL, session: URLSession) {
+        self.init { (_) in }
         self.url = url
-        self.value = ListenableValue<DataFetchValue>((nil, nil, nil))
-        self.producer = { (value) in
-            session.dataTask(with: url) { value.value = ($0, $1, $2); value.terminate() } .resume()
+        self.producer = { (delivery: @escaping ((URLDataProducer.DataFetchValue?) -> Void)) -> Void in
+            session.dataTask(with: url) { delivery(($0, $1, $2)); delivery(nil) } .resume()
         }
     }
-    
-    public func produce() throws {
-        guard value.hasListeners else { throw ReallyLazySequenceError.noListeners }
-        producer(value)
-    }
-    
-    public func listener() -> ListenableSequence<DataFetchValue> {
-        return value.listener()
-    }
-    
+}
+
+extension URLDataProducer {
     public typealias DataListener = Map<ListenableSequence<DataFetchValue>, Result<Data>>
     public func dataListener() -> DataListener {
         return listener()
@@ -87,7 +84,7 @@ public struct URLDataProducer: Listenable {
                                                         "json": data,
                                                         "msg": "Error decoding json as type: \(type(of: decodingType))",
                                                         "error": error
-                            ]
+                                                    ]
                         )
                         return .failure(wrappingError)
                     }

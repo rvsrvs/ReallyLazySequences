@@ -2,7 +2,7 @@
 import ReallyLazySequences
 import Foundation
 
-let s = ReallyLazySequence<Int>()
+let c = ReallyLazySequence<Int>()
     .filter { $0 < 10 }
     .map { Double($0) * 2.0 }
     .consume { (value: Double?) -> Void in
@@ -10,11 +10,12 @@ let s = ReallyLazySequence<Int>()
         print(value)
     }
 
-print(type(of:s))
+print(type(of:c))
 
-try s.push(2)
+try c.push(2)
+try c.push(4)
+try c.push(6)
+try c.push(nil)
+try c.push(7)
 
-typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
-
-type(of: Int.self)
 

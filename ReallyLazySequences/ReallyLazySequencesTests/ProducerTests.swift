@@ -25,9 +25,9 @@ class ProducerTests: XCTestCase {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let testProducer = Producer<Int> { deliver, terminate in
+        let testProducer = Producer<Int> { deliver in
             (0 ... 5).forEach { deliver($0) }
-            terminate()
+            deliver(nil)
         }
         
         testProducer

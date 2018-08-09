@@ -25,7 +25,7 @@ class NetworkingTests: XCTestCase {
 
         guard let url = URL(string: ConfigurationURL) else { return }
         
-        let producer = URLDataProducer(url: url, session: FetcherSupport().session())
+        let producer = URLDataProducer(url: url, session: SessionSupport().session())
         
         producer
             .jsonListener(decodingType: [Configuration].self)
@@ -77,7 +77,7 @@ struct Configuration : Encodable, Decodable {
 fileprivate let WeatherURL = "https://api.openweathermap.org/data/2.5/weather?q=Boston&appid=77e555f36584bc0c3d55e1e584960580"
 fileprivate let ConfigurationURL = "https://www.dropbox.com/s/i4gp5ih4tfq3bve/S65g.json?dl=1"
 
-class FetcherSupport: NSObject, URLSessionDelegate {
+class SessionSupport: NSObject, URLSessionDelegate {
     func session() -> URLSession {
         let configuration = URLSessionConfiguration.default
         return URLSession(configuration: configuration,

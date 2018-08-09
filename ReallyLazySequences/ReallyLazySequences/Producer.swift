@@ -8,55 +8,61 @@
 import Foundation
 
 public protocol ProducerProtocol: class, Listenable {
-    var hasListeners: Bool { get }
+    var listeners: [UUID: Listener<ListenableType>] { get set }
+    var producer: (@escaping (ListenableType?) -> Void) -> Void { get }
+    
+    init(producer: @escaping ((ListenableType?) -> Void) -> Void)
+
     func produce() throws
-    init(producer: @escaping ((ListenableType) -> Void, () -> Void) -> Void)
+    func hasListeners() -> Bool
+    func add(listener: Listener<ListenableType>)
+    func remove(listener: Listener<ListenableType>)
+}
+
+extension ProducerProtocol {
+    public func produce() throws {
+        guard hasListeners() else { throw ReallyLazySequenceError.noListeners }
+        let push = { (value: ListenableType?) in
+            guard let value = value else {
+                self.listeners.values.forEach { listener in
+                    listener.terminate()
+                    self.remove(listener: listener)
+                }
+                return
+            }
+            self.listeners.values.forEach { listener in
+                do { try listener.push(value) }
+                catch { self.remove(listener: listener) }
+            }
+        }
+        producer(push)
+    }
+    
+    public func hasListeners() -> Bool { return listeners.count > 0 }
+
+    public func add(listener: Listener<ListenableType>) {
+        listeners[listener.identifier] = listener
+    }
+    
+    public func remove(listener: Listener<ListenableType>) {
+        listeners.removeValue(forKey: listener.identifier)
+    }
+    
+    public func listener() -> ListenableSequence<ListenableType> {
+        return ListenableSequence<ListenableType> { (listener: Listener<ListenableType>) in
+            self.add(listener: listener)
+        }
+    }
 }
 
 public final class Producer<T>: ProducerProtocol {
     public typealias ListenableType = T
     public typealias ListenableSequenceType = ListenableSequence<T>
     
-    fileprivate(set) public var listeners = [UUID: Listener<T>]()
-    
-    public var hasListeners: Bool { return listeners.count > 0 }
-    
-    private var producer: ((T) -> Void, () -> Void) -> Void
-    
-    public init(producer: @escaping ((T) -> Void, () -> Void) -> Void) {
-        self.producer = producer
-    }
+    public var listeners = [UUID: Listener<T>]()
+    public var producer: (@escaping (T?) -> Void) -> Void
 
-    public func produce() throws {
-        guard hasListeners else { throw ReallyLazySequenceError.noListeners }
-        producer(push, terminate)
-    }
-    
-    private func push(_ value: T) {
-        listeners.values.forEach { listener in
-            do { try listener.push(value) }
-            catch { remove(listener: listener) }
-        }
-    }
-    
-    private func terminate() {
-        listeners.values.forEach { listener in
-            listener.terminate()
-            remove(listener: listener)
-        }
-    }
-    
-    private func add(listener: Listener<T>) {
-        listeners[listener.identifier] = listener
-    }
-    
-    private func remove(listener: Listener<T>) {
-        listeners.removeValue(forKey: listener.identifier)
-    }
-    
-    public func listener() -> ListenableSequence<T> {
-        return ListenableSequence<T> { (listener: Listener<T>) in
-            self.add(listener: listener)
-        }
+    public init(producer: @escaping ((T?) -> Void) -> Void) {
+        self.producer = producer
     }
 }
