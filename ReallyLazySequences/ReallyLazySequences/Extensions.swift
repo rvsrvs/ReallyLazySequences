@@ -47,7 +47,7 @@ public extension ChainedSequence {
 // 1. Its predecessors composed function
 // 2. It's own associated function which takes the predecessors output type and operates on it to produce its own output type
 // 3. a particular function which is specific to the action being taken
-// Number 3 is what is being passed in to the initializer of the specific type in each case
+// Number 3 is what is being passed in to the initializer of the specific types returned below
 
 public extension ReallyLazySequenceProtocol {
     // Map sequential values of one type to a value of the same or different type
@@ -58,13 +58,13 @@ public extension ReallyLazySequenceProtocol {
     }
     
     // When the OutputType of the sequence is an optional, remove nils from the sequence, and transform
-    // the non-optional type
+    // the non-optional type to the output type
     public func compactMap<T, U>(_ transform: @escaping (T) -> U ) -> CompactMap<Self, U> where OutputType == T? {
         return CompactMap<Self, U>(predecessor: self) { delivery in
             return { optionalOptionalInput in
-                guard let optionalInput = optionalOptionalInput else { return delivery(nil) }
-                guard let input = optionalInput else { return ContinuationDone }
-                return { delivery(transform(input)) }
+                guard let optionalInput = optionalOptionalInput else { return delivery(nil) } // termination nil
+                guard let input = optionalInput else { return ContinuationDone } // nil to remove from sequence
+                return { delivery(transform(input)) } // value to pass on
             }
         }
     }
@@ -93,7 +93,8 @@ public extension ReallyLazySequenceProtocol {
         }
     }
     
-    // create a sequence of values from a single value
+    // Optionally in a specific queue, create a sequence of values from a single value
+    // and then flatten that sequence into this one.  If queue is nil perform the operation in line
     func flatMap<T>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
         return FlatMap<Self, T>(predecessor: self) { delivery in
             return { input in
@@ -115,7 +116,8 @@ public extension ReallyLazySequenceProtocol {
         }
     }
 
-    // create a sequence of values from a single value
+    // In the current queue, create a sequence of values from a single value
+    // and then flatten the resulting sequence into this one
     func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
         return flatMap(queue: nil, transform)
     }
