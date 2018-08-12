@@ -8,23 +8,76 @@
 
 import Foundation
 
+public typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
+
+public struct URLDataFetcher: ReallyLazySequenceProtocol {
+    public typealias InputType = (url: URL, session: URLSession)
+    public typealias OutputType = Result<Data>
+    public var generator: (InputType, @escaping (OutputType?) -> Void) -> Void
+    
+    private typealias Composition = () -> Void
+    private var composition: Composition?
+    
+    public init() {
+        self.generator = { (fetch: InputType, delivery: @escaping ((Result<Data>?) -> Void)) -> Void in
+            let task = fetch.session.dataTask(with: fetch.url) {
+                let c = ReallyLazySequence<DataFetchValue>()
+                    .map { (result: DataFetchValue) -> Result<Data> in
+                        guard let response = result.response as? HTTPURLResponse, result.netError == nil else {
+                            return .failure(result.netError!)
+                        }
+                        guard response.statusCode >= 200 && response.statusCode < 300 else {
+                            let error = NSError(domain: "ReallyLazySequences.URLDataFetcher",
+                                                code: 1000,
+                                                userInfo: ["url" : fetch.url, "response": response, "msg": "Invalid response"]
+                            )
+                            return .failure(error)
+                        }
+                        guard let data = result.data  else {
+                            let error = NSError(domain: "ReallyLazySequences.URLDataFetcher",
+                                                code: 1001,
+                                                userInfo: ["url" : fetch.url, "response": response, "msg": "Valid response but no data"]
+                            )
+                            return .failure(error)
+                        }
+                        return .success(data)
+                    }
+                    .consume{ result in
+                        delivery(result)
+                        delivery(nil)
+                    }
+                try? c.push(($0, $1, $2))
+            }
+            task.resume()
+            while task.state != .completed { RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1)) }
+        }
+    }
+    
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
+        let deliveryWrapper = { (output: OutputType?) -> Void in drive(delivery(output)) }
+        return { (input: InputType?) throws -> Void in
+            guard let input = input else { deliveryWrapper(nil); return }
+            self.generator(input, deliveryWrapper)
+        }
+    }
+}
+
 public class URLDataProducer: ProducerProtocol {
-    public typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
     public typealias ListenableType = DataFetchValue
     public typealias ListenableSequenceType = ListenableSequence<DataFetchValue>
     public var listeners = [UUID: Listener<DataFetchValue>]()
-    public var producer: (@escaping (URLDataProducer.DataFetchValue?) -> Void) -> Void
+    public var producer: (@escaping (DataFetchValue?) -> Void) -> Void
 
     var url: URL!
     
-    public required init(producer: @escaping ((URLDataProducer.DataFetchValue?) -> Void) -> Void) {
+    public required init(producer: @escaping ((DataFetchValue?) -> Void) -> Void) {
         self.producer = producer
     }
 
     convenience init(url: URL, session: URLSession) {
         self.init { (_) in }
         self.url = url
-        self.producer = { (delivery: @escaping ((URLDataProducer.DataFetchValue?) -> Void)) -> Void in
+        self.producer = { (delivery: @escaping ((DataFetchValue?) -> Void)) -> Void in
             session.dataTask(with: url) { delivery(($0, $1, $2)); delivery(nil) } .resume()
         }
     }
