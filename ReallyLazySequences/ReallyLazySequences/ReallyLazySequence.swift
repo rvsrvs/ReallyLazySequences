@@ -111,3 +111,23 @@ public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     public init() { }
 }
 
+public struct OneShot<T>: ReallyLazySequenceProtocol {
+    public typealias InputType = Void
+    public typealias OutputType = T
+    public var producer: (@escaping (T?) -> Void) -> Void
+
+    private typealias Composition = () -> Void
+    private var composition: Composition?
+    
+    public init(producer: @escaping ((T?) -> Void) -> Void) {
+        self.producer = producer
+    }
+
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
+        let deliveryWrapper: (T?) -> Void = { value in
+            drive(delivery(value))
+        }
+        return {_ in self.producer(deliveryWrapper) }
+    }
+}
+
