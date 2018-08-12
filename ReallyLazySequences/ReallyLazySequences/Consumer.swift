@@ -16,6 +16,7 @@ import Foundation
 
 public protocol ConsumerProtocol {
     associatedtype InputType
+    var composition: (InputType?) throws -> Void { get }
     func push(_ value: InputType?) throws -> Void
     func push(
         queue: OperationQueue?,
@@ -28,7 +29,7 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     public let predecessor: Predecessor
     // NB Predecessor.InputType is the type of the head of the sequence,
     // NOT the specific output type for the Predecessor's Predecessor
-    private let composition: (Predecessor.InputType?) throws -> Void
+    private(set) public var composition: (Predecessor.InputType?) throws -> Void
     
     public init(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void)) {
         self.predecessor = predecessor
