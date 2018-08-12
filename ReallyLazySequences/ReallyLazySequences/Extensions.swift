@@ -95,21 +95,19 @@ public extension ReallyLazySequenceProtocol {
     
     // Optionally in a specific queue, create a sequence of values from a single value
     // and then flatten that sequence into this one.  If queue is nil perform the operation in line
-    func flatMap<T>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
+    func flatMap<T>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> Generator<T>) -> FlatMap<Self, T> {
         return FlatMap<Self, T>(predecessor: self) { delivery in
             return { input in
                 guard let input = input else { return { delivery(nil) } }
-                let producer = transform(input)
-                producer
-                    .listener()
-                    .listen { value in
+                let generator = transform(input)
+                    .consume { value in
                         guard let value = value else { return }
                         drive(delivery(value))
                     }
                 if let queue = queue {
-                    queue.addOperation { try? producer.produce() }
+                    queue.addOperation { try? generator.push(.start) }
                 } else {
-                    try? producer.produce()
+                    try? generator.push(.start)
                 }
                 return ContinuationDone
             }
@@ -118,7 +116,7 @@ public extension ReallyLazySequenceProtocol {
 
     // In the current queue, create a sequence of values from a single value
     // and then flatten the resulting sequence into this one
-    func flatMap<T>(_ transform: @escaping (OutputType) -> Producer<T>) -> FlatMap<Self, T> {
+    func flatMap<T>(_ transform: @escaping (OutputType) -> Generator<T>) -> FlatMap<Self, T> {
         return flatMap(queue: nil, transform)
     }
     

@@ -28,10 +28,9 @@ public protocol ConsumerProtocol {
 public extension ConsumerProtocol {
     // Accept a push of the Head type and pass it through the composed closure
     public func push(_ value: InputType?) throws -> Void {
-        guard InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
         try composition(value)
     }
-    
+
     // Accept a push of a closure which will generate values type type InputType
     public func push(
         queue: OperationQueue? = nil,
