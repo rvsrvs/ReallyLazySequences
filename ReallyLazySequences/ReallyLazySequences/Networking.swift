@@ -8,18 +8,6 @@
 
 import Foundation
 
-public enum Result<T> {
-    case success(T)
-    case failure(Error)
-    
-    var successful: T? {
-        switch self {
-        case .success(let value): return value
-        case .failure: return nil
-        }
-    }
-}
-
 public class URLDataProducer: ProducerProtocol {
     public typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
     public typealias ListenableType = DataFetchValue

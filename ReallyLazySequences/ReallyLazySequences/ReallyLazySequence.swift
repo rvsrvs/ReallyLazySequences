@@ -7,6 +7,18 @@
 //
 import Foundation
 
+public enum Result<T> {
+    case success(T)
+    case failure(Error)
+    
+    var successful: T? {
+        switch self {
+        case .success(let value): return value
+        case .failure: return nil
+        }
+    }
+}
+
 public enum ReallyLazySequenceError: Error {
     case isComplete
     case nonPushable
