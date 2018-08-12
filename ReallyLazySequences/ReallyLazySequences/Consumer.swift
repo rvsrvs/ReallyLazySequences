@@ -17,6 +17,10 @@ import Foundation
 public protocol ConsumerProtocol {
     associatedtype InputType
     func push(_ value: InputType?) throws -> Void
+    func push(
+        queue: OperationQueue?,
+        _ producer: @escaping ((InputType?) throws-> Void) throws-> Void
+    ) throws -> Void
 }
 
 public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
