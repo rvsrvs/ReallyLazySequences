@@ -28,7 +28,7 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     public let predecessor: Predecessor
     // NB Predecessor.InputType is the type of the head of the sequence,
     // NOT the specific output type for the Predecessor's Predecessor
-    private let _push: (Predecessor.InputType?) throws -> Void
+    private let composition: (Predecessor.InputType?) throws -> Void
     
     public init(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void)) {
         self.predecessor = predecessor
@@ -42,13 +42,13 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
         // Different types of predecessors compose differently
         // This call eventually recurses through all predecessors
         // terminating at an RLS structure.
-        let composition = predecessor.compose(deliveryWrapper)
+        let _composition = predecessor.compose(deliveryWrapper)
         
         // Consumer composes the final push function here.
-        _push = { value in
+        composition = { value in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }
             if value == nil { isComplete = true }
-            try composition(value)
+            try _composition(value)
         }
     }
     
@@ -56,7 +56,7 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     //
     public func push(_ value: Predecessor.InputType?) throws -> Void {
         guard Predecessor.InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
-        try _push(value)
+        try composition(value)
     }
     
     // Accept a push of a closure which
@@ -67,11 +67,11 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
         guard Predecessor.InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
         if let queue = queue {
             queue.addOperation {
-                try? producer(self._push)
+                try? producer(self.composition)
             }
         } else {
             do {
-                try producer(self._push)
+                try producer(self.composition)
             } catch {
                 throw error
             }
