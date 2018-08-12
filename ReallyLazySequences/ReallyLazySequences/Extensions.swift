@@ -59,16 +59,6 @@ public extension ReallyLazySequenceProtocol {
     
     // When the OutputType of the sequence is an optional, remove nils from the sequence, and transform
     // the non-optional type to the output type
-    public func compactMap<T, U>(_ transform: @escaping (T) -> U ) -> CompactMap<Self, U> where OutputType == T? {
-        return CompactMap<Self, U>(predecessor: self) { delivery in
-            return { optionalOptionalInput in
-                guard let optionalInput = optionalOptionalInput else { return delivery(nil) } // termination nil
-                guard let input = optionalInput else { return ContinuationDone } // nil to remove from sequence
-                return { delivery(transform(input)) } // value to pass on
-            }
-        }
-    }
-
     public func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T> {
         return CompactMap<Self, T>(predecessor: self) { delivery in
             return { optionalInput in
