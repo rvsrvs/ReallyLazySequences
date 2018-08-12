@@ -16,6 +16,7 @@ import Foundation
 
 public protocol ConsumerProtocol {
     associatedtype InputType
+    associatedtype PredecessorType
     var composition: (InputType?) throws -> Void { get }
     func push(_ value: InputType?) throws -> Void
     func push(
@@ -26,22 +27,19 @@ public protocol ConsumerProtocol {
 
 public extension ConsumerProtocol {
     // Accept a push of the Head type and pass it through the composed closure
-    //
     public func push(_ value: InputType?) throws -> Void {
         guard InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
         try composition(value)
     }
     
-    // Accept a push of a closure which
+    // Accept a push of a closure which will generate values type type InputType
     public func push(
         queue: OperationQueue? = nil,
         _ producer: @escaping ((InputType?) throws-> Void) throws-> Void
         ) throws -> Void {
         guard InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
         if let queue = queue {
-            queue.addOperation {
-                try? producer(self.composition)
-            }
+            queue.addOperation { try? producer(self.composition) }
         } else {
             do {
                 try producer(self.composition)
@@ -54,10 +52,11 @@ public extension ConsumerProtocol {
 
 public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
     public typealias InputType = Predecessor.InputType
+    public typealias PredecessorType = Predecessor
 
     // NB Predecessor.InputType is the type of the head of the sequence,
     // NOT the specific output type for the Predecessor's Predecessor
-    private(set) public var composition: (Predecessor.InputType?) throws -> Void
+    private(set) public var composition: (InputType?) throws -> Void
     
     public init(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void)) {
         var isComplete = false
