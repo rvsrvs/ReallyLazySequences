@@ -12,6 +12,7 @@
 // Once consumed an RLS can no longer be chained.
 // Consumers can only be initialized and pushed to.
 // i.e. consumers are NOT RLS's
+import Foundation
 
 public protocol ConsumerProtocol {
     associatedtype InputType
@@ -52,5 +53,24 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
     public func push(_ value: Predecessor.InputType?) throws -> Void {
         guard Predecessor.InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
         try _push(value)
+    }
+    
+    // Accept a push of a closure which
+    public func push(
+        queue: OperationQueue? = nil,
+        _ producer: @escaping ((Predecessor.InputType?) throws-> Void) throws-> Void
+        ) throws -> Void {
+        guard Predecessor.InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
+        if let queue = queue {
+            queue.addOperation {
+                try? producer(self._push)
+            }
+        } else {
+            do {
+                try producer(self._push)
+            } catch {
+                throw error
+            }
+        }
     }
 }
