@@ -23,26 +23,7 @@ public protocol ConsumerProtocol {
 
 public extension ConsumerProtocol {
     // Accept a push of the Head type and pass it through the composed closure
-    public func process(_ value: InputType?) throws -> Void {
-        try composition(value)
-    }
-
-    // Accept a push of a closure which will generate values type type InputType
-    public func push(
-        queue: OperationQueue? = nil,
-        _ producer: @escaping ((InputType?) throws-> Void) throws-> Void
-        ) throws -> Void {
-        guard InputType.self != Void.self else { throw ReallyLazySequenceError.nonPushable }
-        if let queue = queue {
-            queue.addOperation { try? producer(self.composition) }
-        } else {
-            do {
-                try producer(self.composition)
-            } catch {
-                throw error
-            }
-        }
-    }
+    public func process(_ value: InputType?) throws -> Void { try composition(value) }
 }
 
 public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {

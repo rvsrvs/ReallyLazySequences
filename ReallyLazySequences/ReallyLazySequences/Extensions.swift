@@ -96,7 +96,7 @@ public extension ReallyLazySequenceProtocol {
     // Optionally in a specific queue, create a sequence of values from a single value
     // and then flatten that sequence into this one.  If queue is nil perform the operation in line
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: GeneratorProtocol, U.InputType == GeneratorControl, U.OutputType == T {
+        where U: GeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
         return FlatMap<Self, T>(predecessor: self) { delivery in
             return { input in
                 guard let input = input else { return { delivery(nil) } }
@@ -106,9 +106,9 @@ public extension ReallyLazySequenceProtocol {
                         drive(delivery(value))
                     }
                 if let queue = queue {
-                    queue.addOperation { try? generator.process(.start) }
+                    queue.addOperation { try? generator.process(input) }
                 } else {
-                    try? generator.process(.start)
+                    try? generator.process(input)
                 }
                 return ContinuationDone
             }
@@ -118,7 +118,7 @@ public extension ReallyLazySequenceProtocol {
     // In the current queue, create a sequence of values from a single value
     // and then flatten the resulting sequence into this one
     func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: GeneratorProtocol, U.InputType == GeneratorControl, U.OutputType == T {
+        where U: GeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
         return flatMap(queue: nil, transform)
     }
     

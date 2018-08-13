@@ -17,7 +17,7 @@ public class ListenableValue<T>: Listenable {
     var hasListeners: Bool { return listeners.count > 0 }
     
     var value: T {
-        willSet { self.push(newValue) }
+        didSet { self.push(newValue) }
     }
     
     init(_ value: T) {

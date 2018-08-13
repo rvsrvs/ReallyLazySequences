@@ -76,7 +76,7 @@ public protocol ReallyLazySequenceProtocol {
     
     // Flatmap and optionally dispatch the producers into an OpQueue to allow them to be parallelized
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: GeneratorProtocol, U.InputType == GeneratorControl, U.OutputType == T
+        where U: GeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T
     
     // swift.Sequence replication
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
@@ -84,7 +84,7 @@ public protocol ReallyLazySequenceProtocol {
     func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T>
     func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: GeneratorProtocol, U.InputType == GeneratorControl, U.OutputType == T
+        where U: GeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T) -> Reduce<Self, T>
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
 }

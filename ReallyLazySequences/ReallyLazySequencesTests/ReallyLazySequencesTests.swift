@@ -28,17 +28,13 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { $0 * 2 }
             .reduce([Double]()) { $0 + [$1] }
             .map { return $0.sorted() }
-            .flatMap { (collected: [Double]) -> Generator<Double> in
-                Generator<Double> { (input, delivery) in
-                    collected.forEach { delivery($0) }; delivery(nil)
-                }
+            .flatMap { (_: [Double]) -> SubsequenceGenerator<[Double], Double> in
+                SubsequenceGenerator { (input, delivery) in input.forEach { delivery($0) }; delivery(nil) }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
-            .flatMap { (collected: Int) -> Generator<Int> in
-                Generator<Int> { (input, delivery) in
-                    (0 ..< 3).forEach { delivery($0 * collected) }; delivery(nil)
-                }
+            .flatMap { (_: Int) -> SubsequenceGenerator<Int, Int> in
+                SubsequenceGenerator { (input, delivery) in (0 ..< 3).forEach { delivery($0 * input) }; delivery(nil) }
             }
             .consume { if let value = $0 { accumulatedResults.append(value) } }
         
@@ -129,7 +125,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) in
-                Generator<Int> { (input, delivery) in collected.forEach { delivery($0) }; delivery(nil) }
+                SubsequenceGenerator<[Int],Int> { (input, delivery) in input.forEach { delivery($0) }; delivery(nil) }
             }
             .consume {
                 guard $0 != nil else {
