@@ -46,7 +46,7 @@ public struct URLDataFetcher: ReallyLazySequenceProtocol {
                         delivery(result)
                         delivery(nil)
                     }
-                try? c.push(($0, $1, $2))
+                try? c.process(($0, $1, $2))
             }
             task.resume()
             while task.state != .completed { RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1)) }

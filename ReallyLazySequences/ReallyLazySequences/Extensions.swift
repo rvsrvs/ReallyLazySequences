@@ -105,9 +105,9 @@ public extension ReallyLazySequenceProtocol {
                         drive(delivery(value))
                     }
                 if let queue = queue {
-                    queue.addOperation { try? generator.push(.start) }
+                    queue.addOperation { try? generator.process(.start) }
                 } else {
-                    try? generator.push(.start)
+                    try? generator.process(.start)
                 }
                 return ContinuationDone
             }

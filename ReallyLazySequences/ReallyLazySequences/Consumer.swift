@@ -18,16 +18,12 @@ public protocol ConsumerProtocol {
     associatedtype InputType
     associatedtype PredecessorType
     var composition: (InputType?) throws -> Void { get }
-    func push(_ value: InputType?) throws -> Void
-    func push(
-        queue: OperationQueue?,
-        _ producer: @escaping ((InputType?) throws-> Void) throws-> Void
-    ) throws -> Void
+    func process(_ value: InputType?) throws -> Void
 }
 
 public extension ConsumerProtocol {
     // Accept a push of the Head type and pass it through the composed closure
-    public func push(_ value: InputType?) throws -> Void {
+    public func process(_ value: InputType?) throws -> Void {
         try composition(value)
     }
 

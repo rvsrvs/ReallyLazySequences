@@ -111,7 +111,7 @@ public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     public init() { }
 }
 
-public struct Subsequence<T, U>: ReallyLazySequenceProtocol {
+public struct SubsequenceGenerator<T, U>: ReallyLazySequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = U
     public var generator: (T, @escaping (U?) -> Void) -> Void

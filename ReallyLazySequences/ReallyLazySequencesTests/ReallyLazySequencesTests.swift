@@ -46,9 +46,9 @@ class ReallyLazySequencesTests: XCTestCase {
                     "Consumer c is wrong type!")
         
         do {
-            for _ in 0 ..< 100000 { try c.push(200) }
-            for i in [8, 12, 4, 3, 2] { try c.push(i) }
-            try c.push(nil)
+            for _ in 0 ..< 100000 { try c.process(200) }
+            for i in [8, 12, 4, 3, 2] { try c.process(i) }
+            try c.process(nil)
         } catch ReallyLazySequenceError.isComplete {
             print("Can't push to a completed sequence")
         } catch {
@@ -106,11 +106,11 @@ class ReallyLazySequencesTests: XCTestCase {
                         "Wrong class")
         
         do {
-            try c.push(1)
-            try c.push(11)
-            try c.push(2)
-            try c.push(3)
-            try c.push(nil)
+            try c.process(1)
+            try c.process(11)
+            try c.process(2)
+            try c.process(3)
+            try c.process(nil)
         } catch ReallyLazySequenceError.isComplete {
             XCTFail("Can't push to a completed sequence")
         } catch {
@@ -141,17 +141,17 @@ class ReallyLazySequencesTests: XCTestCase {
         XCTAssertNotNil(c as Consumer<FlatMap<Reduce<ReallyLazySequence<Int>, Array<Int>>, Int>>, "Wrong class")
         
         do {
-            try c.push(1)
-            try c.push(2)
-            try c.push(3)
-            try c.push(4)
-            try c.push(5)
-            try c.push(10)
-            try c.push(20)
-            try c.push(30)
-            try c.push(40)
-            try c.push(50)
-            try c.push(nil)
+            try c.process(1)
+            try c.process(2)
+            try c.process(3)
+            try c.process(4)
+            try c.process(5)
+            try c.process(10)
+            try c.process(20)
+            try c.process(30)
+            try c.process(40)
+            try c.process(50)
+            try c.process(nil)
         } catch ReallyLazySequenceError.isComplete {
             XCTFail("Can't push to a completed sequence")
         } catch {
