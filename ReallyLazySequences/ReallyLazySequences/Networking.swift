@@ -10,54 +10,45 @@ import Foundation
 
 public typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
 
-public struct URLDataFetcher: ReallyLazySequenceProtocol {
+fileprivate let URLDataMapper = ReallyLazySequence<DataFetchValue>()
+    .map { (result: DataFetchValue) -> Result<Data> in
+        guard let response = result.response as? HTTPURLResponse, result.netError == nil else {
+            return .failure(result.netError!)
+        }
+        guard response.statusCode >= 200 && response.statusCode < 300 else {
+            let error = NSError(domain: "ReallyLazySequences.URLDataFetcher",
+                                code: 1000,
+                                userInfo: ["url" : response.url ?? "unknown", "response": response, "msg": "Invalid response"]
+            )
+            return .failure(error)
+        }
+        guard let data = result.data  else {
+            let error = NSError(domain: "ReallyLazySequences.URLDataFetcher",
+                                code: 1001,
+                                userInfo: ["url" : response.url ?? "unknown", "response": response, "msg": "Valid response but no data"]
+            )
+            return .failure(error)
+        }
+        return .success(data)
+    }
+
+public struct URLDataFetcher: GeneratorProtocol {
     public typealias InputType = (url: URL, session: URLSession)
     public typealias OutputType = Result<Data>
     public var generator: (InputType, @escaping (OutputType?) -> Void) -> Void
     
-    private typealias Composition = () -> Void
-    private var composition: Composition?
+    public init(_ generator: @escaping ((url: URL, session: URLSession), @escaping (Result<Data>?) -> Void) -> Void) {
+        self.generator = generator
+    }
     
     public init() {
-        self.generator = { (fetch: InputType, delivery: @escaping ((Result<Data>?) -> Void)) -> Void in
+        self.init { (fetch: InputType, delivery: @escaping ((OutputType?) -> Void)) -> Void in
             let task = fetch.session.dataTask(with: fetch.url) {
-                let c = ReallyLazySequence<DataFetchValue>()
-                    .map { (result: DataFetchValue) -> Result<Data> in
-                        guard let response = result.response as? HTTPURLResponse, result.netError == nil else {
-                            return .failure(result.netError!)
-                        }
-                        guard response.statusCode >= 200 && response.statusCode < 300 else {
-                            let error = NSError(domain: "ReallyLazySequences.URLDataFetcher",
-                                                code: 1000,
-                                                userInfo: ["url" : fetch.url, "response": response, "msg": "Invalid response"]
-                            )
-                            return .failure(error)
-                        }
-                        guard let data = result.data  else {
-                            let error = NSError(domain: "ReallyLazySequences.URLDataFetcher",
-                                                code: 1001,
-                                                userInfo: ["url" : fetch.url, "response": response, "msg": "Valid response but no data"]
-                            )
-                            return .failure(error)
-                        }
-                        return .success(data)
-                    }
-                    .consume{ result in
-                        delivery(result)
-                        delivery(nil)
-                    }
+                let c = URLDataMapper.consume{ result in delivery(result); delivery(nil) }
                 try? c.process(($0, $1, $2))
             }
             task.resume()
             while task.state != .completed { RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1)) }
-        }
-    }
-    
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
-        let deliveryWrapper = { (output: OutputType?) -> Void in drive(delivery(output)) }
-        return { (input: InputType?) throws -> Void in
-            guard let input = input else { deliveryWrapper(nil); return }
-            self.generator(input, deliveryWrapper)
         }
     }
 }

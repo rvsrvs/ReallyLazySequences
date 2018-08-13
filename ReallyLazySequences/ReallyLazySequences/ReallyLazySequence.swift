@@ -75,14 +75,16 @@ public protocol ReallyLazySequenceProtocol {
     ) -> Reduce<Self, T>
     
     // Flatmap and optionally dispatch the producers into an OpQueue to allow them to be parallelized
-    func flatMap<T>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> Generator<T>) -> FlatMap<Self, T>
+    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
+        where U: GeneratorProtocol, U.InputType == GeneratorControl, U.OutputType == T
     
     // swift.Sequence replication
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
     // All returned types differ only in name
     func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T>
-    func flatMap<T>(_ transform: @escaping (OutputType) -> Generator<T>) -> FlatMap<Self, T>
+    func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
+        where U: GeneratorProtocol, U.InputType == GeneratorControl, U.OutputType == T
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T) -> Reduce<Self, T>
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
 }
@@ -111,46 +113,40 @@ public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     public init() { }
 }
 
-public struct SubsequenceGenerator<T, U>: ReallyLazySequenceProtocol {
-    public typealias InputType = T
-    public typealias OutputType = U
-    public var generator: (T, @escaping (U?) -> Void) -> Void
+public protocol GeneratorProtocol: ReallyLazySequenceProtocol {
+    var generator: (InputType, @escaping (OutputType?) -> Void) -> Void { get set }
+    init(_ generator: @escaping (InputType, @escaping (OutputType?) -> Void) -> Void)
+}
 
-    private typealias Composition = () -> Void
-    private var composition: Composition?
-    
-    public init(_ generator: @escaping (T, @escaping (U?) -> Void) -> Void) {
-        self.generator = generator
-    }
-
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
-        let deliveryWrapper = { (output: U?) -> Void in drive(delivery(output)) }
-        return { (input: T?) throws -> Void in
+public extension GeneratorProtocol {
+    func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
+        let deliveryWrapper = { (output: OutputType?) -> Void in drive(delivery(output)) }
+        return { (input: InputType?) throws -> Void in
             guard let input = input else { deliveryWrapper(nil); return }
             self.generator(input, deliveryWrapper)
         }
     }
 }
 
-public struct Generator<T>: ReallyLazySequenceProtocol {
-    public enum Start { case start }
-    public typealias InputType = Start
+public enum GeneratorControl { case start }
+
+public struct Generator<T>: GeneratorProtocol {
+    public typealias InputType = GeneratorControl
     public typealias OutputType = T
-    public var generator: (@escaping (T?) -> Void) -> Void
+    public var generator: (InputType, @escaping (T?) -> Void) -> Void
     
-    private typealias Composition = () -> Void
-    private var composition: Composition?
-    
-    public init(_ generator: @escaping (@escaping (T?) -> Void) -> Void) {
+    public init(_ generator: @escaping (InputType, @escaping (T?) -> Void) -> Void) {
         self.generator = generator
     }
+}
+
+public struct SubsequenceGenerator<T, U>: GeneratorProtocol {
+    public typealias InputType = T
+    public typealias OutputType = U
+    public var generator: (T, @escaping (U?) -> Void) -> Void
     
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
-        let deliveryWrapper = { (output: T?) -> Void in drive(delivery(output)) }
-        return { (input: Start?) throws -> Void in
-            guard input != nil else { deliveryWrapper(nil); return }
-            self.generator(deliveryWrapper)
-        }
+    public init(_ generator: @escaping (T, @escaping (U?) -> Void) -> Void) {
+        self.generator = generator
     }
 }
 

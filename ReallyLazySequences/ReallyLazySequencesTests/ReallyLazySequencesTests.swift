@@ -29,14 +29,14 @@ class ReallyLazySequencesTests: XCTestCase {
             .reduce([Double]()) { $0 + [$1] }
             .map { return $0.sorted() }
             .flatMap { (collected: [Double]) -> Generator<Double> in
-                Generator<Double> { (delivery) in
+                Generator<Double> { (input, delivery) in
                     collected.forEach { delivery($0) }; delivery(nil)
                 }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
             .flatMap { (collected: Int) -> Generator<Int> in
-                Generator<Int> { (delivery) in
+                Generator<Int> { (input, delivery) in
                     (0 ..< 3).forEach { delivery($0 * collected) }; delivery(nil)
                 }
             }
@@ -129,7 +129,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) in
-                Generator<Int> { (delivery) in collected.forEach { delivery($0) }; delivery(nil) }
+                Generator<Int> { (input, delivery) in collected.forEach { delivery($0) }; delivery(nil) }
             }
             .consume {
                 guard $0 != nil else {

@@ -19,8 +19,21 @@ class NetworkingTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testOneShot() {
-        
+    func testURLDataFetcher() {
+        let expectation = self.expectation(description: "First Listener")
+        let fetcher = URLDataFetcher()
+            .consume { (result: Result<Data>?) in
+                guard let result = result,
+                    case .success(let data) = result,
+                    data.count > 0 else { return }
+                expectation.fulfill()
+            }
+        let session = SessionSupport().session()
+        if let url = URL(string: ConfigurationURL) {
+            let toFetch = (url, session)
+            try? fetcher.process(toFetch)
+        }
+        waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
     
     func testNetworkProcessing() {
