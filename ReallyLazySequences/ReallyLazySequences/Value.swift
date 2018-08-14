@@ -26,7 +26,9 @@ public class ListenableValue<T>: Listenable {
     
     private func push(_ value: T) {
         listeners.values.forEach { listener in
-            do { try listener.push(value) }
+            do {
+                try listener.push(value)
+            }
             catch { remove(listener: listener) }
         }
     }

@@ -54,7 +54,7 @@ public struct ListenableSequence<T>: ReallyLazySequenceProtocol {
         self.compositionHandler = compositionHandler
     }
 
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> (T?) throws -> Void {
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
         let listener = Listener<T>(delivery: delivery)
         compositionHandler(listener)
         return { _ in throw ReallyLazySequenceError.nonPushable }
