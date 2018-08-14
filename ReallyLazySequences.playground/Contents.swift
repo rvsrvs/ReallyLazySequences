@@ -1,6 +1,5 @@
 
 import ReallyLazySequences
-import Foundation
 
 let c = ReallyLazySequence<Int>()
     .filter { $0 < 10 }
