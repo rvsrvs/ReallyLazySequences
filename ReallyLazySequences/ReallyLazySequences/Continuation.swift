@@ -8,12 +8,14 @@
 
 // Continuations represent at computation which can be continued at a later time
 // They are a way of avoiding enormous convoluted stack frames that emerge from
-// composing a chain of functions in an RLS.  They continue the current computation
-// in a stack frame much closer to the users invocation
-// ideally Any? would be replaced with Continuation? but swift does not allow
-// recursive type definitions
+// composing a chain of functions in an RLS and of attaching error handling
+// in-line when processing and RLS. They continue the current computation
+// in a stack frame much closer to the users invocation.
 
 public typealias Continuation = () -> ContinuationResult
+
+// Ideally *Any* would be replaced with ContinuationResult but swift does not allow
+// recursive type definitions
 public typealias AnonymousContinuation = () -> Any
 
 public let ContinuationDone = {() -> ContinuationResult in ContinuationResult.done }

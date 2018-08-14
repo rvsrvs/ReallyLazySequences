@@ -32,7 +32,7 @@ fileprivate let URLDataMapper = ReallyLazySequence<DataFetchValue>()
         return .success(data)
     }
 
-public struct URLDataFetcher: SubsequenceGeneratorProtocol {
+public struct URLDataFetcher: SubsequenceProtocol {
     public typealias InputType = (url: URL, session: URLSession)
     public typealias OutputType = Result<Data>
     public var generator: (InputType, @escaping (OutputType?) -> Void) -> Void

@@ -36,7 +36,8 @@ public extension ChainedSequence {
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery  {
         return predecessor.compose(composer(delivery)) as! InputDelivery
     }
-    public func listen(_ delivery: @escaping (OutputType?) -> Void) {
+    
+    public func listen(_ delivery: @escaping (OutputType?) -> Void) -> Void {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
             delivery(value)
             return .done
@@ -53,7 +54,8 @@ public extension ChainedSequence {
 // Number 3 is what is being passed in to the initializer of the specific types returned below
 
 public extension ReallyLazySequenceProtocol {
-    // Map sequential values of one type to a value of the same or different type
+    // Map sequential values of one type to a value of the same or different type and delivers them
+    // to our successor using the successor's delivery closure
     public func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T> {
         return Map<Self, T>(predecessor: self) { delivery in
             return { (input) -> ContinuationResult in
@@ -103,7 +105,7 @@ public extension ReallyLazySequenceProtocol {
     // Optionally in a specific queue, create a sequence of values from a single value
     // and then flatten that sequence into this one.  If queue is nil perform the operation in line
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: SubsequenceGeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
         return FlatMap<Self, T>(predecessor: self) { delivery in
             return { (input) -> ContinuationResult in
                 guard let input = input else { return delivery(nil) }
@@ -127,7 +129,7 @@ public extension ReallyLazySequenceProtocol {
     // In the current queue, create a sequence of values from a single value
     // and then flatten the resulting sequence into this one
     func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: SubsequenceGeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
         return flatMap(queue: nil, transform)
     }
     

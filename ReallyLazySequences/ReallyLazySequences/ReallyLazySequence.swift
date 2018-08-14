@@ -76,7 +76,7 @@ public protocol ReallyLazySequenceProtocol {
     
     // Flatmap and optionally dispatch the producers into an OpQueue to allow them to be parallelized
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: SubsequenceGeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     
     // swift.Sequence replication
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
@@ -85,7 +85,7 @@ public protocol ReallyLazySequenceProtocol {
     func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T>
     func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: SubsequenceGeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T) -> Reduce<Self, T>
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
 }
@@ -114,12 +114,12 @@ public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
     public init() { }
 }
 
-public protocol SubsequenceGeneratorProtocol: ReallyLazySequenceProtocol {
+public protocol SubsequenceProtocol: ReallyLazySequenceProtocol {
     var generator: (InputType, @escaping (OutputType?) -> Void) -> Void { get set }
     init(_ generator: @escaping (InputType, @escaping (OutputType?) -> Void) -> Void)
 }
 
-public extension SubsequenceGeneratorProtocol {
+public extension SubsequenceProtocol {
     func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
         let deliveryWrapper = { (output: OutputType?) -> Void in
             _ = ContinuationResult.complete(delivery(output));
@@ -132,7 +132,7 @@ public extension SubsequenceGeneratorProtocol {
     }
 }
 
-public struct SubsequenceGenerator<T, U>: SubsequenceGeneratorProtocol {
+public struct Subsequence<T, U>: SubsequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = U
     public var generator: (T, @escaping (U?) -> Void) -> Void

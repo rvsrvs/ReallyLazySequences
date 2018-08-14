@@ -28,15 +28,15 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { $0 * 2 }
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
-            .flatMap { (_: [Double]) -> SubsequenceGenerator<[Double], Double> in
-                SubsequenceGenerator { (input: [Double], delivery: (Double?) -> Void) in
+            .flatMap { (_: [Double]) -> Subsequence<[Double], Double> in
+                Subsequence { (input: [Double], delivery: (Double?) -> Void) in
                     input.forEach { delivery($0) }
                 }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
-            .flatMap { (_: Int) -> SubsequenceGenerator<Int, Int> in
-                SubsequenceGenerator { (input: Int, delivery: (Int?) -> Void)  in
+            .flatMap { (_: Int) -> Subsequence<Int, Int> in
+                Subsequence { (input: Int, delivery: (Int?) -> Void)  in
                     (0 ..< 3).forEach { delivery($0 * input) }
                 }
             }
@@ -129,7 +129,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) in
-                SubsequenceGenerator<[Int],Int> { (input, delivery) in
+                Subsequence<[Int],Int> { (input, delivery) in
                     input.forEach { delivery($0) }
                 }
             }
