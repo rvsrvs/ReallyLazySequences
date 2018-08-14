@@ -20,12 +20,10 @@ public extension ReallyLazySequenceProtocol {
 public extension ReallyLazySequenceProtocol {
     //NB This only gets called when we are NOT a ChainedSequence, i.e. we are the root RLS in a chain
     // Hence the guard let below succeeds as a conversion to our output since on the actual RLS struct
-    // InputType == OutputType
+    // there is a constraint that InputType == OutputType
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
         return {
-            guard let value = $0 as? OutputType? else {
-                return .done
-            }
+            guard let value = $0 as? OutputType? else { return .done }
             return .more({ delivery(value) })
         }
     }
@@ -79,6 +77,8 @@ public extension ReallyLazySequenceProtocol {
     // A generalized form of reduce which allows collection of values until a condition is reached
     // Collected values are then forwarded as the collecting type to the successor when the until condition is met
     // this function allows the initial value to be reset before receiving input of nil
+    // N.B.  This is the ONLY sequence function which maintains mutable internal state.  Setting
+    // the partial value *MUST* be serialized
     public func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) -> T,
@@ -103,7 +103,7 @@ public extension ReallyLazySequenceProtocol {
     // Optionally in a specific queue, create a sequence of values from a single value
     // and then flatten that sequence into this one.  If queue is nil perform the operation in line
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: GeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
+        where U: SubsequenceGeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
         return FlatMap<Self, T>(predecessor: self) { delivery in
             return { (input) -> ContinuationResult in
                 guard let input = input else { return delivery(nil) }
@@ -127,7 +127,7 @@ public extension ReallyLazySequenceProtocol {
     // In the current queue, create a sequence of values from a single value
     // and then flatten the resulting sequence into this one
     func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
-        where U: GeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
+        where U: SubsequenceGeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
         return flatMap(queue: nil, transform)
     }
     
@@ -138,9 +138,7 @@ public extension ReallyLazySequenceProtocol {
     // filter values that do not meet a specified condition
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType> {
         return Filter<Self, OutputType>(predecessor: self) { delivery in
-            return { (input) -> ContinuationResult in
-                return (input == nil || filter(input!)) ?  .more({ delivery(input) }) :  .done
-            }
+            return { (input) in (input == nil || filter(input!)) ?  .more({ delivery(input) }) :  .done }
         }
     }
     
@@ -148,7 +146,7 @@ public extension ReallyLazySequenceProtocol {
     public func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType> {
         return Dispatch<Self, OutputType>(predecessor: self) { delivery in
             return { (input) -> ContinuationResult in
-                queue.addOperation { _ = ContinuationResult.complete(delivery(input)) } ; return .done
+                queue.addOperation { _ = ContinuationResult.complete(delivery(input)) }; return .done
             }
         }
     }
