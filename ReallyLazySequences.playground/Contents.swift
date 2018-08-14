@@ -12,10 +12,12 @@ let c = ReallyLazySequence<Int>()
 
 print(type(of:c))
 
-try c.push(2)
-try c.push(4)
-try c.push(6)
-try c.push(nil)
-try c.push(7)
-
-
+do {
+    try c.process(24)
+    try c.process(4)
+    try c.process(6)
+    try c.process(nil)
+    try c.process(14)
+} catch {
+    print(error)
+}

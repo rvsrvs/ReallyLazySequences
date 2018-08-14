@@ -44,9 +44,9 @@ public protocol ReallyLazySequenceProtocol {
     associatedtype OutputType // The type which is output from a given RLS
     
     // a function to allow input to an RLS
-    typealias InputDelivery  = (InputType?) throws -> Void
+    typealias InputDelivery  = (Self.InputType?) throws -> ContinuationResult
     // a function which consumes the output of an RLS and returns a function to execute the successor RLS
-    typealias ContinuableOutputDelivery = (OutputType?) -> Continuation
+    typealias ContinuableOutputDelivery = (OutputType?) -> ContinuationResult
     typealias TerminalOutputDelivery = (OutputType?) -> Void
 
     // To be used, ReallyLazySequences must be first consumed.
@@ -80,7 +80,8 @@ public protocol ReallyLazySequenceProtocol {
     
     // swift.Sequence replication
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
-    // All returned types differ only in name
+    // All returned types differ only in name, allowing the path through the sequence to
+    // be read from the type name itself
     func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T>
     func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
@@ -96,7 +97,7 @@ public protocol ReallyLazySequenceProtocol {
 // though Consumer types are genericized with the chain of types leading up to consumption
 public protocol ChainedSequence: ReallyLazySequenceProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
-    typealias PredecessorOutputFunction = (PredecessorType.OutputType?) -> Continuation
+    typealias PredecessorOutputFunction = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorOutputFunction
     var predecessor: PredecessorType { get set }
     var composer: Composer { get set }
@@ -120,23 +121,14 @@ public protocol GeneratorProtocol: ReallyLazySequenceProtocol {
 
 public extension GeneratorProtocol {
     func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
-        let deliveryWrapper = { (output: OutputType?) -> Void in drive(delivery(output)) }
-        return { (input: InputType?) throws -> Void in
-            guard let input = input else { deliveryWrapper(nil); return }
-            self.generator(input, deliveryWrapper)
+        let deliveryWrapper = { (output: OutputType?) -> Void in
+            _ = ContinuationResult.complete(delivery(output));
+            return
         }
-    }
-}
-
-public enum GeneratorControl { case start }
-
-public struct Generator<T>: GeneratorProtocol {
-    public typealias InputType = GeneratorControl
-    public typealias OutputType = T
-    public var generator: (InputType, @escaping (T?) -> Void) -> Void
-    
-    public init(_ generator: @escaping (InputType, @escaping (T?) -> Void) -> Void) {
-        self.generator = generator
+        return { (input: InputType?) throws -> ContinuationResult in
+            guard let input = input else { return delivery(nil) }
+            return .more ({ self.generator(input, deliveryWrapper); return ContinuationResult.done })
+        }
     }
 }
 

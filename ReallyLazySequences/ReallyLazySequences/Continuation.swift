@@ -12,11 +12,62 @@
 // in a stack frame much closer to the users invocation
 // ideally Any? would be replaced with Continuation? but swift does not allow
 // recursive type definitions
-public typealias Continuation = () -> Any?
 
-public func drive(_ continuation: Continuation) -> Void {
-    var next = continuation(); while let current = next as? Continuation { next = current() }
+public typealias Continuation = () -> ContinuationResult
+public typealias AnonymousContinuation = () -> Any
+
+public let ContinuationDone = {() -> ContinuationResult in ContinuationResult.done }
+
+public enum ContinuationResult {
+    case more(AnonymousContinuation)
+    case after(AnonymousContinuation, AnonymousContinuation)
+    case done
+    
+    init() {
+        self = .done
+    }
+    
+    init(continuation: @escaping Continuation) {
+        self = .more(continuation)
+    }
+    
+    init(continuation: @escaping Continuation, after: @escaping Continuation) {
+        self = .after(continuation, after)
+    }
+    
+    var canContinue: Bool {
+        switch self {
+        case .done: return false
+        case .more, .after: return true
+        }
+    }
+    
+    var next: ContinuationResult {
+        switch self {
+        case .done:
+            return .done
+        case .more(let continuation):
+            guard let result = continuation() as? ContinuationResult else { return .done }
+            return result
+        case .after(let continuation1, let continuation2):
+            guard let result = continuation1() as? ContinuationResult else { return .more(continuation2) }
+            switch result {
+            case .done: return .more(continuation2)
+            case .more(let continuation1a): return .after(continuation1a, continuation2)
+            case .after: return result.next
+            }
+        }
+    }
+    
+    static func complete(_ result: ContinuationResult) -> ContinuationResult {
+        var current = result
+        while current.canContinue { current = current.next }
+        return current
+    }
+    
+    static func complete(_ continuation: @escaping AnonymousContinuation) -> ContinuationResult {
+        guard let continuation = continuation as? Continuation else { return .done }
+        let result = continuation();
+        return complete(result)
+    }
 }
-
-let ContinuationDone = { nil } as Continuation
-

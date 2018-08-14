@@ -21,8 +21,13 @@ public extension ReallyLazySequenceProtocol {
     //NB This only gets called when we are NOT a ChainedSequence, i.e. we are the root RLS in a chain
     // Hence the guard let below succeeds as a conversion to our output since on the actual RLS struct
     // InputType == OutputType
-    public func compose(_ output: @escaping ContinuableOutputDelivery) -> InputDelivery {
-        return { guard let value = $0 as? OutputType? else { return }; drive(output(value)) }
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery {
+        return {
+            guard let value = $0 as? OutputType? else {
+                return .done
+            }
+            return .more({ delivery(value) })
+        }
     }
 }
 
@@ -30,13 +35,13 @@ public extension ReallyLazySequenceProtocol {
 // This recurses all the way back to the head sequence where it terminates because the head is NOT
 // a ChainedSequence
 public extension ChainedSequence {
-    public func compose(_ output: @escaping ContinuableOutputDelivery) -> ((PredecessorType.InputType?) throws -> Void) {
-        return predecessor.compose(composer(output))
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> InputDelivery  {
+        return predecessor.compose(composer(delivery)) as! InputDelivery
     }
     public func listen(_ delivery: @escaping (OutputType?) -> Void) {
-        let deliveryWrapper = { (value: OutputType?) -> Continuation in
+        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
             delivery(value)
-            return ContinuationDone
+            return .done
         }
         let _ = predecessor.compose(composer(deliveryWrapper))
     }
@@ -53,7 +58,9 @@ public extension ReallyLazySequenceProtocol {
     // Map sequential values of one type to a value of the same or different type
     public func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T> {
         return Map<Self, T>(predecessor: self) { delivery in
-            return { input in input == nil ? { delivery(nil) } : { delivery(transform(input!)) } }
+            return { (input) -> ContinuationResult in
+                return input == nil ? .more({ delivery(nil) }) : .more({ delivery(transform(input!)) })
+            }
         }
     }
     
@@ -61,10 +68,10 @@ public extension ReallyLazySequenceProtocol {
     // the non-optional type to the output type
     public func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T> {
         return CompactMap<Self, T>(predecessor: self) { delivery in
-            return { optionalInput in
-                guard let input = optionalInput else { return delivery(nil) } // termination nil
-                guard let output = transform(input) else { return ContinuationDone }
-                return { delivery(output) } // value to pass on
+            return { (optionalInput) -> ContinuationResult in
+                guard let input = optionalInput else { return .more({ delivery(nil) }) } // termination nil
+                guard let output = transform(input) else { return ContinuationResult.done }
+                return .more({ delivery(output) }) // value to pass on
             }
         }
     }
@@ -80,15 +87,15 @@ public extension ReallyLazySequenceProtocol {
         return Reduce<Self, T>(predecessor: self) { delivery in
             var partialValue = initialValue()
             var setNextPartialValue: Continuation?
-            return { input in
+            return { (input) -> ContinuationResult in
                 _ = setNextPartialValue?(); setNextPartialValue = nil
-                guard let input = input else { drive(delivery(partialValue)); return { delivery(nil) } }
+                guard let input = input else { return .after( { delivery(partialValue) } , { delivery(nil) } ) }
                 partialValue = combine(partialValue, input)
                 if until(partialValue, input) {
-                    setNextPartialValue = { partialValue = initialValue(); return nil }
-                    return { delivery(partialValue) }
+                    setNextPartialValue = { partialValue = initialValue(); return .done }
+                    return .more({ delivery(partialValue) })
                 }
-                return ContinuationDone
+                return .done
             }
         }
     }
@@ -98,19 +105,21 @@ public extension ReallyLazySequenceProtocol {
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
         where U: GeneratorProtocol, U.InputType == Self.OutputType, U.OutputType == T {
         return FlatMap<Self, T>(predecessor: self) { delivery in
-            return { input in
-                guard let input = input else { return { delivery(nil) } }
+            return { (input) -> ContinuationResult in
+                guard let input = input else { return delivery(nil) }
                 let generator = transform(input)
                     .consume { value in
                         guard let value = value else { return }
-                        drive(delivery(value))
+                        //FIXME: This should go up to the main continuation loop
+                        // and not be completed from here..
+                        _ = ContinuationResult.complete(.more({ delivery(value) }))
                     }
                 if let queue = queue {
                     queue.addOperation { try? generator.process(input) }
                 } else {
                     try? generator.process(input)
                 }
-                return ContinuationDone
+                return .done
             }
         }
     }
@@ -129,14 +138,18 @@ public extension ReallyLazySequenceProtocol {
     // filter values that do not meet a specified condition
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType> {
         return Filter<Self, OutputType>(predecessor: self) { delivery in
-            return { input in (input == nil || filter(input!)) ? { delivery(input) } :  ContinuationDone }
+            return { (input) -> ContinuationResult in
+                return (input == nil || filter(input!)) ?  .more({ delivery(input) }) :  .done
+            }
         }
     }
     
     // Perform the rest of the push on another dispatch queue
     public func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType> {
         return Dispatch<Self, OutputType>(predecessor: self) { delivery in
-            return { input in queue.addOperation(BlockOperation { drive(delivery(input)) } ); return ContinuationDone }
+            return { (input) -> ContinuationResult in
+                queue.addOperation { _ = ContinuationResult.complete(delivery(input)) } ; return .done
+            }
         }
     }
 }

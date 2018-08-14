@@ -26,15 +26,19 @@ class ReallyLazySequencesTests: XCTestCase {
             .filter { $0 < 10 }
             .map { Double($0) }
             .map { $0 * 2 }
-            .reduce([Double]()) { $0 + [$1] }
+            .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
             .flatMap { (_: [Double]) -> SubsequenceGenerator<[Double], Double> in
-                SubsequenceGenerator { (input, delivery) in input.forEach { delivery($0) }; delivery(nil) }
+                SubsequenceGenerator { (input: [Double], delivery: (Double?) -> Void) in
+                    input.forEach { delivery($0) }
+                }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
             .flatMap { (_: Int) -> SubsequenceGenerator<Int, Int> in
-                SubsequenceGenerator { (input, delivery) in (0 ..< 3).forEach { delivery($0 * input) }; delivery(nil) }
+                SubsequenceGenerator { (input: Int, delivery: (Int?) -> Void)  in
+                    (0 ..< 3).forEach { delivery($0 * input) }
+                }
             }
             .consume { if let value = $0 { accumulatedResults.append(value) } }
         
@@ -125,7 +129,9 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) in
-                SubsequenceGenerator<[Int],Int> { (input, delivery) in input.forEach { delivery($0) }; delivery(nil) }
+                SubsequenceGenerator<[Int],Int> { (input, delivery) in
+                    input.forEach { delivery($0) }
+                }
             }
             .consume {
                 guard $0 != nil else {

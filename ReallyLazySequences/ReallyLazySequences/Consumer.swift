@@ -17,13 +17,13 @@ import Foundation
 public protocol ConsumerProtocol {
     associatedtype InputType
     associatedtype PredecessorType
-    var composition: (InputType?) throws -> Void { get }
+    var composition: (InputType?) throws -> ContinuationResult { get }
     func process(_ value: InputType?) throws -> Void
 }
 
 public extension ConsumerProtocol {
     // Accept a push of the Head type and pass it through the composed closure
-    public func process(_ value: InputType?) throws -> Void { try composition(value) }
+    public func process(_ value: InputType?) throws -> Void { _ = try composition(value) }
 }
 
 public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
@@ -32,14 +32,14 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
 
     // NB Predecessor.InputType is the type of the head of the sequence,
     // NOT the specific output type for the Predecessor's Predecessor
-    private(set) public var composition: (InputType?) throws -> Void
+    private(set) public var composition: (InputType?) throws -> ContinuationResult
     
     public init(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void)) {
         var isComplete = false
         
-        let deliveryWrapper = { (value: Predecessor.OutputType?) -> Continuation in
+        let deliveryWrapper = { (value: Predecessor.OutputType?) -> ContinuationResult in
             delivery(value)
-            return ContinuationDone
+            return .done
         }
         // Have the predecessor compose its operation with ours
         // Different types of predecessors compose differently
@@ -51,7 +51,13 @@ public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtoco
         composition = { value in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }
             if value == nil { isComplete = true }
-            try predecessorComposition(value)
+            var result: ContinuationResult = .done
+            do {
+                result = ContinuationResult.complete(try predecessorComposition(value))
+            } catch {
+                print(error)
+            }
+            return result
         }
     }
 }

@@ -44,7 +44,9 @@ public struct URLDataFetcher: GeneratorProtocol {
     public init() {
         self.init { (fetch: InputType, delivery: @escaping ((OutputType?) -> Void)) -> Void in
             let task = fetch.session.dataTask(with: fetch.url) {
-                let c = URLDataMapper.consume{ result in delivery(result); delivery(nil) }
+                let c = URLDataMapper.consume{ result in
+                    _ = ContinuationResult.complete(.after({ delivery(result) }, { delivery(nil) }))
+                }
                 try? c.process(($0, $1, $2))
             }
             task.resume()

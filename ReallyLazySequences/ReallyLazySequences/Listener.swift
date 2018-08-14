@@ -29,18 +29,18 @@ public struct Listener<T>: ListenerProtocol, Equatable {
     public typealias InputType = T
     private(set) public var identifier = UUID()
     
-    var delivery: (InputType?) -> Continuation
+    var delivery: (InputType?) -> ContinuationResult
     
-    init(delivery: @escaping (InputType?) -> Continuation) {
+    init(delivery: @escaping (InputType?) -> ContinuationResult) {
         self.delivery = delivery
     }
     
     public func push(_ value: T) throws {
-        drive(delivery(value))
+        _ = ContinuationResult.complete(delivery(value))
     }
     
     public func terminate() {
-        drive(delivery(nil))
+        _ = ContinuationResult.complete(delivery(nil))
     }
 }
 
@@ -54,16 +54,16 @@ public struct ListenableSequence<T>: ReallyLazySequenceProtocol {
         self.compositionHandler = compositionHandler
     }
 
-    public func compose(_ output: @escaping ContinuableOutputDelivery) -> (T?) throws -> Void {
-        let listener = Listener<T>(delivery: output)
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> (T?) throws -> Void {
+        let listener = Listener<T>(delivery: delivery)
         compositionHandler(listener)
         return { _ in throw ReallyLazySequenceError.nonPushable }
     }
     
     public func listen(_ delivery: @escaping (OutputType?) -> Void) {
-        let deliveryWrapper = { (value: OutputType?) -> Continuation in
+        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
             delivery(value)
-            return ContinuationDone
+            return .done
         }
         let _ = compose(deliveryWrapper)
     }
