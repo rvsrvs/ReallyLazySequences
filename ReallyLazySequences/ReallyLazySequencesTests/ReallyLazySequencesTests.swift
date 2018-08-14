@@ -22,32 +22,32 @@ class ReallyLazySequencesTests: XCTestCase {
     func testSimpleSequence() {
         var accumulatedResults: [Int] = []
         
-        let c = ReallyLazySequence<Int>()
+        let c = SimpleSequence<Int>()
             .filter { $0 < 10 }
             .map { Double($0) }
             .map { $0 * 2 }
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
-            .flatMap { (_: [Double]) -> Subsequence<[Double], Double> in
-                Subsequence { (input: [Double], delivery: (Double?) -> Void) in
+            .flatMap { (input: [Double]) -> GeneratingSequence<[Double], Double> in
+                GeneratingSequence { (_: [Double], delivery: (Double?) -> Void) in
                     input.forEach { delivery($0) }
                 }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
-            .flatMap { (_: Int) -> Subsequence<Int, Int> in
-                Subsequence { (input: Int, delivery: (Int?) -> Void)  in
+            .flatMap { (input: Int) -> GeneratingSequence<Int, Int> in
+                GeneratingSequence { (_: Int, delivery: (Int?) -> Void)  in
                     (0 ..< 3).forEach { delivery($0 * input) }
                 }
             }
             .consume { if let value = $0 { accumulatedResults.append(value) } }
         
-        XCTAssertNotNil(c as Consumer<FlatMap<Reduce<Map<FlatMap<Map<Reduce<Map<Map<Filter<ReallyLazySequence<Int>, Int>, Double>, Double>, Array<Double>>, Array<Double>>, Double>, Int>, Int>, Int>>,
+        XCTAssertNotNil(c as Consumer<FlatMap<Reduce<Map<FlatMap<Map<Reduce<Map<Map<Filter<SimpleSequence<Int>, Int>, Double>, Double>, Array<Double>>, Array<Double>>, Double>, Int>, Int>, Int>>,
                     "Consumer c is wrong type!")
         
         do {
-            for _ in 0 ..< 100000 { try c.process(200) }
             for i in [8, 12, 4, 3, 2] { try c.process(i) }
+            for _ in 0 ..< 100000 { try c.process(200) }
             try c.process(nil)
         } catch ReallyLazySequenceError.isComplete {
             print("Can't push to a completed sequence")
@@ -82,7 +82,7 @@ class ReallyLazySequencesTests: XCTestCase {
         let expectation = self.expectation(description: "Complete RLS processing")
         let opQueue = OperationQueue()
         
-        let c = ReallyLazySequence<Int>()
+        let c = SimpleSequence<Int>()
             .filter { $0 < 10 }
             .dispatch(opQueue)
             .map { (value: Int) -> Double in
@@ -97,7 +97,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 if value == 3.0 { expectation.fulfill() }
             }
         
-        XCTAssertNotNil(c as Consumer<Dispatch<Map<Dispatch<Filter<ReallyLazySequence<Int>, Int>, Int>, Double>, Double>>,
+        XCTAssertNotNil(c as Consumer<Dispatch<Map<Dispatch<Filter<SimpleSequence<Int>, Int>, Int>, Double>, Double>>,
                         "Wrong class")
         
         do {
@@ -117,14 +117,14 @@ class ReallyLazySequencesTests: XCTestCase {
     
     func testCollect() {
         let expectation = self.expectation(description: "Complete RLS processing")
-        let c = ReallyLazySequence<Int>()
+        let c = SimpleSequence<Int>()
             .collect(
                 initialValue: [Int](),
                 combine: { (partialValue, input) -> [Int] in return partialValue + [input] },
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) in
-                Subsequence<[Int],Int> { (input, delivery) in
+                GeneratingSequence<[Int],Int> { (input, delivery) in
                     input.forEach { delivery($0) }
                 }
             }
@@ -135,7 +135,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 }
             }
         
-        XCTAssertNotNil(c as Consumer<FlatMap<Reduce<ReallyLazySequence<Int>, Array<Int>>, Int>>, "Wrong class")
+        XCTAssertNotNil(c as Consumer<FlatMap<Reduce<SimpleSequence<Int>, Array<Int>>, Int>>, "Wrong class")
         
         do {
             try c.process(1)

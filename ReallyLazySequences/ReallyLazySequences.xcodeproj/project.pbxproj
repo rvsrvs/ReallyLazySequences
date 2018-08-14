@@ -15,7 +15,6 @@
 		FB628AF921109CFF009A56F9 /* Producer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF821109CFF009A56F9 /* Producer.swift */; };
 		FB628AFC21110420009A56F9 /* Continuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AFB21110420009A56F9 /* Continuation.swift */; };
 		FB680F46211154350089A710 /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB680F45211154350089A710 /* NetworkingTests.swift */; };
-		FBCA36A82115FA0E00984A5B /* Zip.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36A72115FA0E00984A5B /* Zip.swift */; };
 		FBCA36AC2117A83400984A5B /* Listener.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36AB2117A83400984A5B /* Listener.swift */; };
 		FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6133211940C2001C0BE3 /* ListenerTests.swift */; };
 		FBDD61362119C6E4001C0BE3 /* ProducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */; };
@@ -47,7 +46,6 @@
 		FB628AFA211103D5009A56F9 /* ReallyLazySequences.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; name = ReallyLazySequences.playground; path = ../ReallyLazySequences.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		FB628AFB21110420009A56F9 /* Continuation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Continuation.swift; sourceTree = "<group>"; };
 		FB680F45211154350089A710 /* NetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
-		FBCA36A72115FA0E00984A5B /* Zip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zip.swift; sourceTree = "<group>"; };
 		FBCA36AB2117A83400984A5B /* Listener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listener.swift; sourceTree = "<group>"; };
 		FBDD6133211940C2001C0BE3 /* ListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerTests.swift; sourceTree = "<group>"; };
 		FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProducerTests.swift; sourceTree = "<group>"; };
@@ -105,7 +103,6 @@
 				FBCA36AB2117A83400984A5B /* Listener.swift */,
 				FB628AF821109CFF009A56F9 /* Producer.swift */,
 				FBDD6139211B8E7F001C0BE3 /* Value.swift */,
-				FBCA36A72115FA0E00984A5B /* Zip.swift */,
 				FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */,
 				FBDD6137211B0652001C0BE3 /* Networking.swift */,
 				FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */,
@@ -245,7 +242,6 @@
 				FBDD6138211B0652001C0BE3 /* Networking.swift in Sources */,
 				FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */,
 				FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */,
-				FBCA36A82115FA0E00984A5B /* Zip.swift in Sources */,
 				FBDD613A211B8E7F001C0BE3 /* Value.swift in Sources */,
 				FB628AF721109CC6009A56F9 /* Consumer.swift in Sources */,
 				FB628AC5210C9263009A56F9 /* ChainingDeclarations.swift in Sources */,

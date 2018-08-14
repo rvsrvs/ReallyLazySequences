@@ -47,15 +47,21 @@ public protocol ReallyLazySequenceProtocol {
     typealias InputDelivery  = (Self.InputType?) throws -> ContinuationResult
     // a function which consumes the output of an RLS and returns a function to execute the successor RLS
     typealias ContinuableOutputDelivery = (OutputType?) -> ContinuationResult
+    // a function which consumes the output of an RLS and returns nothing.  This is the type
+    // we provide to consumers of the RLS API
     typealias TerminalOutputDelivery = (OutputType?) -> Void
 
     // To be used, ReallyLazySequences must be first consumed.
     // consume uses compose to create a function which accepts input of InputType
     // and outputs OutputType.  The main purpose of an RLS is to compose
     // its function for a consumer.
-    // All RLS successor chains, to be used, eventually terminate in a Consumer
     func compose(_ output: @escaping ContinuableOutputDelivery) -> InputDelivery
+
+    // All RLS successor chains, to be used, eventually terminate in a Consumer or a Listener
+    // consume hands back an object which can be subsequently used
     func consume(_ delivery: @escaping TerminalOutputDelivery) -> Consumer<Self>
+    // listen assumes that the far end of the chain is a reference type and that the
+    // user of the framework already has that reference
     func listen(_ delivery: @escaping TerminalOutputDelivery) -> Void
     
     /*
@@ -78,7 +84,9 @@ public protocol ReallyLazySequenceProtocol {
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     
-    // swift.Sequence replication
+    /*
+     Swift.Sequence replication
+     */
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
     // All returned types differ only in name, allowing the path through the sequence to
     // be read from the type name itself
@@ -97,8 +105,8 @@ public protocol ReallyLazySequenceProtocol {
 // though Consumer types are genericized with the chain of types leading up to consumption
 public protocol ChainedSequence: ReallyLazySequenceProtocol {
     associatedtype PredecessorType: ReallyLazySequenceProtocol
-    typealias PredecessorOutputFunction = (PredecessorType.OutputType?) -> ContinuationResult
-    typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorOutputFunction
+    typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
+    typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery
     var predecessor: PredecessorType { get set }
     var composer: Composer { get set }
     init(predecessor: PredecessorType, composer: @escaping Composer)
@@ -106,12 +114,16 @@ public protocol ChainedSequence: ReallyLazySequenceProtocol {
 
 // Head struct in a sequence.  Note that it has NO predecessor and
 // and does no real work.  It simply allows a value to enter a chain of computation.
-// All RLS predecessor chains evenutally termiante in an RLS struct
+// All RLS predecessor chains evenutally termiante in a struct which meets the RLS protocol,
+// but which does NOT meet the ChainedSequenceProtocol.  Examples of such structs provided
+// by the framework include: SimpleSequence, GeneratingSequence and ListenableSequence
+// Each RLS/non-Chained struct must provide its own compose method which must properly
+// interoperate with the continuation flow expected by consumers and listeners
 // NB. T cannot be Void
-public struct ReallyLazySequence<T>: ReallyLazySequenceProtocol {
+public struct SimpleSequence<T>: ReallyLazySequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = T
-    public init() { }
+    public init() { }    
 }
 
 public protocol SubsequenceProtocol: ReallyLazySequenceProtocol {
@@ -132,7 +144,7 @@ public extension SubsequenceProtocol {
     }
 }
 
-public struct Subsequence<T, U>: SubsequenceProtocol {
+public struct GeneratingSequence<T, U>: SubsequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = U
     public var generator: (T, @escaping (U?) -> Void) -> Void

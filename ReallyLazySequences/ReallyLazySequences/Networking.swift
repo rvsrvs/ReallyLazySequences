@@ -10,7 +10,7 @@ import Foundation
 
 public typealias DataFetchValue = (data: Data?, response: URLResponse?, netError: Error?)
 
-fileprivate let URLDataMapper = ReallyLazySequence<DataFetchValue>()
+fileprivate let URLDataMapper = SimpleSequence<DataFetchValue>()
     .map { (result: DataFetchValue) -> Result<Data> in
         guard let response = result.response as? HTTPURLResponse, result.netError == nil else {
             return .failure(result.netError!)
