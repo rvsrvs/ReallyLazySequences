@@ -68,12 +68,7 @@ class ReallyLazySequencesTests: XCTestCase {
         
         producer
             .listener()
-            .listen {
-                guard $0 != nil else {
-                    firstExpectation.fulfill()
-                    return
-                }
-            }
+            .listen {  guard $0 != nil else { firstExpectation.fulfill(); return } }
         
         do {
             try producer.produce()
