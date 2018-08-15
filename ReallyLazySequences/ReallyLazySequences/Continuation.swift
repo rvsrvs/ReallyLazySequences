@@ -13,16 +13,21 @@
 // in a stack frame much closer to the users invocation.
 
 public typealias Continuation = () -> ContinuationResult
+public typealias ThrowingContinuation = () throws -> ContinuationResult
 
 // Ideally *Any* would be replaced with ContinuationResult but swift does not allow
 // recursive type definitions
 public typealias AnonymousContinuation = () -> Any
+public typealias AnonymousThrowingContinuation = () throws -> Any
 
-public let ContinuationDone = {() -> ContinuationResult in ContinuationResult.done }
+typealias ContinuationErrorHandler = (Error) -> ContinuationResult
 
-public enum ContinuationResult {
+public let ContinuationDone = { () -> ContinuationResult in ContinuationResult.done }
+
+public indirect enum ContinuationResult {
     case more(AnonymousContinuation)
-    case after(AnonymousContinuation, AnonymousContinuation)
+    case moreThrows(AnonymousThrowingContinuation)
+    case after(ContinuationResult, ContinuationResult)
     case done
     
     init() {
@@ -33,43 +38,74 @@ public enum ContinuationResult {
         self = .more(continuation)
     }
     
-    init(continuation: @escaping Continuation, after: @escaping Continuation) {
+    init(continuation: ContinuationResult, after: ContinuationResult) {
         self = .after(continuation, after)
     }
     
     var canContinue: Bool {
         switch self {
         case .done: return false
-        case .more, .after: return true
+        case .more, .moreThrows, .after: return true
         }
     }
     
-    var next: ContinuationResult {
+    private func next(errorHandler: @escaping ContinuationErrorHandler) -> ContinuationResult {
         switch self {
         case .done:
             return .done
         case .more(let continuation):
             guard let result = continuation() as? ContinuationResult else { return .done }
             return result
-        case .after(let continuation1, let continuation2):
-            guard let result = continuation1() as? ContinuationResult else { return .more(continuation2) }
-            switch result {
-            case .done: return .more(continuation2)
-            case .more(let continuation1a): return .after(continuation1a, continuation2)
-            case .after: return result.next
+        case .moreThrows(let continuation):
+            do {
+                guard let result = try continuation() as? ContinuationResult else { return .done }
+                return result
+            } catch {
+                return errorHandler(error)
+            }
+        case .after(let result1, let result2):
+            switch result1 {
+            case .done: return result2
+            case .more(let continuation):
+                guard let result1a = continuation() as? ContinuationResult else { return result2 }
+                return .after(result1a, result2)
+            case .moreThrows(let continuation):
+                do {
+                    guard let result1a = try continuation() as? ContinuationResult else { return result2 }
+                    return .after(result1a, result2)
+                } catch {
+                    return errorHandler(error)
+                }
+            case .after:
+                return ContinuationResult.complete(result1, errorHandler: errorHandler)
             }
         }
     }
     
-    static func complete(_ result: ContinuationResult) -> ContinuationResult {
+    static func complete(
+        _ result: ContinuationResult,
+        errorHandler: @escaping ContinuationErrorHandler = { _ in .done }
+    ) -> ContinuationResult {
         var current = result
-        while current.canContinue { current = current.next }
+        while current.canContinue { current = current.next(errorHandler: errorHandler) }
         return current
     }
     
-    static func complete(_ continuation: @escaping AnonymousContinuation) -> ContinuationResult {
+    static func complete(
+        _ continuation: @escaping AnonymousContinuation,
+        errorHandler: ContinuationErrorHandler = { _ in .done }
+    ) -> ContinuationResult {
         guard let continuation = continuation as? Continuation else { return .done }
-        let result = continuation();
+        let result = ContinuationResult.more(continuation);
+        return complete(result)
+    }
+
+    static func complete(
+        _ continuation: @escaping AnonymousThrowingContinuation,
+        errorHandler: ContinuationErrorHandler = { _ in .done }
+    ) -> ContinuationResult {
+        guard let continuation = continuation as? ThrowingContinuation else { return .done }
+        let result = ContinuationResult.moreThrows(continuation)
         return complete(result)
     }
 }
