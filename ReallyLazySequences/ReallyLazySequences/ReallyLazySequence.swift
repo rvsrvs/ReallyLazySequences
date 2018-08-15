@@ -22,7 +22,6 @@ public enum Result<T> {
 public enum ReallyLazySequenceError: Error {
     case isComplete
     case nonPushable
-    case listenerCompleted
     case noListeners
     
     var description: String {
@@ -31,8 +30,6 @@ public enum ReallyLazySequenceError: Error {
             return "ReallyLazySequence has already completed.  Pushes not allowed"
         case .nonPushable:
             return "push may only be called on Sequences which are NOT already attached to producers"
-        case .listenerCompleted:
-            return "Listener is complete"
         case .noListeners:
             return "No listeners available for producer to produce into"
         }
