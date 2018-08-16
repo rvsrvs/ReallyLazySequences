@@ -91,7 +91,7 @@ public extension ReallyLazySequenceProtocol {
             var setNextPartialValue: Continuation?
             return { (input) -> ContinuationResult in
                 _ = setNextPartialValue?(); setNextPartialValue = nil
-                guard let input = input else { return .after( .more({ delivery(partialValue) }) , .more({ delivery(nil) }) ) }
+                guard let input = input else { return .afterThen( .more({ delivery(partialValue) }) , .more({ delivery(nil) }) ) }
                 partialValue = combine(partialValue, input)
                 if until(partialValue, input) {
                     setNextPartialValue = { partialValue = initialValue(); return .done }

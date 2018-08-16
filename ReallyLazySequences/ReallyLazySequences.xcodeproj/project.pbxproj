@@ -14,6 +14,7 @@
 		FB628AF721109CC6009A56F9 /* Consumer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF621109CC6009A56F9 /* Consumer.swift */; };
 		FB628AF921109CFF009A56F9 /* Producer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF821109CFF009A56F9 /* Producer.swift */; };
 		FB628AFC21110420009A56F9 /* Continuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AFB21110420009A56F9 /* Continuation.swift */; };
+		FB6599E42124B7A500357D8D /* ContinuationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6599E32124B7A500357D8D /* ContinuationTests.swift */; };
 		FB680F46211154350089A710 /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB680F45211154350089A710 /* NetworkingTests.swift */; };
 		FBCA36AC2117A83400984A5B /* Listener.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36AB2117A83400984A5B /* Listener.swift */; };
 		FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6133211940C2001C0BE3 /* ListenerTests.swift */; };
@@ -45,6 +46,7 @@
 		FB628AF821109CFF009A56F9 /* Producer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Producer.swift; sourceTree = "<group>"; };
 		FB628AFA211103D5009A56F9 /* ReallyLazySequences.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; name = ReallyLazySequences.playground; path = ../ReallyLazySequences.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		FB628AFB21110420009A56F9 /* Continuation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Continuation.swift; sourceTree = "<group>"; };
+		FB6599E32124B7A500357D8D /* ContinuationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuationTests.swift; sourceTree = "<group>"; };
 		FB680F45211154350089A710 /* NetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
 		FBCA36AB2117A83400984A5B /* Listener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listener.swift; sourceTree = "<group>"; };
 		FBDD6133211940C2001C0BE3 /* ListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerTests.swift; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 				FB680F45211154350089A710 /* NetworkingTests.swift */,
 				FBDD6133211940C2001C0BE3 /* ListenerTests.swift */,
 				FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */,
+				FB6599E32124B7A500357D8D /* ContinuationTests.swift */,
 				FB33E03A1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequencesTests;
@@ -252,6 +255,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB6599E42124B7A500357D8D /* ContinuationTests.swift in Sources */,
 				FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */,
 				FBDD61362119C6E4001C0BE3 /* ProducerTests.swift in Sources */,
 				FB33E0391EBE7E85009CA3AC /* ReallyLazySequencesTests.swift in Sources */,

@@ -27,7 +27,7 @@ public let ContinuationDone = { () -> ContinuationResult in ContinuationResult.d
 public indirect enum ContinuationResult {
     case more(AnonymousContinuation)
     case moreThrows(AnonymousThrowingContinuation)
-    case after(ContinuationResult, ContinuationResult)
+    case afterThen(ContinuationResult, ContinuationResult)
     case done
     
     init() {
@@ -39,46 +39,36 @@ public indirect enum ContinuationResult {
     }
     
     init(continuation: ContinuationResult, after: ContinuationResult) {
-        self = .after(continuation, after)
+        self = .afterThen(continuation, after)
     }
     
     var canContinue: Bool {
         switch self {
         case .done: return false
-        case .more, .moreThrows, .after: return true
+        case .more, .moreThrows, .afterThen: return true
         }
     }
     
-    private func next(errorHandler: @escaping ContinuationErrorHandler) -> ContinuationResult {
+    private func next(
+        using stack:[ContinuationResult],
+        errorHandler: @escaping ContinuationErrorHandler
+    ) -> (ContinuationResult, [ContinuationResult]) {
         switch self {
         case .done:
-            return .done
+            return (.done, stack)
         case .more(let continuation):
-            guard let result = continuation() as? ContinuationResult else { return .done }
-            return result
+            guard let result = continuation() as? ContinuationResult else { return (.done, stack) }
+            return (result, stack)
         case .moreThrows(let continuation):
             do {
-                guard let result = try continuation() as? ContinuationResult else { return .done }
-                return result
+                guard let result = try continuation() as? ContinuationResult else { return (.done, stack) }
+                return (result, stack)
             } catch {
-                return errorHandler(error)
+                return (errorHandler(error), stack)
             }
-        case .after(let result1, let result2):
-            switch result1 {
-            case .done: return result2
-            case .more(let continuation):
-                guard let result1a = continuation() as? ContinuationResult else { return result2 }
-                return .after(result1a, result2)
-            case .moreThrows(let continuation):
-                do {
-                    guard let result1a = try continuation() as? ContinuationResult else { return result2 }
-                    return .after(result1a, result2)
-                } catch {
-                    return errorHandler(error)
-                }
-            case .after:
-                return ContinuationResult.complete(result1, errorHandler: errorHandler)
-            }
+        case .afterThen(let result1, let result2):
+            let newStack = [result2] + stack
+            return (result1, newStack)
         }
     }
     
@@ -87,25 +77,13 @@ public indirect enum ContinuationResult {
         errorHandler: @escaping ContinuationErrorHandler = { _ in .done }
     ) -> ContinuationResult {
         var current = result
-        while current.canContinue { current = current.next(errorHandler: errorHandler) }
+        var stack = [ContinuationResult]()
+        while current.canContinue {
+            (current, stack) = current.next(using: stack, errorHandler: errorHandler)
+            if !current.canContinue && stack.count > 0 {
+                current = stack[0]; stack = Array(stack.dropFirst())
+            }
+        }
         return current
-    }
-    
-    static func complete(
-        _ continuation: @escaping AnonymousContinuation,
-        errorHandler: ContinuationErrorHandler = { _ in .done }
-    ) -> ContinuationResult {
-        guard let continuation = continuation as? Continuation else { return .done }
-        let result = ContinuationResult.more(continuation);
-        return complete(result)
-    }
-
-    static func complete(
-        _ continuation: @escaping AnonymousThrowingContinuation,
-        errorHandler: ContinuationErrorHandler = { _ in .done }
-    ) -> ContinuationResult {
-        guard let continuation = continuation as? ThrowingContinuation else { return .done }
-        let result = ContinuationResult.moreThrows(continuation)
-        return complete(result)
     }
 }
