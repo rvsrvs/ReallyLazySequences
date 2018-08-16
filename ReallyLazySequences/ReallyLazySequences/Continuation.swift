@@ -12,6 +12,13 @@
 // in-line when processing and RLS. They continue the current computation
 // in a stack frame much closer to the users invocation.
 
+public enum ContinuationError<T>: Error {
+    public typealias Delivery = (T?) -> ContinuationResult
+    public typealias ThrowingDelivery = (T?) throws -> ContinuationResult
+    case context(T, Delivery?, Error?)
+    case throwingContext(T, ThrowingDelivery?, Error?)
+}
+
 public typealias Continuation = () -> ContinuationResult
 public typealias ThrowingContinuation = () throws -> ContinuationResult
 
