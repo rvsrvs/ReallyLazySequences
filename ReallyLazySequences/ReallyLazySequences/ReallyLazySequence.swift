@@ -54,10 +54,11 @@ public protocol ReallyLazySequenceProtocol {
     // its function for a consumer.
     func compose(_ output: @escaping ContinuableOutputDelivery) -> InputDelivery
 
-    // All RLS successor chains, to be used, eventually terminate in a Consumer or a Listener
+    // All RLS successor chains, to be used, eventually terminate in a Consumer or a listen
     // consume hands back an object which can be subsequently used
     func consume(_ delivery: @escaping TerminalOutputDelivery) -> Consumer<Self>
-    // listen assumes that the far end of the chain is a reference type and that the
+    
+    // listen assumes that the head end of the chain is a reference type and that the
     // user of the framework already has that reference
     func listen(_ delivery: @escaping TerminalOutputDelivery) -> Void
     
