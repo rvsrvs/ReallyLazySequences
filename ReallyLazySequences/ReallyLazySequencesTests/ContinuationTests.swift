@@ -95,7 +95,8 @@ class ContinuationTests: XCTestCase {
             return ContinuationResult.done
         }
         let continuation2 = { (value: Int?) throws -> ContinuationResult in
-            throw ContinuationError.context(.map, value, continuation1, ContinuationTestError.test("continuation2") )
+            throw ContinuationErrorContext(
+                opType: .map, value: value, delivery: continuation1, error: ContinuationTestError.test("continuation2") )
         }
         let continuation2a = { (_: Int?) throws -> ContinuationResult in ContinuationResult.more({try continuation1a(nil)}) }
         let continuation3 = { (_: Int?) throws -> ContinuationResult in
@@ -121,22 +122,20 @@ class ContinuationTests: XCTestCase {
         // Attach an error handler that will active in continuation2, i.e. 5 levels away, all processing
         // should continue normally and all expectations should still fulfill
         let driver = { () throws -> ContinuationResult in try continuation7(nil) }
-        let outcome = ContinuationResult.complete(.more(driver)) { (error: Error) -> ContinuationResult in
-            guard let error = error as? ContinuationError<Int?, Int> else {
+        let outcome = ContinuationResult.complete(.more(driver)) { (context: ContinuationErrorContextProtocol) -> ContinuationResult in
+            guard let context = context as? ContinuationErrorContext<Int?, Int> else {
                 XCTFail("Received unhandleable error")
                 return .done
             }
-            switch error {
-            case .context(let op, let value, let delivery, let error):
-                guard case .test(let message)? = error as? ContinuationTestError,
-                    op == .map,
-                    message == "continuation2"
-                    else {
-                        XCTFail("Error from wrong location")
-                        return .done
-                    }
-                return .more({try delivery(value)})
-            }
+            guard let error = context.error as? ContinuationTestError,
+                case .test(let message) = error,
+                context.opType == .map,
+                message == "continuation2"
+                else {
+                    XCTFail("Error from wrong location")
+                    return .done
+                }
+            return .more({try context.delivery(context.value)})
         }
         
         XCTAssertTrue(fulfillCount == 3, "Messages in wrong order at continuation 7")

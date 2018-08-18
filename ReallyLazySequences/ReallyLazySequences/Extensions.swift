@@ -64,7 +64,7 @@ public extension ReallyLazySequenceProtocol {
                     let transformed = try transform(input)
                     return .more({ delivery(transformed) })
                 } catch {
-                    let rlsError = ContinuationError.context(.map, input, delivery, error)
+                    let rlsError = ContinuationErrorContext(opType: .map, value: input, delivery: delivery, error: error)
                     return .error(rlsError)
                 }
             }
@@ -81,7 +81,7 @@ public extension ReallyLazySequenceProtocol {
                     guard let output = try transform(input) else { return ContinuationResult.done }
                     return .more({ delivery(output) }) // value to pass on
                 } catch {
-                    let rlsError = ContinuationError.context(.compactMap, input, delivery, error)
+                    let rlsError = ContinuationErrorContext(opType: .compactMap, value: input, delivery: delivery, error: error)
                     return ContinuationResult.error(rlsError)
                 }
             }
@@ -112,7 +112,7 @@ public extension ReallyLazySequenceProtocol {
                     }
                     return .done
                 } catch {
-                    let rlsError = ContinuationError.context(.reduce, input, delivery, error)
+                    let rlsError = ContinuationErrorContext(opType: .reduce, value: input, delivery: delivery, error: error)
                     return ContinuationResult.error(rlsError)
                 }
             }
@@ -141,7 +141,7 @@ public extension ReallyLazySequenceProtocol {
                         }
                         return .done
                     } catch {
-                        let rlsError = ContinuationError.context(.flatMap, input, delivery, error)
+                        let rlsError = ContinuationErrorContext(opType: .flatMap, value: input, delivery: delivery, error: error)
                         return ContinuationResult.error(rlsError)
                     }
                 }
@@ -168,7 +168,7 @@ public extension ReallyLazySequenceProtocol {
                     let result = try filter(input)
                     return result ? .more({ delivery(input) }) :  .done
                 } catch {
-                    let rlsError = ContinuationError.context(.filter, input, delivery, error)
+                    let rlsError = ContinuationErrorContext(opType: .filter, value: input, delivery: delivery, error: error)
                     return ContinuationResult.error(rlsError)
                 }
             }

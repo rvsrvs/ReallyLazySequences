@@ -12,31 +12,31 @@
 // in-line when processing an RLS. They continue the current computation
 // in a stack frame much closer to the users invocation.
 
-public protocol ContinuationErrorProtocol: Error { }
+public protocol ContinuationErrorContextProtocol: Error { }
 
-public enum ContinuationError<T, U>: ContinuationErrorProtocol, Equatable {
-    case context(ReallyLazySequenceOperationType, T, (U?) throws -> ContinuationResult, Error)
+public struct ContinuationErrorContext<T, U>: ContinuationErrorContextProtocol, Equatable {
+    var opType: ReallyLazySequenceOperationType
+    var value: T
+    var delivery: (U?) throws -> ContinuationResult
+    var error: Error
 
-    public static func == (lhs: ContinuationError<T, U>, rhs: ContinuationError<T, U>) -> Bool {
-        switch (lhs, rhs) {
-        case (let .context(lOp, lValue, lDelivery, lError), let .context(rOp, rValue, rDelivery, rError)):
-            return lOp == rOp
-                && (type(of: lValue)    == type(of: rValue))
-                && (type(of: lDelivery) == type(of: rDelivery))
-                && (type(of: lError)    == type(of: rError))
-        }
+    public static func == (lhs: ContinuationErrorContext<T, U>, rhs: ContinuationErrorContext<T, U>) -> Bool {
+            return lhs.opType == rhs.opType
+                && (type(of: lhs.value)    == type(of: rhs.value))
+                && (type(of: lhs.delivery) == type(of: rhs.delivery))
+                && (type(of: lhs.error)    == type(of: rhs.error))
     }
 }
 
 public typealias Continuation = () throws -> ContinuationResult
 
-typealias ContinuationErrorHandler = (ContinuationErrorProtocol) -> ContinuationResult
+typealias ContinuationErrorHandler = (ContinuationErrorContextProtocol) -> ContinuationResult
 
 public let ContinuationDone = { () -> ContinuationResult in ContinuationResult.done }
 
 public indirect enum ContinuationResult: Equatable {
     case more(Continuation)
-    case error(ContinuationErrorProtocol)
+    case error(ContinuationErrorContextProtocol)
     case afterThen(ContinuationResult, ContinuationResult)
     case done
     
@@ -56,11 +56,11 @@ public indirect enum ContinuationResult: Equatable {
         self = .done
     }
     
-    init(continuation: @escaping Continuation) {
+    init(_ continuation: @escaping Continuation) {
         self = .more(continuation)
     }
     
-    init(continuation: ContinuationResult, after: ContinuationResult) {
+    init(_ continuation: ContinuationResult, _ after: ContinuationResult) {
         self = .afterThen(continuation, after)
     }
     
@@ -82,7 +82,7 @@ public indirect enum ContinuationResult: Equatable {
             do {
                 return (try continuation(), stack)
             } catch {
-                guard let rlsError = error as? ContinuationErrorProtocol else { return (.done, stack) }
+                guard let rlsError = error as? ContinuationErrorContextProtocol else { return (.done, stack) }
                 return (.error(rlsError), stack)
             }
         case .error(let error):
