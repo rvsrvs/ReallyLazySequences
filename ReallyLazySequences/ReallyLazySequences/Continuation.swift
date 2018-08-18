@@ -9,31 +9,28 @@
 // Continuations represent at computation which can be continued at a later time
 // They are a way of avoiding enormous convoluted stack frames that emerge from
 // composing a chain of functions in an RLS and of attaching error handling
-// in-line when processing and RLS. They continue the current computation
+// in-line when processing an RLS. They continue the current computation
 // in a stack frame much closer to the users invocation.
 
 public protocol ContinuationErrorProtocol: Error { }
 
-public extension ContinuationErrorProtocol { }
-
-public enum ContinuationError<T, U>: ContinuationErrorProtocol {
-    public typealias Delivery = (U?) throws -> ContinuationResult
+public enum ContinuationError<T, U>: ContinuationErrorProtocol, Equatable {
+    case context(ReallyLazySequenceOperationType, T, (U?) throws -> ContinuationResult, Error)
 
     public static func == (lhs: ContinuationError<T, U>, rhs: ContinuationError<T, U>) -> Bool {
         switch (lhs, rhs) {
-        case (let .context(lValue, lDelivery, lError), let .context(rValue, rDelivery, rError)):
-            return (type(of: lValue)    == type(of: rValue))
+        case (let .context(lOp, lValue, lDelivery, lError), let .context(rOp, rValue, rDelivery, rError)):
+            return lOp == rOp
+                && (type(of: lValue)    == type(of: rValue))
                 && (type(of: lDelivery) == type(of: rDelivery))
                 && (type(of: lError)    == type(of: rError))
         }
     }
-    
-    case context(T, Delivery, Error)
 }
 
 public typealias Continuation = () throws -> ContinuationResult
 
-typealias ContinuationErrorHandler = (Error) -> ContinuationResult
+typealias ContinuationErrorHandler = (ContinuationErrorProtocol) -> ContinuationResult
 
 public let ContinuationDone = { () -> ContinuationResult in ContinuationResult.done }
 

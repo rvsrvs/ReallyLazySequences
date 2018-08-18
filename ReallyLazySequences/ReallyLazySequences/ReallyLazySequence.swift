@@ -19,6 +19,14 @@ public enum Result<T> {
     }
 }
 
+public enum ReallyLazySequenceOperationType: Equatable {
+    case map
+    case flatMap
+    case compactMap
+    case reduce
+    case filter
+}
+
 public enum ReallyLazySequenceError: Error {
     case isComplete
     case nonPushable
@@ -79,7 +87,7 @@ public protocol ReallyLazySequenceProtocol {
     ) -> Reduce<Self, T>
     
     // Flatmap and optionally dispatch the producers into an OpQueue to allow them to be parallelized
-    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
+    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> FlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     
     /*
@@ -89,11 +97,11 @@ public protocol ReallyLazySequenceProtocol {
     // All returned types differ only in name, allowing the path through the sequence to
     // be read from the type name itself
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> Map<Self, T>
-    func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T>
-    func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
+    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> CompactMap<Self, T>
+    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> FlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> Reduce<Self, T>
-    func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
+    func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> Filter<Self, OutputType>
 }
 
 // The protocol allowing chaining of sequences.  Reminiscent of LazySequence

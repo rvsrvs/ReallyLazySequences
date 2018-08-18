@@ -64,7 +64,7 @@ public extension ReallyLazySequenceProtocol {
                     let transformed = try transform(input)
                     return .more({ delivery(transformed) })
                 } catch {
-                    let rlsError = ContinuationError.context(input, delivery, error)
+                    let rlsError = ContinuationError.context(.map, input, delivery, error)
                     return .error(rlsError)
                 }
             }
@@ -73,12 +73,17 @@ public extension ReallyLazySequenceProtocol {
     
     // When the OutputType of the sequence is an optional, remove nils from the sequence, and transform
     // the non-optional type to the output type
-    public func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T> {
+    public func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> CompactMap<Self, T> {
         return CompactMap<Self, T>(predecessor: self) { delivery in
             return { (optionalInput) -> ContinuationResult in
                 guard let input = optionalInput else { return .more({ delivery(nil) }) } // termination nil
-                guard let output = transform(input) else { return ContinuationResult.done }
-                return .more({ delivery(output) }) // value to pass on
+                do {
+                    guard let output = try transform(input) else { return ContinuationResult.done }
+                    return .more({ delivery(output) }) // value to pass on
+                } catch {
+                    let rlsError = ContinuationError.context(.compactMap, input, delivery, error)
+                    return ContinuationResult.error(rlsError)
+                }
             }
         }
     }
@@ -107,7 +112,7 @@ public extension ReallyLazySequenceProtocol {
                     }
                     return .done
                 } catch {
-                    let rlsError = ContinuationError.context(input, delivery, error)
+                    let rlsError = ContinuationError.context(.reduce, input, delivery, error)
                     return ContinuationResult.error(rlsError)
                 }
             }
@@ -116,31 +121,36 @@ public extension ReallyLazySequenceProtocol {
     
     // Optionally in a specific queue, create a sequence of values from a single value
     // and then flatten that sequence into this one.  If queue is nil perform the operation in line
-    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
+    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> FlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
-        return FlatMap<Self, T>(predecessor: self) { delivery in
-            return { (input) -> ContinuationResult in
-                guard let input = input else { return delivery(nil) }
-                let generator = transform(input)
-                    .consume { value in
-                        guard let value = value else { return }
-                        //FIXME: This should go up to the main continuation loop
-                        // and not be completed from here..
-                        _ = ContinuationResult.complete(.more({ delivery(value) }))
+            return FlatMap<Self, T>(predecessor: self) { delivery in
+                return { (input) -> ContinuationResult in
+                    guard let input = input else { return delivery(nil) }
+                    do {
+                        let generator = try transform(input)
+                            .consume { value in
+                                guard let value = value else { return }
+                                //FIXME: This should go up to the main continuation loop
+                                // and not be completed from here..
+                                _ = ContinuationResult.complete(.more({ delivery(value) }))
+                        }
+                        if let queue = queue {
+                            queue.addOperation { try? generator.process(input) }
+                        } else {
+                            try? generator.process(input)
+                        }
+                        return .done
+                    } catch {
+                        let rlsError = ContinuationError.context(.flatMap, input, delivery, error)
+                        return ContinuationResult.error(rlsError)
                     }
-                if let queue = queue {
-                    queue.addOperation { try? generator.process(input) }
-                } else {
-                    try? generator.process(input)
                 }
-                return .done
             }
-        }
     }
 
     // In the current queue, create a sequence of values from a single value
     // and then flatten the resulting sequence into this one
-    func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
+    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> FlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
         return flatMap(queue: nil, transform)
     }
@@ -150,9 +160,18 @@ public extension ReallyLazySequenceProtocol {
     }
 
     // filter values that do not meet a specified condition
-    func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType> {
+    func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> Filter<Self, OutputType> {
         return Filter<Self, OutputType>(predecessor: self) { delivery in
-            return { (input) in (input == nil || filter(input!)) ?  .more({ delivery(input) }) :  .done }
+            return { (input) in
+                do {
+                    guard let input = input else { return .more({ delivery(nil) })}
+                    let result = try filter(input)
+                    return result ? .more({ delivery(input) }) :  .done
+                } catch {
+                    let rlsError = ContinuationError.context(.filter, input, delivery, error)
+                    return ContinuationResult.error(rlsError)
+                }
+            }
         }
     }
     
