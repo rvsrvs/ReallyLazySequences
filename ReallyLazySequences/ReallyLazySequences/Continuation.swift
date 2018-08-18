@@ -12,30 +12,48 @@
 // in-line when processing and RLS. They continue the current computation
 // in a stack frame much closer to the users invocation.
 
-public enum ContinuationError<T>: Error {
-    public typealias Delivery = (T?) -> ContinuationResult
-    public typealias ThrowingDelivery = (T?) throws -> ContinuationResult
-    case context(T, Delivery?, Error?)
-    case throwingContext(T, ThrowingDelivery?, Error?)
+public protocol ContinuationErrorProtocol: Error { }
+
+public extension ContinuationErrorProtocol { }
+
+public enum ContinuationError<T, U>: ContinuationErrorProtocol {
+    public typealias Delivery = (U?) throws -> ContinuationResult
+
+    public static func == (lhs: ContinuationError<T, U>, rhs: ContinuationError<T, U>) -> Bool {
+        switch (lhs, rhs) {
+        case (let .context(lValue, lDelivery, lError), let .context(rValue, rDelivery, rError)):
+            return (type(of: lValue)    == type(of: rValue))
+                && (type(of: lDelivery) == type(of: rDelivery))
+                && (type(of: lError)    == type(of: rError))
+        }
+    }
+    
+    case context(T, Delivery, Error)
 }
 
-public typealias Continuation = () -> ContinuationResult
-public typealias ThrowingContinuation = () throws -> ContinuationResult
-
-// Ideally *Any* would be replaced with ContinuationResult but swift does not allow
-// recursive type definitions
-public typealias AnonymousContinuation = () -> Any
-public typealias AnonymousThrowingContinuation = () throws -> Any
+public typealias Continuation = () throws -> ContinuationResult
 
 typealias ContinuationErrorHandler = (Error) -> ContinuationResult
 
 public let ContinuationDone = { () -> ContinuationResult in ContinuationResult.done }
 
-public indirect enum ContinuationResult {
-    case more(AnonymousContinuation)
-    case moreThrows(AnonymousThrowingContinuation)
+public indirect enum ContinuationResult: Equatable {
+    case more(Continuation)
+    case error(ContinuationErrorProtocol)
     case afterThen(ContinuationResult, ContinuationResult)
     case done
+    
+    public static func == (lhs: ContinuationResult, rhs: ContinuationResult) -> Bool {
+        switch (lhs, rhs) {
+        case (.done, .done): return true
+        case (.more, .more): return true
+        case (.error, .error): return true
+        case (let .afterThen(after1, then1), let .afterThen(after2, then2)):
+            return after1 == after2 && then1 == then2
+        default:
+            return false
+        }
+    }
     
     init() {
         self = .done
@@ -52,7 +70,7 @@ public indirect enum ContinuationResult {
     var canContinue: Bool {
         switch self {
         case .done: return false
-        case .more, .moreThrows, .afterThen: return true
+        case .more, .error, .afterThen: return true
         }
     }
     
@@ -64,15 +82,14 @@ public indirect enum ContinuationResult {
         case .done:
             return (.done, stack)
         case .more(let continuation):
-            guard let result = continuation() as? ContinuationResult else { return (.done, stack) }
-            return (result, stack)
-        case .moreThrows(let continuation):
             do {
-                guard let result = try continuation() as? ContinuationResult else { return (.done, stack) }
-                return (result, stack)
+                return (try continuation(), stack)
             } catch {
-                return (errorHandler(error), stack)
+                guard let rlsError = error as? ContinuationErrorProtocol else { return (.done, stack) }
+                return (.error(rlsError), stack)
             }
+        case .error(let error):
+            return (errorHandler(error), stack)
         case .afterThen(let result1, let result2):
             let newStack = [result2] + stack
             return (result1, newStack)

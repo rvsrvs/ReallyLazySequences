@@ -56,10 +56,17 @@ public extension ChainedSequence {
 public extension ReallyLazySequenceProtocol {
     // Map sequential values of one type to a value of the same or different type and delivers them
     // to our successor using the successor's delivery closure
-    public func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T> {
+    public func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> Map<Self, T> {
         return Map<Self, T>(predecessor: self) { delivery in
             return { (input) -> ContinuationResult in
-                return input == nil ? .more({ delivery(nil) }) : .more({ delivery(transform(input!)) })
+                guard let input = input else {return .more({ delivery(nil) }) }
+                do {
+                    let transformed = try transform(input)
+                    return .more({ delivery(transformed) })
+                } catch {
+                    let rlsError = ContinuationError.context(input, delivery, error)
+                    return .error(rlsError)
+                }
             }
         }
     }
@@ -83,21 +90,26 @@ public extension ReallyLazySequenceProtocol {
     // the partial value *MUST* be serialized
     public func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
-        combine: @escaping (T, OutputType) -> T,
+        combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
     ) -> Reduce<Self, T> {
         return Reduce<Self, T>(predecessor: self) { delivery in
             var partialValue = initialValue()
             var setNextPartialValue: Continuation?
             return { (input) -> ContinuationResult in
-                _ = setNextPartialValue?(); setNextPartialValue = nil
-                guard let input = input else { return .afterThen( .more({ delivery(partialValue) }) , .more({ delivery(nil) }) ) }
-                partialValue = combine(partialValue, input)
-                if until(partialValue, input) {
-                    setNextPartialValue = { partialValue = initialValue(); return .done }
-                    return .more({ delivery(partialValue) })
+                do {
+                    _ = try setNextPartialValue?(); setNextPartialValue = nil
+                    guard let input = input else { return .afterThen( .more({ delivery(partialValue) }) , .more({ delivery(nil) }) ) }
+                    partialValue = try combine(partialValue, input)
+                    if until(partialValue, input) {
+                        setNextPartialValue = { partialValue = initialValue(); return .done }
+                        return .more({ delivery(partialValue) })
+                    }
+                    return .done
+                } catch {
+                    let rlsError = ContinuationError.context(input, delivery, error)
+                    return ContinuationResult.error(rlsError)
                 }
-                return .done
             }
         }
     }
@@ -133,7 +145,7 @@ public extension ReallyLazySequenceProtocol {
         return flatMap(queue: nil, transform)
     }
     
-    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T) -> Reduce<Self, T> {
+    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> Reduce<Self, T> {
         return collect(initialValue: initialValue, combine: combine, until: { $1 == nil })
     }
 

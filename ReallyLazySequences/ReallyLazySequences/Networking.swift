@@ -45,8 +45,14 @@ public struct URLDataFetcher: SubsequenceProtocol {
         self.init { (fetch: InputType, delivery: @escaping ((OutputType?) -> Void)) -> Void in
             let task = fetch.session.dataTask(with: fetch.url) {
                 let c = URLDataMapper.consume{ result in
-                    _ = ContinuationResult.complete(.more({ delivery(result) }))
-                    _ = ContinuationResult.complete(.more({ delivery(nil) }))
+                    let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
+                        delivery(value)
+                        return .done
+                    }
+                    _ = ContinuationResult.complete(
+                        .afterThen(.more({ deliveryWrapper(result) }),
+                               .more({ deliveryWrapper(nil) }))
+                    )
                 }
                 try? c.process(($0, $1, $2))
             }

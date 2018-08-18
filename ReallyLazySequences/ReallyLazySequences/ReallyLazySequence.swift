@@ -74,7 +74,7 @@ public protocol ReallyLazySequenceProtocol {
     // This is a generalized form of reduce
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
-        combine: @escaping (T, OutputType) -> T,
+        combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
     ) -> Reduce<Self, T>
     
@@ -88,11 +88,11 @@ public protocol ReallyLazySequenceProtocol {
     // each of these returns a different concrete type meeting the ChainedSequenceProtocol
     // All returned types differ only in name, allowing the path through the sequence to
     // be read from the type name itself
-    func map<T>(_ transform: @escaping (OutputType) -> T ) -> Map<Self, T>
+    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> Map<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) -> T? ) -> CompactMap<Self, T>
     func flatMap<T, U>(_ transform: @escaping (OutputType) -> U) -> FlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
-    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) -> T) -> Reduce<Self, T>
+    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> Reduce<Self, T>
     func filter(_ filter: @escaping (OutputType) -> Bool ) -> Filter<Self, OutputType>
 }
 
