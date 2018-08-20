@@ -1,7 +1,7 @@
 
 import ReallyLazySequences
 
-let c = ReallyLazySequence<Int>()
+let c = SimpleSequence<Int>()
     .filter { $0 < 10 }
     .map { Double($0) * 2.0 }
     .consume { (value: Double?) -> Void in
@@ -12,11 +12,7 @@ let c = ReallyLazySequence<Int>()
 print(type(of:c))
 
 do {
-    try c.process(24)
-    try c.process(4)
-    try c.process(6)
-    try c.process(nil)
-    try c.process(14)
+    try [24, 4, 6, nil, 14].forEach {_ = try c.process($0) }
 } catch {
     print(error)
 }
