@@ -66,10 +66,6 @@ public protocol ReallyLazySequenceProtocol {
     // consume hands back an object which can be subsequently used
     func consume(_ delivery: @escaping TerminalOutputDelivery) -> Consumer<Self>
     
-    // listen assumes that the head end of the chain is a reference type and that the
-    // user of the framework already has that reference
-    func listen(_ delivery: @escaping TerminalOutputDelivery) -> Void
-    
     /*
      Useful RLS-only functions, not related to Swift.Sequence
     */

@@ -58,16 +58,7 @@ public extension ReallyLazySequenceProtocol {
     // to our successor using the successor's delivery closure
     public func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> Map<Self, T> {
         return Map<Self, T>(predecessor: self) { delivery in
-            return { (input) -> ContinuationResult in
-                guard let input = input else {return .more({ delivery(nil) }) }
-                do {
-                    let transformed = try transform(input)
-                    return .more({ delivery(transformed) })
-                } catch {
-                    let rlsError = ContinuationErrorContext(opType: .map, value: input, delivery: delivery, error: error)
-                    return .error(rlsError)
-                }
-            }
+            Composers.mapComposer(delivery: delivery, transform: transform)
         }
     }
     
@@ -75,16 +66,7 @@ public extension ReallyLazySequenceProtocol {
     // the non-optional type to the output type
     public func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> CompactMap<Self, T> {
         return CompactMap<Self, T>(predecessor: self) { delivery in
-            return { (optionalInput) -> ContinuationResult in
-                guard let input = optionalInput else { return .more({ delivery(nil) }) } // termination nil
-                do {
-                    guard let output = try transform(input) else { return ContinuationResult.done }
-                    return .more({ delivery(output) }) // value to pass on
-                } catch {
-                    let rlsError = ContinuationErrorContext(opType: .compactMap, value: input, delivery: delivery, error: error)
-                    return ContinuationResult.error(rlsError)
-                }
-            }
+            Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
     }
 
@@ -99,23 +81,7 @@ public extension ReallyLazySequenceProtocol {
         until: @escaping (T, OutputType?) -> Bool
     ) -> Reduce<Self, T> {
         return Reduce<Self, T>(predecessor: self) { delivery in
-            var partialValue = initialValue()
-            var setNextPartialValue: Continuation?
-            return { (input) -> ContinuationResult in
-                do {
-                    _ = try setNextPartialValue?(); setNextPartialValue = nil
-                    guard let input = input else { return .afterThen( .more({ delivery(partialValue) }) , .more({ delivery(nil) }) ) }
-                    partialValue = try combine(partialValue, input)
-                    if until(partialValue, input) {
-                        setNextPartialValue = { partialValue = initialValue(); return .done }
-                        return .more({ delivery(partialValue) })
-                    }
-                    return .done
-                } catch {
-                    let rlsError = ContinuationErrorContext(opType: .reduce, value: input, delivery: delivery, error: error)
-                    return ContinuationResult.error(rlsError)
-                }
-            }
+            Composers.collectComposer(delivery: delivery, initialValue: initialValue, combine: combine, until: until)
         }
     }
     
@@ -124,27 +90,7 @@ public extension ReallyLazySequenceProtocol {
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> FlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
             return FlatMap<Self, T>(predecessor: self) { delivery in
-                return { (input) -> ContinuationResult in
-                    guard let input = input else { return delivery(nil) }
-                    do {
-                        let generator = try transform(input)
-                            .consume { value in
-                                guard let value = value else { return }
-                                //FIXME: This should go up to the main continuation loop
-                                // and not be completed from here..
-                                _ = ContinuationResult.complete(.more({ delivery(value) }))
-                        }
-                        if let queue = queue {
-                            queue.addOperation { try? generator.process(input) }
-                        } else {
-                            try? generator.process(input)
-                        }
-                        return .done
-                    } catch {
-                        let rlsError = ContinuationErrorContext(opType: .flatMap, value: input, delivery: delivery, error: error)
-                        return ContinuationResult.error(rlsError)
-                    }
-                }
+                Composers.flatMapComposer(delivery: delivery, queue: queue, transform: transform)
             }
     }
 
@@ -162,25 +108,14 @@ public extension ReallyLazySequenceProtocol {
     // filter values that do not meet a specified condition
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> Filter<Self, OutputType> {
         return Filter<Self, OutputType>(predecessor: self) { delivery in
-            return { (input) in
-                do {
-                    guard let input = input else { return .more({ delivery(nil) })}
-                    let result = try filter(input)
-                    return result ? .more({ delivery(input) }) :  .done
-                } catch {
-                    let rlsError = ContinuationErrorContext(opType: .filter, value: input, delivery: delivery, error: error)
-                    return ContinuationResult.error(rlsError)
-                }
-            }
+            Composers.filterComposer(delivery: delivery, filter: filter)
         }
     }
     
     // Perform the rest of the push on another dispatch queue
     public func dispatch(_ queue: OperationQueue) -> Dispatch<Self, OutputType> {
         return Dispatch<Self, OutputType>(predecessor: self) { delivery in
-            return { (input) -> ContinuationResult in
-                queue.addOperation { _ = ContinuationResult.complete(delivery(input)) }; return .done
-            }
+            Composers.dispatchComposer(delivery: delivery, queue: queue)
         }
     }
 }
