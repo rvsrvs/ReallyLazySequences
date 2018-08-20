@@ -25,12 +25,12 @@ class ProducerTests: XCTestCase {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let testProducer = Producer<Int> { deliver in
+        let testGenerator = ListenableGenerator<Int> { deliver in
             (0 ... 5).forEach { deliver($0) }
             deliver(nil)
         }
         
-        testProducer
+        testGenerator
             .listener()
             .map {  $0 * 2 }
             .listen {
@@ -38,7 +38,7 @@ class ProducerTests: XCTestCase {
                 doubler.fulfill()
             }
         
-        testProducer
+        testGenerator
             .listener()
             .map {  $0 * 4 }
             .listen {
@@ -46,7 +46,7 @@ class ProducerTests: XCTestCase {
                 quadrupler.fulfill()
             }
         
-        try? testProducer.produce()
+        try? testGenerator.generate()
         waitForExpectations(timeout: 30.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
 }

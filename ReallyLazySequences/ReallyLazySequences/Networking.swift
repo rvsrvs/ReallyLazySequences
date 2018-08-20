@@ -62,29 +62,29 @@ public struct URLDataFetcher: SubsequenceProtocol {
     }
 }
 
-public class URLDataProducer: ProducerProtocol {
+public class URLDataGenerator: ListenableGeneratorProtocol {
     public typealias ListenableType = DataFetchValue
     public typealias ListenableSequenceType = ListenableSequence<DataFetchValue>
     public var listeners = [UUID: Listener<DataFetchValue>]()
-    public var producer: (@escaping (DataFetchValue?) -> Void) -> Void
+    public var generator: (@escaping (DataFetchValue?) -> Void) -> Void
 
     var url: URL!
     
-    public required init(producer: @escaping ((DataFetchValue?) -> Void) -> Void) {
-        self.producer = producer
+    public required init(generator: @escaping ((DataFetchValue?) -> Void) -> Void) {
+        self.generator = generator
     }
 
     convenience init(url: URL, session: URLSession) {
         self.init { (_) in }
         self.url = url
-        self.producer = { (delivery: @escaping ((DataFetchValue?) -> Void)) -> Void in
+        self.generator = { (delivery: @escaping ((DataFetchValue?) -> Void)) -> Void in
             session.dataTask(with: url) { delivery(($0, $1, $2)); delivery(nil) } .resume()
         }
     }
 }
 
-extension URLDataProducer {
-    public typealias DataListener = Map<ListenableSequence<DataFetchValue>, Result<Data>>
+extension URLDataGenerator {
+    public typealias DataListener = ListenableMap<ListenableSequence<DataFetchValue>, Result<Data>>
     public func dataListener() -> DataListener {
         return listener()
             .map { (result: DataFetchValue) -> Result<Data> in
@@ -109,7 +109,7 @@ extension URLDataProducer {
             }
     }
     
-    public func jsonListener<JSONType: Decodable>(decodingType: JSONType.Type) -> Map<DataListener, Result<JSONType>> {
+    public func jsonListener<JSONType: Decodable>(decodingType: JSONType.Type) -> ListenableMap<DataListener, Result<JSONType>> {
         return dataListener()
             .map { (fetchResult: Result<Data>) -> Result<JSONType> in
                 switch fetchResult {

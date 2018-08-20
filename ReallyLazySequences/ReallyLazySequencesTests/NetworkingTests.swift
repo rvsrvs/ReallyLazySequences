@@ -42,7 +42,7 @@ class NetworkingTests: XCTestCase {
 
         guard let url = URL(string: ConfigurationURL) else { return }
         
-        let producer = URLDataProducer(url: url, session: SessionSupport().session())
+        let producer = URLDataGenerator(url: url, session: SessionSupport().session())
         
         producer
             .jsonListener(decodingType: [Configuration].self)
@@ -70,7 +70,7 @@ class NetworkingTests: XCTestCase {
         }
 
         do {
-            try producer.produce()
+            try producer.generate()
         } catch {
             XCTFail(error.localizedDescription)
         }

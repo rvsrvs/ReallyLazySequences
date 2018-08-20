@@ -8,11 +8,11 @@
 
 import Foundation
 
-public class ListenableValue<T>: Listenable {
+public class ListenableValue<T>: ListenerManagerProtocol {
     public typealias ListenableType = T
     public typealias ListenableSequenceType = ListenableSequence<T>
     
-    fileprivate var listeners = [UUID: Listener<T>]()
+    public var listeners = [UUID: Listener<T>]()
     
     var hasListeners: Bool { return listeners.count > 0 }
     
@@ -37,20 +37,6 @@ public class ListenableValue<T>: Listenable {
         listeners.values.forEach { listener in
             listener.terminate()
             remove(listener: listener)
-        }
-    }
-    
-    private func add(listener: Listener<T>) {
-        listeners[listener.identifier] = listener
-    }
-    
-    private func remove(listener: Listener<T>) {
-        listeners.removeValue(forKey: listener.identifier)
-    }
-    
-    public func listener() -> ListenableSequence<T> {
-        return ListenableSequence<T> { (listener: Listener<T>) in
-            self.add(listener: listener)
         }
     }
 }

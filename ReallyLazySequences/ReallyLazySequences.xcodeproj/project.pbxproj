@@ -10,9 +10,9 @@
 		FB33E0341EBE7E85009CA3AC /* ReallyLazySequences.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB33E02A1EBE7E85009CA3AC /* ReallyLazySequences.framework */; };
 		FB33E0391EBE7E85009CA3AC /* ReallyLazySequencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */; };
 		FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */; };
-		FB628AC5210C9263009A56F9 /* ChainingDeclarations.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */; };
+		FB5C978F212A491400E48544 /* ListenableChainingDeclarations.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5C978E212A491400E48544 /* ListenableChainingDeclarations.swift */; };
+		FB628AC5210C9263009A56F9 /* ConsumableChainingDeclarations.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AC4210C9263009A56F9 /* ConsumableChainingDeclarations.swift */; };
 		FB628AF721109CC6009A56F9 /* Consumer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF621109CC6009A56F9 /* Consumer.swift */; };
-		FB628AF921109CFF009A56F9 /* Producer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AF821109CFF009A56F9 /* Producer.swift */; };
 		FB628AFC21110420009A56F9 /* Continuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB628AFB21110420009A56F9 /* Continuation.swift */; };
 		FB6599E42124B7A500357D8D /* ContinuationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6599E32124B7A500357D8D /* ContinuationTests.swift */; };
 		FB6599E6212A1DF400357D8D /* Composers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6599E5212A1DF400357D8D /* Composers.swift */; };
@@ -42,9 +42,9 @@
 		FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReallyLazySequencesTests.swift; sourceTree = "<group>"; };
 		FB33E03A1EBE7E85009CA3AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainingDeclarations.swift; sourceTree = "<group>"; };
+		FB5C978E212A491400E48544 /* ListenableChainingDeclarations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenableChainingDeclarations.swift; sourceTree = "<group>"; };
+		FB628AC4210C9263009A56F9 /* ConsumableChainingDeclarations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumableChainingDeclarations.swift; sourceTree = "<group>"; };
 		FB628AF621109CC6009A56F9 /* Consumer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Consumer.swift; sourceTree = "<group>"; };
-		FB628AF821109CFF009A56F9 /* Producer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Producer.swift; sourceTree = "<group>"; };
 		FB628AFA211103D5009A56F9 /* ReallyLazySequences.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; name = ReallyLazySequences.playground; path = ../ReallyLazySequences.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		FB628AFB21110420009A56F9 /* Continuation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Continuation.swift; sourceTree = "<group>"; };
 		FB6599E32124B7A500357D8D /* ContinuationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuationTests.swift; sourceTree = "<group>"; };
@@ -105,12 +105,12 @@
 				FB628AFB21110420009A56F9 /* Continuation.swift */,
 				FB628AF621109CC6009A56F9 /* Consumer.swift */,
 				FBCA36AB2117A83400984A5B /* Listener.swift */,
-				FB628AF821109CFF009A56F9 /* Producer.swift */,
 				FBDD6139211B8E7F001C0BE3 /* Value.swift */,
 				FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */,
 				FB6599E5212A1DF400357D8D /* Composers.swift */,
 				FBDD6137211B0652001C0BE3 /* Networking.swift */,
-				FB628AC4210C9263009A56F9 /* ChainingDeclarations.swift */,
+				FB628AC4210C9263009A56F9 /* ConsumableChainingDeclarations.swift */,
+				FB5C978E212A491400E48544 /* ListenableChainingDeclarations.swift */,
 				FB33E02E1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequences;
@@ -242,15 +242,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB5C978F212A491400E48544 /* ListenableChainingDeclarations.swift in Sources */,
 				FB628AFC21110420009A56F9 /* Continuation.swift in Sources */,
 				FBCA36AC2117A83400984A5B /* Listener.swift in Sources */,
-				FB628AF921109CFF009A56F9 /* Producer.swift in Sources */,
 				FBDD6138211B0652001C0BE3 /* Networking.swift in Sources */,
 				FB3F3AC81ED5C1AC0005EFB4 /* Extensions.swift in Sources */,
 				FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */,
 				FBDD613A211B8E7F001C0BE3 /* Value.swift in Sources */,
 				FB628AF721109CC6009A56F9 /* Consumer.swift in Sources */,
-				FB628AC5210C9263009A56F9 /* ChainingDeclarations.swift in Sources */,
+				FB628AC5210C9263009A56F9 /* ConsumableChainingDeclarations.swift in Sources */,
 				FB6599E6212A1DF400357D8D /* Composers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

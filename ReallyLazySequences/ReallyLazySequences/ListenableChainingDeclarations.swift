@@ -1,18 +1,14 @@
 //
-//  ChainingDeclarations.swift
+//  ListenableChainingDeclarations.swift
 //  ReallyLazySequences
 //
-//  Created by Van Simmons on 7/28/18.
+//  Created by Van Simmons on 8/19/18.
 //  Copyright © 2018 ComputeCycles, LLC. All rights reserved.
 //
 
-//===================================================================================
-// structs for Chaining.  These only make it easier to read the types of an RLS
-// using type(of:).  The introduction of higher kinded types (HKTs) in Swift would
-// make this not require all the boilerplate. 
-//===================================================================================
+import Foundation
 
-public struct Map<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+public struct ListenableMap<Predecessor: ListenableSequenceProtocol, Output>: ListenableChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -26,7 +22,7 @@ public struct Map<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSeque
     }
 }
 
-public struct Reduce<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+public struct ListenableReduce<Predecessor: ListenableSequenceProtocol, Output>: ListenableChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -40,7 +36,7 @@ public struct Reduce<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSe
     }
 }
 
-public struct Filter<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+public struct ListenableFilter<Predecessor: ListenableSequenceProtocol, Output>: ListenableChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -54,7 +50,7 @@ public struct Filter<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSe
     }
 }
 
-public struct FlatMap<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+public struct ListenableFlatMap<Predecessor: ListenableSequenceProtocol, Output>: ListenableChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -68,7 +64,7 @@ public struct FlatMap<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedS
     }
 }
 
-public struct CompactMap<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+public struct ListenableCompactMap<Predecessor: ListenableSequenceProtocol, Output>: ListenableChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -82,7 +78,7 @@ public struct CompactMap<Predecessor: ReallyLazySequenceProtocol, Output>: Chain
     }
 }
 
-public struct Dispatch<Predecessor: ReallyLazySequenceProtocol, Output>: ChainedSequence {
+public struct ListenableDispatch<Predecessor: ListenableSequenceProtocol, Output>: ListenableChainedSequence {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -95,4 +91,3 @@ public struct Dispatch<Predecessor: ReallyLazySequenceProtocol, Output>: Chained
         self.composer = composer
     }
 }
-
