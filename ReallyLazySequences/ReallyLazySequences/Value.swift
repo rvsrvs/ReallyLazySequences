@@ -27,7 +27,7 @@ public class ListenableValue<T>: ListenerManagerProtocol {
     private func push(_ value: T) {
         listeners.values.forEach { listener in
             do {
-                try listener.push(value)
+                _ = try listener.process(value)
             }
             catch { remove(listener: listener) }
         }
@@ -35,7 +35,7 @@ public class ListenableValue<T>: ListenerManagerProtocol {
     
     func terminate() {
         listeners.values.forEach { listener in
-            listener.terminate()
+            _ = listener.terminate()
             remove(listener: listener)
         }
     }

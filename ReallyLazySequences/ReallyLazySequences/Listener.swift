@@ -44,8 +44,8 @@ public protocol Listenable {
 public protocol ListenerProtocol {
     associatedtype InputType
     var identifier: UUID { get }
-    func push(_ value: InputType) throws
-    func terminate()
+    func process(_ value: InputType) throws -> ContinuationResult
+    func terminate() -> ContinuationResult
 }
 
 public struct Listener<T>: ListenerProtocol, Equatable {
@@ -62,12 +62,12 @@ public struct Listener<T>: ListenerProtocol, Equatable {
         self.delivery = delivery
     }
     
-    public func push(_ value: T) throws {
-        _ = ContinuationResult.complete(delivery(value))
+    public func process(_ value: T) throws -> ContinuationResult {
+        return ContinuationResult.complete(delivery(value))
     }
     
-    public func terminate() {
-        _ = ContinuationResult.complete(delivery(nil))
+    public func terminate() -> ContinuationResult {
+        return ContinuationResult.complete(delivery(nil))
     }
 }
 
@@ -134,13 +134,13 @@ extension ListenableGeneratorProtocol {
         let push = { (value: ListenableType?) in
             guard let value = value else {
                 self.listeners.values.forEach { listener in
-                    listener.terminate()
+                    _ = listener.terminate()
                     self.remove(listener: listener)
                 }
                 return
             }
             self.listeners.values.forEach { listener in
-                do { try listener.push(value) }
+                do { _ = try listener.process(value) }
                 catch { self.remove(listener: listener) }
             }
         }
