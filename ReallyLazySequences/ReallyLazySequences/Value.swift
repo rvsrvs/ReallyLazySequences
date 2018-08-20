@@ -17,20 +17,16 @@ public class ListenableValue<T>: ListenerManagerProtocol {
     var hasListeners: Bool { return listeners.count > 0 }
     
     var value: T {
-        didSet { self.push(value) }
+        didSet {
+            listeners.values.forEach { listener in
+                do { _ = try listener.process(value) }
+                catch { remove(listener: listener) }
+            }
+        }
     }
     
     init(_ value: T) {
         self.value = value
-    }
-    
-    private func push(_ value: T) {
-        listeners.values.forEach { listener in
-            do {
-                _ = try listener.process(value)
-            }
-            catch { remove(listener: listener) }
-        }
     }
     
     func terminate() {
