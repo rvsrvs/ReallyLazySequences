@@ -87,9 +87,9 @@ struct Composers {
                         _ = ContinuationResult.complete(.more({ delivery(value) }))
                 }
                 if let queue = queue {
-                    queue.addOperation { try? generator.process(input) }
+                    queue.addOperation { _ = try? generator.process(input) }
                 } else {
-                    try? generator.process(input)
+                    _ = try? generator.process(input)
                 }
                 return .done
             } catch {

@@ -14,18 +14,11 @@
 
 public protocol ContinuationErrorContextProtocol: Error { }
 
-public struct ContinuationErrorContext<T, U>: ContinuationErrorContextProtocol, Equatable {
+public struct ContinuationErrorContext<T, U>: ContinuationErrorContextProtocol {
     var opType: ReallyLazySequenceOperationType
     var value: T
     var delivery: (U?) throws -> ContinuationResult
     var error: Error
-
-    public static func == (lhs: ContinuationErrorContext<T, U>, rhs: ContinuationErrorContext<T, U>) -> Bool {
-            return lhs.opType == rhs.opType
-                && (type(of: lhs.value)    == type(of: rhs.value))
-                && (type(of: lhs.delivery) == type(of: rhs.delivery))
-                && (type(of: lhs.error)    == type(of: rhs.error))
-    }
 }
 
 public typealias Continuation = () throws -> ContinuationResult
@@ -34,36 +27,12 @@ typealias ContinuationErrorHandler = (ContinuationErrorContextProtocol) -> Conti
 
 public let ContinuationDone = { () -> ContinuationResult in ContinuationResult.done }
 
-public indirect enum ContinuationResult: Equatable {
+public indirect enum ContinuationResult {
     case more(Continuation)
     case error(ContinuationErrorContextProtocol)
     case afterThen(ContinuationResult, ContinuationResult)
     case done
-    
-    public static func == (lhs: ContinuationResult, rhs: ContinuationResult) -> Bool {
-        switch (lhs, rhs) {
-        case (.done, .done): return true
-        case (.more, .more): return true
-        case (.error, .error): return true
-        case (let .afterThen(after1, then1), let .afterThen(after2, then2)):
-            return after1 == after2 && then1 == then2
-        default:
-            return false
-        }
-    }
-    
-    init() {
-        self = .done
-    }
-    
-    init(_ continuation: @escaping Continuation) {
-        self = .more(continuation)
-    }
-    
-    init(_ continuation: ContinuationResult, _ after: ContinuationResult) {
-        self = .afterThen(continuation, after)
-    }
-    
+        
     var canContinue: Bool {
         switch self {
         case .done: return false

@@ -46,9 +46,9 @@ class ReallyLazySequencesTests: XCTestCase {
                     "Consumer c is wrong type!")
         
         do {
-            for i in [8, 12, 4, 3, 2] { try c.process(i) }
-            for _ in 0 ..< 100000 { try c.process(200) }
-            try c.process(nil)
+            for i in [8, 12, 4, 3, 2] { _ = try c.process(i) }
+            for _ in 0 ..< 100000 { _ = try c.process(200) }
+            _ = try c.process(nil)
         } catch ReallyLazySequenceError.isComplete {
             print("Can't push to a completed sequence")
         } catch {
@@ -101,11 +101,7 @@ class ReallyLazySequencesTests: XCTestCase {
                         "Wrong class")
         
         do {
-            try c.process(1)
-            try c.process(11)
-            try c.process(2)
-            try c.process(3)
-            try c.process(nil)
+            try [1, 11, 2, 3, nil].forEach { _ = try c.process($0) }
         } catch ReallyLazySequenceError.isComplete {
             XCTFail("Can't push to a completed sequence")
         } catch {
@@ -138,17 +134,7 @@ class ReallyLazySequencesTests: XCTestCase {
         XCTAssertNotNil(c as Consumer<ConsumableFlatMap<ConsumableReduce<SimpleSequence<Int>, Array<Int>>, Int>>, "Wrong class")
         
         do {
-            try c.process(1)
-            try c.process(2)
-            try c.process(3)
-            try c.process(4)
-            try c.process(5)
-            try c.process(10)
-            try c.process(20)
-            try c.process(30)
-            try c.process(40)
-            try c.process(50)
-            try c.process(nil)
+            try [1, 2, 3, 4, 5, 10, 20, 30, 40, 50, nil].forEach { _ = try c.process($0) }
         } catch ReallyLazySequenceError.isComplete {
             XCTFail("Can't push to a completed sequence")
         } catch {

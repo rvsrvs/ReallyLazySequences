@@ -67,15 +67,16 @@ public protocol ConsumerProtocol {
     associatedtype InputType
     associatedtype PredecessorType
     var composition: (InputType?) throws -> ContinuationResult { get }
-    func process(_ value: InputType?) throws -> Void
+    func process(_ value: InputType?) throws -> ContinuationResult
 }
 
 public extension ConsumerProtocol {
     // Accept a push of the Head type and pass it through the composed closure
-    public func process(_ value: InputType?) throws -> Void { _ = try composition(value) }
+    public func process(_ value: InputType?) throws -> ContinuationResult { return try composition(value) }
 }
 
 public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
+    
     public typealias InputType = Predecessor.InputType
     public typealias PredecessorType = Predecessor
 

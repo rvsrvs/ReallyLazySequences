@@ -54,7 +54,7 @@ public struct URLDataFetcher: SubsequenceProtocol {
                                .more({ deliveryWrapper(nil) }))
                     )
                 }
-                try? c.process(($0, $1, $2))
+                _ = try? c.process(($0, $1, $2))
             }
             task.resume()
             while task.state != .completed { RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1)) }

@@ -31,7 +31,7 @@ class NetworkingTests: XCTestCase {
         let session = SessionSupport().session()
         if let url = URL(string: ConfigurationURL) {
             let toFetch = (url, session)
-            try? fetcher.process(toFetch)
+            _ = try? fetcher.process(toFetch)
         }
         waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }

@@ -141,8 +141,12 @@ class ContinuationTests: XCTestCase {
         XCTAssertTrue(fulfillCount == 3, "Messages in wrong order at continuation 7")
         fulfillCount += 1
         expectation3.fulfill()
-
-        XCTAssert(outcome == ContinuationResult.done, "Finished undone")
+        
+        switch outcome {
+        case .done: ()
+        default:
+            XCTFail("Finished undone")
+        }
         waitForExpectations(timeout: 10.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
 }
