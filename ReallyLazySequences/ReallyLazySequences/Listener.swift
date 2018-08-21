@@ -58,7 +58,7 @@ public struct ListenerProxy<T> where T: ListenerManagerProtocol {
 public protocol ListenerProtocol {
     associatedtype InputType
     var identifier: UUID { get }
-    func process(_ value: InputType) throws -> ContinuationResult
+    func process(_ value: InputType?) throws -> ContinuationResult
     func terminate() -> ContinuationResult
 }
 
@@ -79,7 +79,7 @@ public struct Listener<T, U>: ListenerProtocol, Equatable where U: ListenerManag
         self.delivery = delivery
     }
     
-    public func process(_ value: T) throws -> ContinuationResult {
+    public func process(_ value: T?) throws -> ContinuationResult {
         return ContinuationResult.complete(delivery(value))
     }
     
@@ -162,7 +162,6 @@ public protocol ListenableGeneratorProtocol: ListenerManagerProtocol {
 extension ListenableGeneratorProtocol {
     public func generate(for value: InputType) {
         let delivery = { (input: ListenableType?) -> Void in
-            guard let input = input else { return }
             guard self.hasListeners() else { return }
             self.listeners.forEach { (pair) in
                 let (_, listener) = pair

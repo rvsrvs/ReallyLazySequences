@@ -62,13 +62,20 @@ class ReallyLazySequencesTests: XCTestCase {
         let expectation = self.expectation(description: "First Listener")
         
         let generator = ListenableGenerator<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
-            (0 ..< value).forEach { delivery($0) }
+            (0 ..< value).forEach {
+                delivery($0)
+            }
             delivery(nil)
         }
         
         var proxy = generator
             .listener()
-            .listen {  guard $0 != nil else { expectation.fulfill(); return } }
+            .listen {
+                guard $0 != nil else {
+                    expectation.fulfill()
+                    return
+                }
+            }
         
         generator.generate(for: 3)
         
