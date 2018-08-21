@@ -21,13 +21,13 @@ class ProducerTests: XCTestCase {
         super.tearDown()
     }
     
-    func testListenableProducer() {
+    func testListenableGenerator() {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let testGenerator = ListenableGenerator<Int> { deliver in
-            (0 ... 5).forEach { deliver($0) }
-            deliver(nil)
+        let testGenerator = ListenableGenerator<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
+            (0 ... value).forEach { delivery($0) }
+            delivery(nil)
         }
         
         var proxy1 = testGenerator
@@ -46,7 +46,8 @@ class ProducerTests: XCTestCase {
                 quadrupler.fulfill()
             }
         
-        try? testGenerator.generate()
+        testGenerator.generate(for: 5)
+        
         waitForExpectations(timeout: 30.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
         proxy1.terminate()
         proxy2.terminate()

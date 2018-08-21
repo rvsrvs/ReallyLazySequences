@@ -42,7 +42,7 @@ class NetworkingTests: XCTestCase {
 
         guard let url = URL(string: ConfigurationURL) else { return }
         
-        let producer = URLDataGenerator(url: url, session: SessionSupport().session())
+        let producer = URLDataGenerator()
         
         var proxy1 = producer
             .jsonListener(decodingType: [Configuration].self)
@@ -69,11 +69,7 @@ class NetworkingTests: XCTestCase {
                 }
             }
 
-        do {
-            try producer.generate()
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
+        producer.generate(for: (url: url, session: SessionSupport().session()))
         
         waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
         proxy1.terminate()

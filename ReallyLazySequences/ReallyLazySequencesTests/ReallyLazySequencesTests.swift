@@ -59,23 +59,20 @@ class ReallyLazySequencesTests: XCTestCase {
     }
     
     func testSimpleProducer() {
-        let firstExpectation = self.expectation(description: "First Listener")
+        let expectation = self.expectation(description: "First Listener")
         
-        let generator = ListenableGenerator<Int> { deliver in
-            (0 ..< 3).forEach { deliver($0) }
-            deliver(nil)
+        let generator = ListenableGenerator<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
+            (0 ..< value).forEach { delivery($0) }
+            delivery(nil)
         }
         
         var proxy = generator
             .listener()
-            .listen {  guard $0 != nil else { firstExpectation.fulfill(); return } }
+            .listen {  guard $0 != nil else { expectation.fulfill(); return } }
         
-        do {
-            try generator.generate()
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-        waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        generator.generate(for: 3)
+        
+        waitForExpectations(timeout: 1.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
         proxy.terminate()
     }
     

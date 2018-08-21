@@ -14,17 +14,6 @@ public protocol Listenable {
     func listener() -> ListenableSequenceType
 }
 
-public struct ListenerProxy<T> where T: ListenerManagerProtocol {
-    var identifier: UUID
-    var listenerManager: T?
-    
-    public mutating func terminate() {
-        guard let lm = listenerManager else { return }
-        lm.remove(self)
-        listenerManager = nil
-    }
-}
-
 public protocol ListenerManagerProtocol: class, Listenable {
     var listeners: [UUID: Listener<ListenableType, Self>] { get set }
     func hasListeners() -> Bool
@@ -52,6 +41,17 @@ extension ListenerManagerProtocol {
         return ListenableSequence<ListenableType, Self>(self) { (listener: Listener<ListenableType, Self>) in
             self.add(listener: listener)
         }
+    }
+}
+
+public struct ListenerProxy<T> where T: ListenerManagerProtocol {
+    var identifier: UUID
+    var listenerManager: T?
+    
+    public mutating func terminate() {
+        guard let lm = listenerManager else { return }
+        lm.remove(self)
+        listenerManager = nil
     }
 }
 
@@ -98,10 +98,10 @@ public protocol ListenableSequenceProtocol: ReallyLazySequenceProtocol {
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
     ) -> ListenableReduce<Self, T>
-    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T>
+    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ListenableReduce<Self, T>
@@ -153,41 +153,38 @@ public protocol ListenableChainedSequence: ListenableSequenceProtocol where Head
 }
 
 public protocol ListenableGeneratorProtocol: ListenerManagerProtocol {
-    var generator: (@escaping (ListenableType?) -> Void) -> Void { get }
-    init(generator: @escaping ((ListenableType?) -> Void) -> Void)
-    func generate() throws
+    associatedtype InputType
+    var generator: (InputType, @escaping (ListenableType?) -> Void) -> Void { get set }
+    init(_ generator: @escaping (InputType, @escaping (ListenableType?) -> Void) -> Void)
+    func generate(for: InputType) -> Void
 }
 
 extension ListenableGeneratorProtocol {
-    public func generate() throws {
-        guard hasListeners() else { throw ReallyLazySequenceError.noListeners }
-        let push = { (value: ListenableType?) in
-            guard let value = value else {
-                self.listeners.values.forEach { listener in
-                    _ = listener.terminate()
+    public func generate(for value: InputType) {
+        let delivery = { (input: ListenableType?) -> Void in
+            guard let input = input else { return }
+            guard self.hasListeners() else { return }
+            self.listeners.forEach { (pair) in
+                let (_, listener) = pair
+                do {
+                    _ = try listener.process(input)
+                } catch {
                     self.remove(listener: listener)
                 }
-                return
-            }
-            self.listeners.values.forEach { listener in
-                do { _ = try listener.process(value) }
-                catch { self.remove(listener: listener) }
             }
         }
-        generator(push)
+        generator(value, delivery)
     }
 }
 
-public final class ListenableGenerator<T>: ListenableGeneratorProtocol {
-    public typealias ListenableType = T
-    public typealias ListenableSequenceType = ListenableSequence<T, ListenableGenerator<T>>
+public final class ListenableGenerator<T, U>: ListenableGeneratorProtocol {
+    public var listeners: [UUID : Listener<U, ListenableGenerator<T, U>>] = [ : ]
+    public typealias InputType = T
+    public typealias ListenableType = U
+    public typealias ListenableSequenceType = ListenableSequence<ListenableType, ListenableGenerator<T,U>>
+    public var generator: (T, @escaping (U?) -> Void) -> Void
     
-    public var listeners = [UUID: Listener<T, ListenableGenerator<T>>]()
-    public var generator: (@escaping (T?) -> Void) -> Void
-    
-    public init(generator: @escaping ((T?) -> Void) -> Void) {
+    public init(_ generator: @escaping (T, @escaping (U?) -> Void) -> Void) {
         self.generator = generator
     }
 }
-
-

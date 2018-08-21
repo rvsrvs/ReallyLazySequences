@@ -63,22 +63,19 @@ public struct URLDataFetcher: SubsequenceProtocol {
 }
 
 public final class URLDataGenerator: ListenableGeneratorProtocol {
+    public typealias InputType = (URL, URLSession)
     public typealias ListenableType = DataFetchValue
     public typealias ListenableSequenceType = ListenableSequence<DataFetchValue, URLDataGenerator>
     public var listeners = [UUID: Listener<DataFetchValue, URLDataGenerator>]()
-    public var generator: (@escaping (DataFetchValue?) -> Void) -> Void
+    public var generator: (InputType, @escaping (ListenableType?) -> Void) -> Void
 
-    var url: URL!
-    
-    public required init(generator: @escaping ((DataFetchValue?) -> Void) -> Void) {
+    public init(_ generator: @escaping (InputType, @escaping (ListenableType?) -> Void) -> Void) {
         self.generator = generator
     }
 
-    convenience init(url: URL, session: URLSession) {
-        self.init { (_) in }
-        self.url = url
-        self.generator = { (delivery: @escaping ((DataFetchValue?) -> Void)) -> Void in
-            session.dataTask(with: url) { delivery(($0, $1, $2)); delivery(nil) } .resume()
+    convenience init() {
+        self.init { (params: (URL, URLSession), delivery: @escaping ((DataFetchValue?) -> Void)) -> Void in
+            params.1.dataTask(with: params.0) { delivery(($0, $1, $2)); delivery(nil) } .resume()
         }
     }
 }
@@ -94,14 +91,14 @@ extension URLDataGenerator {
                 guard response.statusCode >= 200 && response.statusCode < 300 else {
                     let error = NSError(domain: "ReallyLazySequences.URLDataProducer",
                                         code: 1000,
-                                        userInfo: ["url" : self.url, "response": response, "msg": "Invalid response"]
+                                        userInfo: ["response": response, "msg": "Invalid response"]
                     )
                     return .failure(error)
                 }
                 guard let data = result.data  else {
                     let error = NSError(domain: "ReallyLazySequences.URLDataProducer",
                                         code: 1001,
-                                        userInfo: ["url" : self.url, "response": response, "msg": "Valid response but no data"]
+                                        userInfo: ["response": response, "msg": "Valid response but no data"]
                     )
                     return .failure(error)
                 }
@@ -121,7 +118,6 @@ extension URLDataGenerator {
                         let wrappingError = NSError(domain: "ReallyLazySequences.URLDataProducer",
                                                     code: 1002,
                                                     userInfo: [
-                                                        "url" : self.url,
                                                         "json": data,
                                                         "msg": "Error decoding json as type: \(type(of: decodingType))",
                                                         "error": error
