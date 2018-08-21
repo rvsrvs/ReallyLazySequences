@@ -66,7 +66,7 @@ class ReallyLazySequencesTests: XCTestCase {
             deliver(nil)
         }
         
-        generator
+        var proxy = generator
             .listener()
             .listen {  guard $0 != nil else { firstExpectation.fulfill(); return } }
         
@@ -76,6 +76,7 @@ class ReallyLazySequencesTests: XCTestCase {
             XCTFail(error.localizedDescription)
         }
         waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        proxy.terminate()
     }
     
     func testDispatch() {

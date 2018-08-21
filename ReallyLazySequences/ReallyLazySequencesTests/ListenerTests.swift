@@ -27,17 +27,17 @@ class ListenerTests: XCTestCase {
         
         let testValue = ListenableValue<Int>(2)
         
-        testValue
+        var proxy1 = testValue
             .listener()
-            .map {  $0 * 2 }
+            .map { $0 * 2 }
             .listen {
                 guard $0 != nil else { XCTFail(); return }
                 doubler.fulfill()
             }
         
-        testValue
+        var proxy2 = testValue
             .listener()
-            .map {  $0 * 4 }
+            .map { $0 * 4 }
             .listen {
                 guard $0 != nil else { XCTFail(); return }
                 quadrupler.fulfill()
@@ -45,5 +45,7 @@ class ListenerTests: XCTestCase {
         
         testValue.value = 4
         waitForExpectations(timeout: 2.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        proxy1.terminate()
+        proxy2.terminate()
     }
 }

@@ -62,10 +62,10 @@ public struct URLDataFetcher: SubsequenceProtocol {
     }
 }
 
-public class URLDataGenerator: ListenableGeneratorProtocol {
+public final class URLDataGenerator: ListenableGeneratorProtocol {
     public typealias ListenableType = DataFetchValue
-    public typealias ListenableSequenceType = ListenableSequence<DataFetchValue>
-    public var listeners = [UUID: Listener<DataFetchValue>]()
+    public typealias ListenableSequenceType = ListenableSequence<DataFetchValue, URLDataGenerator>
+    public var listeners = [UUID: Listener<DataFetchValue, URLDataGenerator>]()
     public var generator: (@escaping (DataFetchValue?) -> Void) -> Void
 
     var url: URL!
@@ -84,7 +84,7 @@ public class URLDataGenerator: ListenableGeneratorProtocol {
 }
 
 extension URLDataGenerator {
-    public typealias DataListener = ListenableMap<ListenableSequence<DataFetchValue>, Result<Data>>
+    public typealias DataListener = ListenableMap<ListenableSequence<DataFetchValue, URLDataGenerator>, Result<Data>>
     public func dataListener() -> DataListener {
         return listener()
             .map { (result: DataFetchValue) -> Result<Data> in

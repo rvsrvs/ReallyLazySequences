@@ -8,11 +8,11 @@
 
 import Foundation
 
-public class ListenableValue<T>: ListenerManagerProtocol {
+public final class ListenableValue<T>: ListenerManagerProtocol {
     public typealias ListenableType = T
-    public typealias ListenableSequenceType = ListenableSequence<T>
+    public typealias ListenableSequenceType = ListenableSequence<T, ListenableValue<T>>
     
-    public var listeners = [UUID: Listener<T>]()
+    public var listeners = [UUID: Listener<T, ListenableValue<T>>]()
     
     var hasListeners: Bool { return listeners.count > 0 }
     

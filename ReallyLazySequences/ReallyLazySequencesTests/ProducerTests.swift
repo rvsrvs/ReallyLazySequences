@@ -30,7 +30,7 @@ class ProducerTests: XCTestCase {
             deliver(nil)
         }
         
-        testGenerator
+        var proxy1 = testGenerator
             .listener()
             .map {  $0 * 2 }
             .listen {
@@ -38,7 +38,7 @@ class ProducerTests: XCTestCase {
                 doubler.fulfill()
             }
         
-        testGenerator
+        var proxy2 = testGenerator
             .listener()
             .map {  $0 * 4 }
             .listen {
@@ -48,5 +48,7 @@ class ProducerTests: XCTestCase {
         
         try? testGenerator.generate()
         waitForExpectations(timeout: 30.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        proxy1.terminate()
+        proxy2.terminate()
     }
 }
