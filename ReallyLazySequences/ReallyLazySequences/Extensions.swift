@@ -9,8 +9,8 @@ import Foundation
 
 // Implement Consume
 public extension ConsumableSequenceProtocol {
-    func consume(_ delivery: @escaping (Self.OutputType?) -> Void) -> Consumer<Self> {
-        return Consumer<Self>(predecessor: self, delivery:  delivery )
+    func consume(_ delivery: @escaping (Self.OutputType?) -> Void) -> Consumer<Self.InputType> {
+        return Consumer<Self.InputType>(predecessor: self, delivery:  delivery )
     }
 }
 

@@ -42,8 +42,7 @@ class ReallyLazySequencesTests: XCTestCase {
             }
             .consume { if let value = $0 { accumulatedResults.append(value) } }
         
-        XCTAssertNotNil(c as Consumer<ConsumableFlatMap<ConsumableReduce<ConsumableMap<ConsumableFlatMap<ConsumableMap<ConsumableReduce<ConsumableMap<ConsumableMap<ConsumableFilter<SimpleSequence<Int>, Int>, Double>, Double>, Array<Double>>, Array<Double>>, Double>, Int>, Int>, Int>>,
-                    "Consumer c is wrong type!")
+        XCTAssertNotNil(c as Consumer<Int>, "Consumer c is wrong type!")
         
         do {
             for i in [8, 12, 4, 3, 2] { _ = try c.process(i) }
@@ -102,8 +101,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 if value == 3.0 { expectation.fulfill() }
             }
         
-        XCTAssertNotNil(c as Consumer<ConsumableDispatch<ConsumableMap<ConsumableDispatch<ConsumableFilter<SimpleSequence<Int>, Int>, Int>, Double>, Double>>,
-                        "Wrong class")
+        XCTAssertNotNil(c as Consumer<Int>, "Wrong class")
         
         do {
             try [1, 11, 2, 3, nil].forEach { _ = try c.process($0) }
@@ -136,7 +134,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 }
             }
         
-        XCTAssertNotNil(c as Consumer<ConsumableFlatMap<ConsumableReduce<SimpleSequence<Int>, Array<Int>>, Int>>, "Wrong class")
+        XCTAssertNotNil(c as Consumer<Int>, "Wrong class")
         
         do {
             try [1, 2, 3, 4, 5, 10, 20, 30, 40, 50, nil].forEach { _ = try c.process($0) }

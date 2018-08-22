@@ -17,7 +17,7 @@ import Foundation
 public protocol ConsumableSequenceProtocol: ReallyLazySequenceProtocol {
     // All RLS successor chains, to be used, eventually terminate in a Consumer or a listen
     // consume hands back an object which can be subsequently used
-    func consume(_ delivery: @escaping TerminalOutputDelivery) -> Consumer<Self>
+    func consume(_ delivery: @escaping (Self.OutputType?) -> Void) -> Consumer<Self.InputType>
     
     // Dispatch into an operation queue and drive the dispatch all the way through
     // unlike Swift.Sequence, downstream operations may occur on separate queues
@@ -65,7 +65,6 @@ public protocol ConsumableChainedSequence: ConsumableSequenceProtocol {
 
 public protocol ConsumerProtocol {
     associatedtype InputType
-    associatedtype PredecessorType
     var composition: (InputType?) throws -> ContinuationResult { get }
     func process(_ value: InputType?) throws -> ContinuationResult
 }
@@ -75,16 +74,15 @@ public extension ConsumerProtocol {
     public func process(_ value: InputType?) throws -> ContinuationResult { return try composition(value) }
 }
 
-public struct Consumer<Predecessor: ReallyLazySequenceProtocol>: ConsumerProtocol {
-    
-    public typealias InputType = Predecessor.InputType
-    public typealias PredecessorType = Predecessor
+public struct Consumer<T>: ConsumerProtocol {
+    public typealias InputType = T
 
     // NB Predecessor.InputType is the type of the head of the sequence,
     // NOT the specific output type for the Predecessor's Predecessor
     private(set) public var composition: (InputType?) throws -> ContinuationResult
     
-    public init(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void)) {
+    public init<Predecessor>(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void))
+        where Predecessor: ReallyLazySequenceProtocol, Predecessor.InputType == T {
         var isComplete = false
         
         let deliveryWrapper = { (value: Predecessor.OutputType?) -> ContinuationResult in
