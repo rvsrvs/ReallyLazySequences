@@ -14,12 +14,15 @@ public struct ListenableMap<Predecessor: ListenableSequenceProtocol, Output>: Li
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> LMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -29,12 +32,15 @@ public struct ListenableReduce<Predecessor: ListenableSequenceProtocol, Output>:
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> LReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -44,12 +50,15 @@ public struct ListenableFilter<Predecessor: ListenableSequenceProtocol, Output>:
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> LFilter<\(type(of:Predecessor.OutputType.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -59,12 +68,15 @@ public struct ListenableFlatMap<Predecessor: ListenableSequenceProtocol, Output>
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> LFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -74,12 +86,15 @@ public struct ListenableCompactMap<Predecessor: ListenableSequenceProtocol, Outp
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> LCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -89,11 +104,14 @@ public struct ListenableDispatch<Predecessor: ListenableSequenceProtocol, Output
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> LDispatchMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }

@@ -44,7 +44,7 @@ public enum ReallyLazySequenceError: Error {
     }
 }
 
-public protocol ReallyLazySequenceProtocol {
+public protocol ReallyLazySequenceProtocol: CustomStringConvertible {
     associatedtype InputType  // The _initial_ initial type for the head for a given RLS chain
     associatedtype OutputType // The type which is output from a given RLS
     
@@ -58,6 +58,8 @@ public protocol ReallyLazySequenceProtocol {
 }
 
 public struct SimpleSequence<T>: ConsumableSequenceProtocol {
+    public var description: String = "SimpleSequence<\(type(of:T.self))>"
+        .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     public typealias InputType = T
     public typealias OutputType = T
     public init() { }    
@@ -82,6 +84,9 @@ public extension SubsequenceProtocol {
 }
 
 public struct GeneratingSequence<T, U>: SubsequenceProtocol {
+    public var description: String = "GeneratingSubsequence<\(type(of:T.self), type(of:U.self))>"
+        .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+    
     public typealias InputType = T
     public typealias OutputType = U
     public var generator: (T, @escaping (U?) -> Void) -> Void

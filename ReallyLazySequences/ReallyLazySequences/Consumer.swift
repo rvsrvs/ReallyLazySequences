@@ -63,7 +63,7 @@ public protocol ConsumableChainedSequence: ConsumableSequenceProtocol {
     init(predecessor: PredecessorType, composer: @escaping Composer)
 }
 
-public protocol ConsumerProtocol {
+public protocol ConsumerProtocol: CustomStringConvertible {
     associatedtype InputType
     var composition: (InputType?) throws -> ContinuationResult { get }
     func process(_ value: InputType?) throws -> ContinuationResult
@@ -77,12 +77,15 @@ public extension ConsumerProtocol {
 public struct Consumer<T>: ConsumerProtocol {
     public typealias InputType = T
 
+    public var description: String
     // NB Predecessor.InputType is the type of the head of the sequence,
     // NOT the specific output type for the Predecessor's Predecessor
     private(set) public var composition: (InputType?) throws -> ContinuationResult
     
     public init<Predecessor>(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void))
         where Predecessor: ReallyLazySequenceProtocol, Predecessor.InputType == T {
+        self.description = "\(predecessor.description) >> Consumer<\(type(of:InputType.self))>"
+                .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
         var isComplete = false
         
         let deliveryWrapper = { (value: Predecessor.OutputType?) -> ContinuationResult in

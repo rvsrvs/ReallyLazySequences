@@ -17,12 +17,15 @@ public struct ConsumableMap<Predecessor: ConsumableSequenceProtocol, Output>: Co
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> CMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -31,12 +34,15 @@ public struct ConsumableReduce<Predecessor: ConsumableSequenceProtocol, Output>:
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> CReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -45,12 +51,15 @@ public struct ConsumableFilter<Predecessor: ConsumableSequenceProtocol, Output>:
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> CFilter<\(type(of:Predecessor.OutputType.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -59,12 +68,15 @@ public struct ConsumableFlatMap<Predecessor: ConsumableSequenceProtocol, Output>
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> CFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -73,12 +85,15 @@ public struct ConsumableCompactMap<Predecessor: ConsumableSequenceProtocol, Outp
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> CCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 
@@ -87,12 +102,15 @@ public struct ConsumableDispatch<Predecessor: ConsumableSequenceProtocol, Output
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
     
+    public var description: String
     public var predecessor: Predecessor
     public var composer: Composer
     
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
+        self.description = "\(predecessor.description) >> CDispatch<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
+            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     }
 }
 

@@ -38,6 +38,7 @@ extension URLSession {
 public struct URLDataFetcher: SubsequenceProtocol {
     public typealias InputType = (url: URL, session: URLSession)
     public typealias OutputType = Result<Data>
+    public var description: String = "URLDataFetcher"
     public var generator: (InputType, @escaping (OutputType?) -> Void) -> Void
     
     public init(_ generator: @escaping ((url: URL, session: URLSession), @escaping (Result<Data>?) -> Void) -> Void) {

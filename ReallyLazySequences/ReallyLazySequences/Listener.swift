@@ -109,6 +109,9 @@ public struct ListenableSequence<T, U>: ListenableSequenceProtocol where T: List
     public typealias OutputType = U
     public typealias HeadType = T
     
+    public var description: String = "ListenableSequence<\(type(of:T.self), type(of:U.self))>"
+        .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+
     public var compositionHandler: (Listener<T, U>) -> Void
     private weak var head: HeadType?
     private var identifier = UUID()
