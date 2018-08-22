@@ -69,8 +69,7 @@ public struct URLDataFetcher: SubsequenceProtocol {
 public final class URLDataGenerator: ListenableGeneratorProtocol {
     public typealias InputType = (URL, URLSession)
     public typealias ListenableType = Result<Data>
-    public typealias ListenableSequenceType = ListenableSequence<Result<Data>, URLDataGenerator>
-    public var listeners = [UUID: Listener<Result<Data>, URLDataGenerator>]()
+    public var listeners = [UUID: Listener<URLDataGenerator, Result<Data>>]()
     public var generator: (InputType, @escaping (ListenableType?) -> Void) -> Void
 
     public init(_ generator: @escaping (InputType, @escaping (ListenableType?) -> Void) -> Void) {
@@ -87,7 +86,7 @@ public final class URLDataGenerator: ListenableGeneratorProtocol {
 extension URLDataGenerator {
     public func jsonListener<JSONType: Decodable>(
         decodingType: JSONType.Type
-    ) -> ListenableMap<ListenableSequence<Result<Data>, URLDataGenerator>, Result<JSONType>> {
+    ) -> ListenableMap<ListenableSequence<URLDataGenerator, Result<Data>>, Result<JSONType>> {
         return listener()
             .map { (fetchResult: Result<Data>) -> Result<JSONType> in
                 switch fetchResult {

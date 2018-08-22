@@ -29,7 +29,7 @@ public protocol ConsumableSequenceProtocol: ReallyLazySequenceProtocol {
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
-        ) -> ConsumableReduce<Self, T>
+    ) -> ConsumableReduce<Self, T>
     
     // Flatmap and optionally dispatch the producers into an OpQueue to allow them to be parallelized
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
