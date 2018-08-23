@@ -29,7 +29,6 @@ public struct ContinuationErrorContext<T, U>: ContinuationErrorContextProtocol {
 }
 
 public typealias Continuation = () throws -> ContinuationResult
-
 typealias ContinuationErrorHandler = (ContinuationErrorContextProtocol) -> ContinuationResult
 
 public indirect enum ContinuationResult {
@@ -50,8 +49,8 @@ public indirect enum ContinuationResult {
         errorHandler: @escaping ContinuationErrorHandler
     ) -> (ContinuationResult, [ContinuationResult]) {
         switch self {
-        case .done:
-            return (.done(.canContinue), stack)
+        case .done(let termination):
+            return (.done(termination), stack)
         case .more(let continuation):
             do {
                 return (try continuation(), stack)
