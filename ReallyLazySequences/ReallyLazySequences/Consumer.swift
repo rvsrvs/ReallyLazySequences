@@ -6,15 +6,9 @@
 //  Copyright © 2018 ComputeCycles, LLC. All rights reserved.
 //
 
-// The termination of any RLS successor chain
-// Only Consumers invoke the initial compose function, which creates the
-// push closure. Only consumers can be "pushed" to because of this.
-// Once consumed an RLS can no longer be chained.
-// Consumers can only be initialized and pushed to.
-// i.e. consumers are NOT RLS's
 import Foundation
 
-public protocol ConsumableSequenceProtocol: ReallyLazySequenceProtocol {
+public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType>
     
     // Consumable chaining
@@ -34,13 +28,8 @@ public protocol ConsumableSequenceProtocol: ReallyLazySequenceProtocol {
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ConsumableFilter<Self, OutputType>
 }
 
-// The protocol allowing chaining of sequences.  Reminiscent of LazySequence
-// ChainedSequences compose their predecessor's action (e.g. map, collect, flatmap, filter)
-// with their own when asked to do so by a consumer.
-// NB a Consumer retains ONLY the composed function and not the actual sequence object,
-// though Consumer types are genericized with the chain of types leading up to consumption
-public protocol ConsumableChainedSequence: ConsumableSequenceProtocol {
-    associatedtype PredecessorType: ConsumableSequenceProtocol
+public protocol ChainedConsumableProtocol: ConsumableProtocol {
+    associatedtype PredecessorType: ConsumableProtocol
     typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery
     var predecessor: PredecessorType { get set }
@@ -73,7 +62,7 @@ public struct Consumer<T>: Equatable {
     
     public init<Predecessor>(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> ContinuationTermination))
         where Predecessor: ReallyLazySequenceProtocol, Predecessor.InputType == T {
-        self.description = standardize("\(predecessor.description) >> Consumer<\(type(of:T.self))>")
+        self.description = standardize("\(predecessor.description) >> Consume<\(type(of:Predecessor.OutputType.self))>")
         let deliveryWrapper = { (value: Predecessor.OutputType?) -> ContinuationResult in
             return .done(delivery(value))
         }
@@ -81,7 +70,7 @@ public struct Consumer<T>: Equatable {
         // Different types of predecessors compose differently
         // This call eventually recurses through all predecessors
         // terminating at an RLS structure.
-        let predecessorComposition = predecessor.compose(deliveryWrapper)
+        let composedInputFunction = predecessor.compose(deliveryWrapper)
         
         var isComplete = false
             
@@ -91,7 +80,7 @@ public struct Consumer<T>: Equatable {
             if value == nil { isComplete = true }
             var result: ContinuationResult = .done(.canContinue)
             do {
-                result = ContinuationResult.complete(try predecessorComposition(value))
+                result = ContinuationResult.complete(try composedInputFunction(value))
             } catch {
                 print(error)
             }

@@ -19,7 +19,7 @@ public final class ListenableValue<T>: Listenable {
         didSet {
             listeners.values.forEach { listener in
                 do { _ = try listener.process(value) }
-                catch { remove(listener: listener) }
+                catch { _ = remove(consumer: listener) }
             }
         }
     }

@@ -13,8 +13,8 @@ public protocol Listenable: class {
     var listeners: [UUID: Consumer<ListenableType>] { get set }
     func listener() -> Listener<Self, ListenableType>
     func hasListeners() -> Bool
-    func add(listener: Consumer<ListenableType>)
-    func remove(listener: Consumer<ListenableType>)
+    func add(_ consumer: Consumer<ListenableType>)
+    func remove(consumer: Consumer<ListenableType>) -> Consumer<ListenableType>?
     func remove(proxy: ListenerProxy<Self>) -> Consumer<ListenableType>?
     func terminate()
 }
@@ -22,12 +22,14 @@ public protocol Listenable: class {
 extension Listenable {
     public func hasListeners() -> Bool { return listeners.count > 0 }
     
-    public func add(listener: Consumer<ListenableType>) {
-        listeners[listener.identifier] = listener
+    public func add(_ consumer: Consumer<ListenableType>) {
+        listeners[consumer.identifier] = consumer
     }
     
-    public func remove(listener: Consumer<ListenableType>) {
-        listeners.removeValue(forKey: listener.identifier)
+    public func remove(consumer: Consumer<ListenableType>) -> Consumer<ListenableType>? {
+        let c = listeners[consumer.identifier]
+        listeners.removeValue(forKey: consumer.identifier)
+        return c
     }
     
     public func remove(proxy: ListenerProxy<Self>) -> Consumer<ListenableType>? {
@@ -40,13 +42,13 @@ extension Listenable {
     public func terminate() {
         listeners.values.forEach { listener in
             _ = try? listener.process(nil)
-            remove(listener: listener)
+            _ = remove(consumer: listener)
         }
     }
 
     public func listener() -> Listener<Self, ListenableType> {
-        return Listener<Self, ListenableType>(self) { (listener: Consumer<ListenableType>) in
-            self.add(listener: listener)
+        return Listener<Self, ListenableType>(self) { (consumer: Consumer<ListenableType>) in
+            self.add(consumer)
         }
     }
 }
@@ -86,20 +88,20 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
 }
 
 public struct Listener<T, U>: ListenerProtocol where T: Listenable {
+    public typealias ListenableType = T
     public typealias InputType = U
     public typealias OutputType = U
-    public typealias ListenableType = T
     
     public var description: String = "Listener<\(type(of:T.self), type(of:U.self))>"
         .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
 
-    public var compositionHandler: (Consumer<U>) -> Void
+    public var installer: (Consumer<U>) -> Void
     private weak var listenable: ListenableType?
     private var identifier = UUID()
     
-    init(_ listenable: T, compositionHandler: @escaping (Consumer<U>) -> Void) {
+    init(_ listenable: T, installer: @escaping (Consumer<U>) -> Void) {
         self.listenable = listenable
-        self.compositionHandler = compositionHandler
+        self.installer = installer
     }
     
     public func proxy() -> ListenerProxy<T> {
@@ -108,7 +110,7 @@ public struct Listener<T, U>: ListenerProtocol where T: Listenable {
     
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
         let listener = Consumer<U>(delivery: delivery)
-        compositionHandler(listener)
+        installer(listener)
         return { _ in throw ReallyLazySequenceError.nonPushable }
     }
     
@@ -119,7 +121,7 @@ public struct Listener<T, U>: ListenerProtocol where T: Listenable {
     }
 }
 
-public protocol ListenableChainedSequence: ListenerProtocol where ListenableType == PredecessorType.ListenableType {
+public protocol ChainedListenerProtocol: ListenerProtocol where ListenableType == PredecessorType.ListenableType {
     associatedtype PredecessorType: ListenerProtocol
     typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery
@@ -128,37 +130,34 @@ public protocol ListenableChainedSequence: ListenerProtocol where ListenableType
     init(predecessor: PredecessorType, composer: @escaping Composer)
 }
 
-public protocol ListenableGeneratorProtocol: Listenable {
+public protocol ListenableSequenceProtocol: Listenable {
     associatedtype InputType
-    var generator: (InputType, @escaping (ListenableType?) -> Void) -> Void { get set }
+    var sequenceGenerator: (InputType, @escaping (ListenableType?) -> Void) -> Void { get set }
     init(_ generator: @escaping (InputType, @escaping (ListenableType?) -> Void) -> Void)
     func generate(for: InputType) -> Void
 }
 
-extension ListenableGeneratorProtocol {
+extension ListenableSequenceProtocol {
     public func generate(for value: InputType) {
         let delivery = { (input: ListenableType?) -> Void in
             guard self.hasListeners() else { return }
             self.listeners.forEach { (pair) in
-                let (_, listener) = pair
-                do {
-                    _ = try listener.process(input)
-                } catch {
-                    self.remove(listener: listener)
-                }
+                let (identifier, listener) = pair
+                do { _ = try listener.process(input) }
+                catch { self.listeners.removeValue(forKey: identifier) }
             }
         }
-        generator(value, delivery)
+        sequenceGenerator(value, delivery)
     }
 }
 
-public final class ListenableGenerator<T, U>: ListenableGeneratorProtocol {
+public final class ListenableSequence<T, U>: ListenableSequenceProtocol {
     public var listeners: [UUID : Consumer<U>] = [ : ]
     public typealias InputType = T
     public typealias ListenableType = U
-    public var generator: (T, @escaping (U?) -> Void) -> Void
+    public var sequenceGenerator: (T, @escaping (U?) -> Void) -> Void
     
-    public init(_ generator: @escaping (T, @escaping (U?) -> Void) -> Void) {
-        self.generator = generator
+    public init(_ sequenceGenerator: @escaping (T, @escaping (U?) -> Void) -> Void) {
+        self.sequenceGenerator = sequenceGenerator
     }
 }

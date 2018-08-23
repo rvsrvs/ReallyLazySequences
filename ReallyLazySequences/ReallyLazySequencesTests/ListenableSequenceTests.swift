@@ -21,11 +21,11 @@ class ProducerTests: XCTestCase {
         super.tearDown()
     }
     
-    func testListenableGenerator() {
+    func testListenableSequence() {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let testGenerator = ListenableGenerator<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
+        let testGenerator = ListenableSequence<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
             (0 ... value).forEach { delivery($0) }
             delivery(nil)
         }

@@ -8,7 +8,7 @@
 import Foundation
 
 // Implement Consume
-public extension ConsumableSequenceProtocol {
+public extension ConsumableProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType> {
         return Consumer<Self.InputType>(predecessor: self, delivery:  delivery )
     }
@@ -28,7 +28,7 @@ public extension ReallyLazySequenceProtocol {
     }
 }
 
-public extension ConsumableChainedSequence {
+public extension ChainedConsumableProtocol {
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery  {
         return predecessor.compose(composer(delivery)) as! ContinuableInputDelivery
     }
@@ -41,7 +41,7 @@ public extension ConsumableChainedSequence {
 // 3. a particular function which is specific to the action being taken
 // Number 3 is what is being passed in to the initializer of the specific types returned below
 
-public extension ConsumableSequenceProtocol {
+public extension ConsumableProtocol {
     public func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T> {
         return ConsumableMap<Self, T>(predecessor: self) { delivery in
             Composers.mapComposer(delivery: delivery, transform: transform)
@@ -93,7 +93,7 @@ public extension ConsumableSequenceProtocol {
     }
 }
 
-extension ListenableChainedSequence {
+extension ChainedListenerProtocol {
     public func proxy() -> ListenerProxy<ListenableType> {
         return predecessor.proxy()
     }

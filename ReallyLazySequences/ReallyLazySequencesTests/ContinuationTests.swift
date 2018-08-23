@@ -67,7 +67,17 @@ class ContinuationTests: XCTestCase {
         let continuation5 = { ContinuationResult.afterThen(.more(continuation4), .more(continuation4a)) }
         let continuation6 = { ContinuationResult.more(continuation5) }
         let continuation7 = { ContinuationResult.more(continuation6) }
-        let _ = ContinuationResult.complete(.more(continuation7))
+        let result = ContinuationResult.complete(.more(continuation7))
+        switch result {
+        case .done(let termination):
+            switch termination {
+            case .canContinue: ()
+            default:
+                XCTFail("bad return from done")
+            }
+        default:
+            XCTFail("did not complete")
+        }
         waitForExpectations(timeout: 10.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
 

@@ -28,15 +28,15 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { $0 * 2 }
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
-            .flatMap { (input: [Double]) -> GeneratingSequence<[Double], Double> in
-                GeneratingSequence { (_: [Double], delivery: (Double?) -> Void) in
+            .flatMap { (input: [Double]) -> Subsequence<[Double], Double> in
+                Subsequence { (_: [Double], delivery: (Double?) -> Void) in
                     input.forEach { delivery($0) }
                 }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
-            .flatMap { (input: Int) -> GeneratingSequence<Int, Int> in
-                GeneratingSequence { (_: Int, delivery: (Int?) -> Void)  in
+            .flatMap { (input: Int) -> Subsequence<Int, Int> in
+                Subsequence { (_: Int, delivery: (Int?) -> Void)  in
                     (0 ..< 3).forEach { delivery($0 * input) }
                 }
             }
@@ -60,7 +60,7 @@ class ReallyLazySequencesTests: XCTestCase {
     func testSimpleProducer() {
         let expectation = self.expectation(description: "First Listener")
         
-        let generator = ListenableGenerator<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
+        let generator = ListenableSequence<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
             (0 ..< value).forEach {
                 delivery($0)
             }
@@ -125,7 +125,7 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) in
-                GeneratingSequence<[Int],Int> { (input, delivery) in
+                Subsequence<[Int],Int> { (input, delivery) in
                     input.forEach { delivery($0) }
                 }
             }

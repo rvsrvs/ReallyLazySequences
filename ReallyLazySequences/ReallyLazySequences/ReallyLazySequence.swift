@@ -63,7 +63,7 @@ public protocol ReallyLazySequenceProtocol: CustomStringConvertible {
     func compose(_ output: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery
 }
 
-public struct SimpleSequence<T>: ConsumableSequenceProtocol {
+public struct SimpleSequence<T>: ConsumableProtocol {
     public var description: String = "SimpleSequence<\(type(of:T.self))>"
         .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     public typealias InputType = T
@@ -71,7 +71,7 @@ public struct SimpleSequence<T>: ConsumableSequenceProtocol {
     public init() { }    
 }
 
-public protocol SubsequenceProtocol: ConsumableSequenceProtocol {
+public protocol SubsequenceProtocol: ConsumableProtocol {
     var generator: (InputType, @escaping (OutputType?) -> Void) -> Void { get set }
     init(_ generator: @escaping (InputType, @escaping (OutputType?) -> Void) -> Void)
 }
@@ -89,7 +89,7 @@ public extension SubsequenceProtocol {
     }
 }
 
-public struct GeneratingSequence<T, U>: SubsequenceProtocol {
+public struct Subsequence<T, U>: SubsequenceProtocol {
     public var description: String = "GeneratingSubsequence<\(type(of:T.self), type(of:U.self))>"
         .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
     

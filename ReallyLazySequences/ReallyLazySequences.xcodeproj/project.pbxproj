@@ -19,7 +19,7 @@
 		FB680F46211154350089A710 /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB680F45211154350089A710 /* NetworkingTests.swift */; };
 		FBCA36AC2117A83400984A5B /* Listener.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36AB2117A83400984A5B /* Listener.swift */; };
 		FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6133211940C2001C0BE3 /* ListenerTests.swift */; };
-		FBDD61362119C6E4001C0BE3 /* ProducerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */; };
+		FBDD61362119C6E4001C0BE3 /* ListenableSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD61352119C6E4001C0BE3 /* ListenableSequenceTests.swift */; };
 		FBDD6138211B0652001C0BE3 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6137211B0652001C0BE3 /* Networking.swift */; };
 		FBDD613A211B8E7F001C0BE3 /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6139211B8E7F001C0BE3 /* Value.swift */; };
 		FBFC58511EBE7FBD00F3D63A /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFC58501EBE7FBD00F3D63A /* ReallyLazySequence.swift */; };
@@ -52,7 +52,7 @@
 		FB680F45211154350089A710 /* NetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
 		FBCA36AB2117A83400984A5B /* Listener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listener.swift; sourceTree = "<group>"; };
 		FBDD6133211940C2001C0BE3 /* ListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerTests.swift; sourceTree = "<group>"; };
-		FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProducerTests.swift; sourceTree = "<group>"; };
+		FBDD61352119C6E4001C0BE3 /* ListenableSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenableSequenceTests.swift; sourceTree = "<group>"; };
 		FBDD6137211B0652001C0BE3 /* Networking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		FBDD6139211B8E7F001C0BE3 /* Value.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Value.swift; sourceTree = "<group>"; };
 		FBF5B0321ED4894600BCAFB0 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
@@ -119,11 +119,11 @@
 		FB33E0371EBE7E85009CA3AC /* ReallyLazySequencesTests */ = {
 			isa = PBXGroup;
 			children = (
-				FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */,
-				FB680F45211154350089A710 /* NetworkingTests.swift */,
-				FBDD6133211940C2001C0BE3 /* ListenerTests.swift */,
-				FBDD61352119C6E4001C0BE3 /* ProducerTests.swift */,
 				FB6599E32124B7A500357D8D /* ContinuationTests.swift */,
+				FB33E0381EBE7E85009CA3AC /* ReallyLazySequencesTests.swift */,
+				FBDD6133211940C2001C0BE3 /* ListenerTests.swift */,
+				FBDD61352119C6E4001C0BE3 /* ListenableSequenceTests.swift */,
+				FB680F45211154350089A710 /* NetworkingTests.swift */,
 				FB33E03A1EBE7E85009CA3AC /* Info.plist */,
 			);
 			path = ReallyLazySequencesTests;
@@ -261,7 +261,7 @@
 			files = (
 				FB6599E42124B7A500357D8D /* ContinuationTests.swift in Sources */,
 				FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */,
-				FBDD61362119C6E4001C0BE3 /* ProducerTests.swift in Sources */,
+				FBDD61362119C6E4001C0BE3 /* ListenableSequenceTests.swift in Sources */,
 				FB33E0391EBE7E85009CA3AC /* ReallyLazySequencesTests.swift in Sources */,
 				FB680F46211154350089A710 /* NetworkingTests.swift in Sources */,
 			);
