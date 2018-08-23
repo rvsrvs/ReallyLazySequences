@@ -11,7 +11,7 @@ import Foundation
 public final class ListenableValue<T>: Listenable {
     public typealias ListenableType = T
     
-    public var listeners = [UUID: Listener<ListenableValue<T>, T>]()
+    public var listeners = [UUID: Consumer<T>]()
     
     var hasListeners: Bool { return listeners.count > 0 }
     
@@ -30,7 +30,7 @@ public final class ListenableValue<T>: Listenable {
     
     func terminate() {
         listeners.values.forEach { listener in
-            _ = listener.terminate()
+            _ = try? listener.process(nil)
             remove(listener: listener)
         }
     }

@@ -63,8 +63,9 @@ public protocol ConsumableChainedSequence: ConsumableSequenceProtocol {
     init(predecessor: PredecessorType, composer: @escaping Composer)
 }
 
-public protocol ConsumerProtocol: CustomStringConvertible {
+public protocol ConsumerProtocol: CustomStringConvertible, Equatable {
     associatedtype InputType
+    var identifier: UUID { get }
     var composition: (InputType?) throws -> ContinuationResult { get }
     func process(_ value: InputType?) throws -> ContinuationResult
 }
@@ -77,17 +78,35 @@ public extension ConsumerProtocol {
 public struct Consumer<T>: ConsumerProtocol {
     public typealias InputType = T
 
+    public static func == (lhs: Consumer<T>, rhs: Consumer<T>) -> Bool {
+        return lhs.identifier == rhs.identifier
+    }
+
+    public var identifier: UUID = UUID()
     public var description: String
     // NB Predecessor.InputType is the type of the head of the sequence,
     // NOT the specific output type for the Predecessor's Predecessor
     private(set) public var composition: (InputType?) throws -> ContinuationResult
     
+    public init(delivery: @escaping (InputType?) throws -> ContinuationResult) {
+        self.description = standardize("Consumer<\(type(of:InputType.self))>")
+        var isComplete = false
+        composition = { value in
+            guard !isComplete else { throw ReallyLazySequenceError.isComplete }
+            if value == nil { isComplete = true }
+            var result: ContinuationResult = .done
+            do {
+                result = ContinuationResult.complete(try delivery(value))
+            } catch {
+                print(error)
+            }
+            return result
+        }
+    }
+    
     public init<Predecessor>(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void))
         where Predecessor: ReallyLazySequenceProtocol, Predecessor.InputType == T {
-        self.description = "\(predecessor.description) >> Consumer<\(type(of:InputType.self))>"
-                .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
-        var isComplete = false
-        
+        self.description = standardize("\(predecessor.description) >> Consumer<\(type(of:InputType.self))>")
         let deliveryWrapper = { (value: Predecessor.OutputType?) -> ContinuationResult in
             delivery(value)
             return .done
@@ -98,6 +117,8 @@ public struct Consumer<T>: ConsumerProtocol {
         // terminating at an RLS structure.
         let predecessorComposition = predecessor.compose(deliveryWrapper)
         
+        var isComplete = false
+            
         // Consumer composes the final push function here.
         composition = { value in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }

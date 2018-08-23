@@ -44,6 +44,12 @@ public enum ReallyLazySequenceError: Error {
     }
 }
 
+func standardize(_ description: String) -> String {
+    return description
+        .replacingOccurrences(of: ".Type", with: "")
+        .replacingOccurrences(of: "Swift.", with: "")
+}
+
 public protocol ReallyLazySequenceProtocol: CustomStringConvertible {
     associatedtype InputType  // The _initial_ initial type for the head for a given RLS chain
     associatedtype OutputType // The type which is output from a given RLS

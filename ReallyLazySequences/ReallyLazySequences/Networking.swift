@@ -70,7 +70,7 @@ public struct URLDataFetcher: SubsequenceProtocol {
 public final class URLDataGenerator: ListenableGeneratorProtocol {
     public typealias InputType = (URL, URLSession)
     public typealias ListenableType = Result<Data>
-    public var listeners = [UUID: Listener<URLDataGenerator, Result<Data>>]()
+    public var listeners = [UUID: Consumer<Result<Data>>]()
     public var generator: (InputType, @escaping (ListenableType?) -> Void) -> Void
 
     public init(_ generator: @escaping (InputType, @escaping (ListenableType?) -> Void) -> Void) {
