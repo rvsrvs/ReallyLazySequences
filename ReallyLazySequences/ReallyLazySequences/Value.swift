@@ -12,8 +12,7 @@ public final class ListenableValue<T>: Listenable {
     public typealias ListenableType = T
     
     public var listeners = [UUID: Consumer<T>]()
-    
-    var hasListeners: Bool { return listeners.count > 0 }
+    public var hasListeners: Bool { return listeners.count > 0 }
     
     var value: T {
         didSet {

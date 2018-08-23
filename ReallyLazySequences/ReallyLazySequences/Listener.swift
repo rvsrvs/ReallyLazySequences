@@ -12,18 +12,20 @@ public protocol Listenable: class {
     associatedtype ListenableType
     var listeners: [UUID: Consumer<ListenableType>] { get set }
     func listener() -> Listener<Self, ListenableType>
-    func hasListeners() -> Bool
-    func add(_ consumer: Consumer<ListenableType>)
+    var hasListeners: Bool { get }
+    func add(_ consumer: Consumer<ListenableType>) -> ListenerProxy<Self>
     func remove(consumer: Consumer<ListenableType>) -> Consumer<ListenableType>?
     func remove(proxy: ListenerProxy<Self>) -> Consumer<ListenableType>?
     func terminate()
 }
 
 extension Listenable {
-    public func hasListeners() -> Bool { return listeners.count > 0 }
+    public var hasListeners: Bool { return listeners.count > 0 }
     
-    public func add(_ consumer: Consumer<ListenableType>) {
-        listeners[consumer.identifier] = consumer
+    public func add(_ consumer: Consumer<ListenableType>)  -> ListenerProxy<Self> {
+        let uuid = UUID()
+        listeners[uuid] = consumer
+        return ListenerProxy<Self>(identifier: uuid, listenable: self)
     }
     
     public func remove(consumer: Consumer<ListenableType>) -> Consumer<ListenableType>? {
@@ -48,7 +50,7 @@ extension Listenable {
 
     public func listener() -> Listener<Self, ListenableType> {
         return Listener<Self, ListenableType>(self) { (consumer: Consumer<ListenableType>) in
-            self.add(consumer)
+            _ = self.add(consumer)
         }
     }
 }
@@ -140,7 +142,7 @@ public protocol ListenableSequenceProtocol: Listenable {
 extension ListenableSequenceProtocol {
     public func generate(for value: InputType) {
         let delivery = { (input: ListenableType?) -> Void in
-            guard self.hasListeners() else { return }
+            guard self.hasListeners else { return }
             self.listeners.forEach { (pair) in
                 let (identifier, listener) = pair
                 do { _ = try listener.process(input) }
