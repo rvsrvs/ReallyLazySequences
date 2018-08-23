@@ -55,9 +55,9 @@ public struct ListenerProxy<T> where T: Listenable {
 }
 
 public protocol ListenableSequenceProtocol: ReallyLazySequenceProtocol {
-    associatedtype HeadType: Listenable
-    func listen(_ delivery: @escaping (OutputType?) -> Void) -> ListenerProxy<HeadType>
-    func proxy() -> ListenerProxy<HeadType>
+    associatedtype ListenableType: Listenable
+    func listen(_ delivery: @escaping (OutputType?) -> Void) -> ListenerProxy<ListenableType>
+    func proxy() -> ListenerProxy<ListenableType>
     func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType>
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
@@ -77,13 +77,13 @@ public protocol ListenableSequenceProtocol: ReallyLazySequenceProtocol {
 public struct ListenableSequence<T, U>: ListenableSequenceProtocol where T: Listenable {
     public typealias InputType = U
     public typealias OutputType = U
-    public typealias HeadType = T
+    public typealias ListenableType = T
     
     public var description: String = "ListenableSequence<\(type(of:T.self), type(of:U.self))>"
         .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
 
     public var compositionHandler: (Consumer<U>) -> Void
-    private weak var head: HeadType?
+    private weak var head: ListenableType?
     private var identifier = UUID()
     
     init(_ head: T, compositionHandler: @escaping (Consumer<U>) -> Void) {
@@ -111,7 +111,7 @@ public struct ListenableSequence<T, U>: ListenableSequenceProtocol where T: List
     }
 }
 
-public protocol ListenableChainedSequence: ListenableSequenceProtocol where HeadType == PredecessorType.HeadType {
+public protocol ListenableChainedSequence: ListenableSequenceProtocol where ListenableType == PredecessorType.ListenableType {
     associatedtype PredecessorType: ListenableSequenceProtocol
     typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery

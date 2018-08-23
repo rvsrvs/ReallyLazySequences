@@ -116,7 +116,7 @@ public extension ConsumableSequenceProtocol {
 
 extension ListenableChainedSequence {
     
-    public func proxy() -> ListenerProxy<HeadType> {
+    public func proxy() -> ListenerProxy<ListenableType> {
         return predecessor.proxy()
     }
     
@@ -124,7 +124,7 @@ extension ListenableChainedSequence {
         return predecessor.compose(composer(delivery)) as! ContinuableInputDelivery
     }
 
-    public func listen(_ delivery: @escaping (OutputType?) -> Void) -> ListenerProxy<HeadType> {
+    public func listen(_ delivery: @escaping (OutputType?) -> Void) -> ListenerProxy<ListenableType> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
             delivery(value)
             return .done(.canContinue)
