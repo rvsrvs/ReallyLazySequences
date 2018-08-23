@@ -21,8 +21,7 @@ public struct ListenableMap<Predecessor: ListenerProtocol, Output>: ListenableCh
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> LMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> LMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -39,8 +38,7 @@ public struct ListenableReduce<Predecessor: ListenerProtocol, Output>: Listenabl
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> LReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> LReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -57,8 +55,7 @@ public struct ListenableFilter<Predecessor: ListenerProtocol, Output>: Listenabl
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> LFilter<\(type(of:Predecessor.OutputType.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> LFilter<\(type(of:Predecessor.OutputType.self))>")
     }
 }
 
@@ -75,8 +72,7 @@ public struct ListenableFlatMap<Predecessor: ListenerProtocol, Output>: Listenab
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> LFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> LFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -93,8 +89,7 @@ public struct ListenableCompactMap<Predecessor: ListenerProtocol, Output>: Liste
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> LCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> LCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -111,7 +106,6 @@ public struct ListenableDispatch<Predecessor: ListenerProtocol, Output>: Listena
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> LDispatchMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> LDispatchMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }

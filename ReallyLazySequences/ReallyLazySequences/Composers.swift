@@ -82,8 +82,6 @@ struct Composers {
                 let generator = try transform(input)
                     .consume { value in
                         guard let value = value else { return .canContinue }
-                        //FIXME: This should go up to the main continuation loop
-                        // and not be completed from here..
                         _ = ContinuationResult.complete(.more({ delivery(value) }))
                         return .terminate
                     }

@@ -24,8 +24,7 @@ public struct ConsumableMap<Predecessor: ConsumableSequenceProtocol, Output>: Co
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> CMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> CMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -41,8 +40,7 @@ public struct ConsumableReduce<Predecessor: ConsumableSequenceProtocol, Output>:
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> CReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> CReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -58,8 +56,7 @@ public struct ConsumableFilter<Predecessor: ConsumableSequenceProtocol, Output>:
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> CFilter<\(type(of:Predecessor.OutputType.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> CFilter<\(type(of:Predecessor.OutputType.self))>")
     }
 }
 
@@ -75,8 +72,7 @@ public struct ConsumableFlatMap<Predecessor: ConsumableSequenceProtocol, Output>
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> CFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> CFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -92,8 +88,7 @@ public struct ConsumableCompactMap<Predecessor: ConsumableSequenceProtocol, Outp
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> CCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> CCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -109,8 +104,7 @@ public struct ConsumableDispatch<Predecessor: ConsumableSequenceProtocol, Output
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = "\(predecessor.description) >> CDispatch<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>"
-            .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+        self.description = standardize("\(predecessor.description) >> CDispatch<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 

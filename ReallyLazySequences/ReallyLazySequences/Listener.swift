@@ -16,6 +16,7 @@ public protocol Listenable: class {
     func add(listener: Consumer<ListenableType>)
     func remove(listener: Consumer<ListenableType>)
     func remove(proxy: ListenerProxy<Self>) -> Consumer<ListenableType>?
+    func terminate()
 }
 
 extension Listenable {
@@ -35,6 +36,14 @@ extension Listenable {
         return c
     }
     
+    
+    public func terminate() {
+        listeners.values.forEach { listener in
+            _ = try? listener.process(nil)
+            remove(listener: listener)
+        }
+    }
+
     public func listener() -> Listener<Self, ListenableType> {
         return Listener<Self, ListenableType>(self) { (listener: Consumer<ListenableType>) in
             self.add(listener: listener)
@@ -58,6 +67,8 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     associatedtype ListenableType: Listenable
     func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<ListenableType>
     func proxy() -> ListenerProxy<ListenableType>
+    
+    // Listenable Chaining
     func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType>
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,

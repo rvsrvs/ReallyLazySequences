@@ -15,32 +15,17 @@
 import Foundation
 
 public protocol ConsumableSequenceProtocol: ReallyLazySequenceProtocol {
-    // All RLS successor chains, to be used, eventually terminate in a Consumer or a listen
-    // consume hands back an object which can be subsequently used
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType>
     
-    // Dispatch into an operation queue and drive the dispatch all the way through
-    // unlike Swift.Sequence, downstream operations may occur on separate queues
+    // Consumable chaining
     func dispatch(_ queue: OperationQueue) -> ConsumableDispatch<Self, OutputType>
-    
-    // Batch up values until a condition is met and then release the values
-    // This is a generalized form of reduce
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
     ) -> ConsumableReduce<Self, T>
-    
-    // Flatmap and optionally dispatch the producers into an OpQueue to allow them to be parallelized
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
-    
-    /*
-     Swift.Sequence replication
-     */
-    // each of these returns a different concrete type meeting the ChainedSequenceProtocol
-    // All returned types differ only in name, allowing the path through the sequence to
-    // be read from the type name itself
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ConsumableCompactMap<Self, T>
     func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>

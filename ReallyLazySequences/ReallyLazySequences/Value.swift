@@ -27,11 +27,4 @@ public final class ListenableValue<T>: Listenable {
     init(_ value: T) {
         self.value = value
     }
-    
-    func terminate() {
-        listeners.values.forEach { listener in
-            _ = try? listener.process(nil)
-            remove(listener: listener)
-        }
-    }
 }

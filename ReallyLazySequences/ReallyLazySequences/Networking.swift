@@ -30,7 +30,7 @@ extension URLSession {
                 )
                 return completionHandler(.failure(error))
             }
-            return completionHandler(.success(data))
+            completionHandler(.success(data))
         }
     }
 }
@@ -47,21 +47,20 @@ public struct URLDataSubsequence: SubsequenceProtocol {
     
     public init() {
         self.init { (fetch: InputType, delivery: @escaping ((OutputType?) -> Void)) -> Void in
-            let task = fetch.session.dataTask(with: fetch.url) { (result: Result<Data>) in
-                let c = SimpleSequence<Result<Data>>()
-                    .consume { result in
-                        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
-                            delivery(value)
-                            return .done(.canContinue)
-                        }
-                        _ = ContinuationResult.complete(
-                            .afterThen(.more({ deliveryWrapper(result) }),
-                                       .more({ deliveryWrapper(nil) }))
-                        )
-                        return .canContinue
+            let c = SimpleSequence<Result<Data>>()
+                .consume { result in
+                    let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
+                        delivery(value)
+                        return .done(.canContinue)
                     }
-                _ = try? c.process(result)
-            }
+                    _ = ContinuationResult.complete(
+                        .afterThen(.more({ deliveryWrapper(result) }),
+                                   .more({ deliveryWrapper(nil) }))
+                    )
+                    return .canContinue
+                }
+            
+            let task = fetch.session.dataTask(with: fetch.url) { (result: Result<Data>) in _ = try? c.process(result) }
             task.resume()
             while task.state != .completed { RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1)) }
         }
