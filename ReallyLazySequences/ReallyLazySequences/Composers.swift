@@ -32,7 +32,7 @@ struct Composers {
         return { (optionalInput: U?) -> ContinuationResult in
             guard let input = optionalInput else { return .more({ delivery(nil) }) } // termination nil
             do {
-                guard let transformed = try transform(input) else { return ContinuationResult.done }
+                guard let transformed = try transform(input) else { return .done(.canContinue) }
                 return .more({ delivery(transformed) }) // value to pass on
             } catch {
                 let rlsError = ContinuationErrorContext(opType: .compactMap, value: input, delivery: delivery, error: error)
@@ -60,10 +60,10 @@ struct Composers {
                 if until(partialValue, input) {
                     return .afterThen(
                         .more({ delivery(partialValue) }),
-                        .more({ partialValue = initialValue(); return .done })
+                        .more({ partialValue = initialValue(); return .done(.canContinue) })
                     )
                 }
-                return .done
+                return .done(.canContinue)
             } catch {
                 let rlsError = ContinuationErrorContext(opType: .reduce, value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
@@ -81,17 +81,18 @@ struct Composers {
             do {
                 let generator = try transform(input)
                     .consume { value in
-                        guard let value = value else { return }
+                        guard let value = value else { return .canContinue }
                         //FIXME: This should go up to the main continuation loop
                         // and not be completed from here..
                         _ = ContinuationResult.complete(.more({ delivery(value) }))
-                }
+                        return .terminate
+                    }
                 if let queue = queue {
                     queue.addOperation { _ = try? generator.process(input) }
                 } else {
                     _ = try? generator.process(input)
                 }
-                return .done
+                return .done(.canContinue)
             } catch {
                 let rlsError = ContinuationErrorContext(opType: .flatMap, value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
@@ -107,7 +108,7 @@ struct Composers {
             do {
                 guard let input = input else { return .more({ delivery(nil) })}
                 let result = try filter(input)
-                return result ? .more({ delivery(input) }) :  .done
+                return result ? .more({ delivery(input) }) :  .done(.canContinue)
             } catch {
                 let rlsError = ContinuationErrorContext(opType: .filter, value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
@@ -121,7 +122,7 @@ struct Composers {
     ) -> (T?) -> ContinuationResult {
         return { (input: T?) -> ContinuationResult in
             queue.addOperation { _ = ContinuationResult.complete(delivery(input)) }
-            return .done
+            return .done(.canContinue)
         }
     }
 }

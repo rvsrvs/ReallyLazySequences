@@ -9,7 +9,7 @@ import Foundation
 
 // Implement Consume
 public extension ConsumableSequenceProtocol {
-    func consume(_ delivery: @escaping (Self.OutputType?) -> Void) -> Consumer<Self.InputType> {
+    func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType> {
         return Consumer<Self.InputType>(predecessor: self, delivery:  delivery )
     }
 }
@@ -25,7 +25,7 @@ public extension ReallyLazySequenceProtocol {
     // there is a constraint that InputType == OutputType
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
         return {
-            guard let value = $0 as? OutputType? else { return .done }
+            guard let value = $0 as? OutputType? else { return .done(.canContinue) }
             return .more({ delivery(value) })
         }
     }
@@ -127,7 +127,7 @@ extension ListenableChainedSequence {
     public func listen(_ delivery: @escaping (OutputType?) -> Void) -> ListenerProxy<HeadType> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
             delivery(value)
-            return .done
+            return .done(.canContinue)
         }
         let _ = predecessor.compose(composer(deliveryWrapper))
         return predecessor.proxy()

@@ -56,7 +56,7 @@ public protocol ReallyLazySequenceProtocol: CustomStringConvertible {
     
     typealias ContinuableInputDelivery  = (Self.InputType?) throws -> ContinuationResult
     typealias ContinuableOutputDelivery = (OutputType?) -> ContinuationResult
-    typealias TerminalOutputDelivery = (OutputType?) -> Void
+    typealias TerminalOutputDelivery = (OutputType?) -> ContinuationTermination
 
     // The function which is called from the tail of an RLS chain to cause it
     // to create its composed function  
@@ -84,7 +84,7 @@ public extension SubsequenceProtocol {
         }
         return { (input: InputType?) throws -> ContinuationResult in
             guard let input = input else { return delivery(nil) }
-            return .more ({ self.generator(input, deliveryWrapper); return ContinuationResult.done })
+            return .more ({ self.generator(input, deliveryWrapper); return ContinuationResult.done(.canContinue) })
         }
     }
 }

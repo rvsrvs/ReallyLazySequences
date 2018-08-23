@@ -21,12 +21,13 @@ class NetworkingTests: XCTestCase {
 
     func testURLDataFetcher() {
         let expectation = self.expectation(description: "First Listener")
-        let fetcher = URLDataFetcher()
+        let fetcher = URLDataSubsequence()
             .consume { (result: Result<Data>?) in
                 guard let result = result,
                     case .success(let data) = result,
-                    data.count > 0 else { return }
+                    data.count > 0 else { return .canContinue }
                 expectation.fulfill()
+                return .canContinue
             }
         let session = SessionSupport().session()
         if let url = URL(string: ConfigurationURL) {

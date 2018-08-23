@@ -46,13 +46,13 @@ class ContinuationTests: XCTestCase {
             XCTAssertTrue(fulfillCount == 0, "Messages in wrong order at continuation 1")
             fulfillCount += 1
             expectation.fulfill()
-            return ContinuationResult.done
+            return ContinuationResult.done(.canContinue)
         }
         let continuation1a = { () -> ContinuationResult in
             XCTAssertTrue(fulfillCount == 1, "Messages in wrong order at continuation 2a")
             fulfillCount += 1
             expectation0.fulfill()
-            return ContinuationResult.done
+            return ContinuationResult.done(.canContinue)
         }
         let continuation2 = { ContinuationResult.more(continuation1) }
         let continuation2a = { () -> ContinuationResult in ContinuationResult.more(continuation1a)}
@@ -62,7 +62,7 @@ class ContinuationTests: XCTestCase {
             XCTAssertTrue(fulfillCount == 2, "Messages in wrong order at continuation 4a")
             fulfillCount += 1
             expectation1.fulfill()
-            return ContinuationResult.done
+            return ContinuationResult.done(.canContinue)
         }
         let continuation5 = { ContinuationResult.afterThen(.more(continuation4), .more(continuation4a)) }
         let continuation6 = { ContinuationResult.more(continuation5) }
@@ -86,13 +86,13 @@ class ContinuationTests: XCTestCase {
             XCTAssertTrue(fulfillCount == 0, "Messages in wrong order at continuation 1")
             fulfillCount += 1
             expectation0.fulfill()
-            return ContinuationResult.done
+            return ContinuationResult.done(.canContinue)
         }
         let continuation1a = { (_: Int?) throws -> ContinuationResult in
             XCTAssertTrue(fulfillCount == 1, "Messages in wrong order at continuation 1a")
             fulfillCount += 1
             expectation1.fulfill()
-            return ContinuationResult.done
+            return ContinuationResult.done(.canContinue)
         }
         let continuation2 = { (value: Int?) throws -> ContinuationResult in
             throw ContinuationErrorContext(
@@ -107,7 +107,7 @@ class ContinuationTests: XCTestCase {
             XCTAssertTrue(fulfillCount == 2, "Messages in wrong order at continuation 4a")
             fulfillCount += 1
             expectation2.fulfill()
-            return ContinuationResult.done
+            return ContinuationResult.done(.canContinue)
         }
         let continuation5 = { (_: Int?) throws -> ContinuationResult in
             ContinuationResult.afterThen(.more({ try continuation4(nil) }), .more({ try continuation4a(nil)}))
@@ -125,7 +125,7 @@ class ContinuationTests: XCTestCase {
         let outcome = ContinuationResult.complete(.more(driver)) { (context: ContinuationErrorContextProtocol) -> ContinuationResult in
             guard let context = context as? ContinuationErrorContext<Int?, Int> else {
                 XCTFail("Received unhandleable error")
-                return .done
+                return .done(.canContinue)
             }
             guard let error = context.error as? ContinuationTestError,
                 case .test(let message) = error,
@@ -133,7 +133,7 @@ class ContinuationTests: XCTestCase {
                 message == "continuation2"
                 else {
                     XCTFail("Error from wrong location")
-                    return .done
+                    return .done(.canContinue)
                 }
             return .more({try context.delivery(context.value)})
         }

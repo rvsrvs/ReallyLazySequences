@@ -14,6 +14,13 @@
 
 public protocol ContinuationErrorContextProtocol: Error { }
 
+public enum ContinuationTermination: Equatable {
+    case canContinue
+    case terminate
+    case stop
+    case pause
+}
+
 public struct ContinuationErrorContext<T, U>: ContinuationErrorContextProtocol {
     var opType: ReallyLazySequenceOperationType
     var value: T
@@ -25,13 +32,11 @@ public typealias Continuation = () throws -> ContinuationResult
 
 typealias ContinuationErrorHandler = (ContinuationErrorContextProtocol) -> ContinuationResult
 
-public let ContinuationDone = { () -> ContinuationResult in ContinuationResult.done }
-
 public indirect enum ContinuationResult {
     case more(Continuation)
     case error(ContinuationErrorContextProtocol)
     case afterThen(ContinuationResult, ContinuationResult)
-    case done
+    case done(ContinuationTermination)
         
     var canContinue: Bool {
         switch self {
@@ -46,12 +51,12 @@ public indirect enum ContinuationResult {
     ) -> (ContinuationResult, [ContinuationResult]) {
         switch self {
         case .done:
-            return (.done, stack)
+            return (.done(.canContinue), stack)
         case .more(let continuation):
             do {
                 return (try continuation(), stack)
             } catch {
-                guard let rlsError = error as? ContinuationErrorContextProtocol else { return (.done, stack) }
+                guard let rlsError = error as? ContinuationErrorContextProtocol else { return (.done(.canContinue), stack) }
                 return (.error(rlsError), stack)
             }
         case .error(let error):
@@ -64,7 +69,7 @@ public indirect enum ContinuationResult {
     
     static func complete(
         _ result: ContinuationResult,
-        errorHandler: @escaping ContinuationErrorHandler = { _ in .done }
+        errorHandler: @escaping ContinuationErrorHandler = { _ in .done(.canContinue) }
     ) -> ContinuationResult {
         var current = result
         var stack = [ContinuationResult]()

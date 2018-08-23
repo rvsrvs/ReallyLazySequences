@@ -17,7 +17,7 @@ import Foundation
 public protocol ConsumableSequenceProtocol: ReallyLazySequenceProtocol {
     // All RLS successor chains, to be used, eventually terminate in a Consumer or a listen
     // consume hands back an object which can be subsequently used
-    func consume(_ delivery: @escaping (Self.OutputType?) -> Void) -> Consumer<Self.InputType>
+    func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType>
     
     // Dispatch into an operation queue and drive the dispatch all the way through
     // unlike Swift.Sequence, downstream operations may occur on separate queues
@@ -63,38 +63,22 @@ public protocol ConsumableChainedSequence: ConsumableSequenceProtocol {
     init(predecessor: PredecessorType, composer: @escaping Composer)
 }
 
-public protocol ConsumerProtocol: CustomStringConvertible, Equatable {
-    associatedtype InputType
-    var identifier: UUID { get }
-    var composition: (InputType?) throws -> ContinuationResult { get }
-    func process(_ value: InputType?) throws -> ContinuationResult
-}
-
-public extension ConsumerProtocol {
-    // Accept a push of the Head type and pass it through the composed closure
-    public func process(_ value: InputType?) throws -> ContinuationResult { return try composition(value) }
-}
-
-public struct Consumer<T>: ConsumerProtocol {
-    public typealias InputType = T
-
+public struct Consumer<T>: Equatable {
     public static func == (lhs: Consumer<T>, rhs: Consumer<T>) -> Bool {
         return lhs.identifier == rhs.identifier
     }
 
     public var identifier: UUID = UUID()
     public var description: String
-    // NB Predecessor.InputType is the type of the head of the sequence,
-    // NOT the specific output type for the Predecessor's Predecessor
-    private(set) public var composition: (InputType?) throws -> ContinuationResult
+    private var composition: (T?) throws -> ContinuationResult
     
-    public init(delivery: @escaping (InputType?) throws -> ContinuationResult) {
-        self.description = standardize("Consumer<\(type(of:InputType.self))>")
+    public init(delivery: @escaping (T?) throws -> ContinuationResult) {
+        self.description = standardize("Consumer<\(type(of:T.self))>")
         var isComplete = false
         composition = { value in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }
             if value == nil { isComplete = true }
-            var result: ContinuationResult = .done
+            var result = ContinuationResult.done(.canContinue)
             do {
                 result = ContinuationResult.complete(try delivery(value))
             } catch {
@@ -104,12 +88,11 @@ public struct Consumer<T>: ConsumerProtocol {
         }
     }
     
-    public init<Predecessor>(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> Void))
+    public init<Predecessor>(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> ContinuationTermination))
         where Predecessor: ReallyLazySequenceProtocol, Predecessor.InputType == T {
-        self.description = standardize("\(predecessor.description) >> Consumer<\(type(of:InputType.self))>")
+        self.description = standardize("\(predecessor.description) >> Consumer<\(type(of:T.self))>")
         let deliveryWrapper = { (value: Predecessor.OutputType?) -> ContinuationResult in
-            delivery(value)
-            return .done
+            return .done(delivery(value))
         }
         // Have the predecessor compose its operation with ours
         // Different types of predecessors compose differently
@@ -123,7 +106,7 @@ public struct Consumer<T>: ConsumerProtocol {
         composition = { value in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }
             if value == nil { isComplete = true }
-            var result: ContinuationResult = .done
+            var result: ContinuationResult = .done(.canContinue)
             do {
                 result = ContinuationResult.complete(try predecessorComposition(value))
             } catch {
@@ -132,4 +115,6 @@ public struct Consumer<T>: ConsumerProtocol {
             return result
         }
     }
+    
+    public func process(_ value: T?) throws -> ContinuationResult { return try composition(value) }
 }

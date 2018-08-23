@@ -35,7 +35,7 @@ extension URLSession {
     }
 }
 
-public struct URLDataFetcher: SubsequenceProtocol {
+public struct URLDataSubsequence: SubsequenceProtocol {
     public typealias InputType = (url: URL, session: URLSession)
     public typealias OutputType = Result<Data>
     public var description: String = "URLDataFetcher"
@@ -47,20 +47,21 @@ public struct URLDataFetcher: SubsequenceProtocol {
     
     public init() {
         self.init { (fetch: InputType, delivery: @escaping ((OutputType?) -> Void)) -> Void in
-            let task = fetch.session.dataTask(with: fetch.url, completionHandler: { (result: Result<Data>) in
+            let task = fetch.session.dataTask(with: fetch.url) { (result: Result<Data>) in
                 let c = SimpleSequence<Result<Data>>()
                     .consume { result in
                         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
                             delivery(value)
-                            return .done
+                            return .done(.canContinue)
                         }
                         _ = ContinuationResult.complete(
                             .afterThen(.more({ deliveryWrapper(result) }),
                                        .more({ deliveryWrapper(nil) }))
                         )
-                }
+                        return .canContinue
+                    }
                 _ = try? c.process(result)
-            })
+            }
             task.resume()
             while task.state != .completed { RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1)) }
         }

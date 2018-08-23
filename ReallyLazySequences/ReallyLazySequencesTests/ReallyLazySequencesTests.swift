@@ -40,7 +40,7 @@ class ReallyLazySequencesTests: XCTestCase {
                     (0 ..< 3).forEach { delivery($0 * input) }
                 }
             }
-            .consume { if let value = $0 { accumulatedResults.append(value) } }
+            .consume { if let value = $0 { accumulatedResults.append(value) }; return .canContinue }
         
         XCTAssertNotNil(c as Consumer<Int>, "Consumer c is wrong type!")
         
@@ -96,9 +96,10 @@ class ReallyLazySequencesTests: XCTestCase {
             .dispatch(OperationQueue.main)
             .consume {
                 XCTAssertEqual(OperationQueue.current, OperationQueue.main)
-                guard let value = $0 else { return }
+                guard let value = $0 else { return .canContinue}
                 XCTAssertNotEqual(value, 11.0)
                 if value == 3.0 { expectation.fulfill() }
+                return .canContinue
             }
         
         XCTAssertNotNil(c as Consumer<Int>, "Wrong class")
@@ -130,8 +131,9 @@ class ReallyLazySequencesTests: XCTestCase {
             .consume {
                 guard $0 != nil else {
                     expectation.fulfill()
-                    return
+                    return .canContinue
                 }
+                return .canContinue
             }
         
         XCTAssertNotNil(c as Consumer<Int>, "Wrong class")

@@ -104,7 +104,7 @@ public struct ListenableSequence<T, U>: ListenableSequenceProtocol where T: List
     public func listen(_ delivery: @escaping (U?) -> Void) -> ListenerProxy<T> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
             delivery(value)
-            return .done
+            return .done(.canContinue)
         }
         let _ = compose(deliveryWrapper)
         return ListenerProxy(identifier: identifier, listenable: head)
