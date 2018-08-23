@@ -31,16 +31,18 @@ class ListenerTests: XCTestCase {
             .listener()
             .map { $0 * 2 }
             .listen {
-                guard $0 != nil else { XCTFail(); return }
+                guard $0 != nil else { XCTFail(); return .canContinue  }
                 doubler.fulfill()
+                return .canContinue 
             }
         
         var proxy2 = testValue
             .listener()
             .map { $0 * 4 }
             .listen {
-                guard $0 != nil else { XCTFail(); return }
+                guard $0 != nil else { XCTFail(); return .canContinue  }
                 quadrupler.fulfill()
+                return .canContinue
             }
         
         testValue.value = 4

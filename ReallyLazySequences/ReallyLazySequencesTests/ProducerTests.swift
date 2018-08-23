@@ -34,16 +34,18 @@ class ProducerTests: XCTestCase {
             .listener()
             .map {  $0 * 2 }
             .listen {
-                guard $0 == 10 else { return }
+                guard $0 == 10 else { return .canContinue }
                 doubler.fulfill()
+                return .canContinue
             }
         
         var proxy2 = testGenerator
             .listener()
             .map {  $0 * 4 }
             .listen {
-                guard $0 == 20 else { return }
+                guard $0 == 20 else { return .canContinue }
                 quadrupler.fulfill()
+                return .canContinue
             }
         
         testGenerator.generate(for: 5)

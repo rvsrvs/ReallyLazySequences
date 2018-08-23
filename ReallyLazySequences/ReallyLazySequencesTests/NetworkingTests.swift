@@ -49,25 +49,27 @@ class NetworkingTests: XCTestCase {
             .jsonListener(decodingType: [Configuration].self)
             .dispatch(OperationQueue.main)
             .listen {
-                guard let result = $0 else { return }
+                guard let result = $0 else { return .canContinue  }
                 switch result {
                 case .success:
                     firstExpectation.fulfill()
                 case .failure(let error):
                     XCTFail(error.localizedDescription)
                 }
+                return .canContinue
             }
         
         var proxy2 = producer
             .jsonListener(decodingType: [Configuration].self)
             .listen {
-                guard let result = $0 else { return }
+                guard let result = $0 else { return .canContinue  }
                 switch result {
                 case .success:
                     secondExpectation.fulfill()
                 case .failure(let error):
                     XCTFail(error.localizedDescription)
                 }
+                return .canContinue 
             }
 
         producer.generate(for: (url: url, session: SessionSupport().session()))

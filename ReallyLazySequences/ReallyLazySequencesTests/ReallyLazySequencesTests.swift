@@ -72,8 +72,9 @@ class ReallyLazySequencesTests: XCTestCase {
             .listen {
                 guard $0 != nil else {
                     expectation.fulfill()
-                    return
+                    return .canContinue
                 }
+                return .canContinue 
             }
         
         generator.generate(for: 3)

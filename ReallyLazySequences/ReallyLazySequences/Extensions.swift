@@ -14,7 +14,7 @@ public extension ConsumableSequenceProtocol {
     }
 }
 
-public extension ListenableSequenceProtocol {
+public extension ListenerProtocol {
     
 }
 
@@ -124,17 +124,14 @@ extension ListenableChainedSequence {
         return predecessor.compose(composer(delivery)) as! ContinuableInputDelivery
     }
 
-    public func listen(_ delivery: @escaping (OutputType?) -> Void) -> ListenerProxy<ListenableType> {
-        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
-            delivery(value)
-            return .done(.canContinue)
-        }
+    public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<ListenableType> {
+        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in  return .done(delivery(value)) }
         let _ = predecessor.compose(composer(deliveryWrapper))
         return predecessor.proxy()
     }
 }
 
-public extension ListenableSequenceProtocol {
+public extension ListenerProtocol {
     // Map sequential values of one type to a value of the same or different type and delivers them
     // to our successor using the successor's delivery closure
     public func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T> {

@@ -88,7 +88,7 @@ public final class URLDataGenerator: ListenableGeneratorProtocol {
 extension URLDataGenerator {
     public func jsonListener<JSONType: Decodable>(
         decodingType: JSONType.Type
-    ) -> ListenableMap<ListenableSequence<URLDataGenerator, Result<Data>>, Result<JSONType>> {
+    ) -> ListenableMap<Listener<URLDataGenerator, Result<Data>>, Result<JSONType>> {
         return listener()
             .map { (fetchResult: Result<Data>) -> Result<JSONType> in
                 switch fetchResult {

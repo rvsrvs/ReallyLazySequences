@@ -11,7 +11,7 @@ import Foundation
 public protocol Listenable: class {
     associatedtype ListenableType
     var listeners: [UUID: Consumer<ListenableType>] { get set }
-    func listener() -> ListenableSequence<Self, ListenableType>
+    func listener() -> Listener<Self, ListenableType>
     func hasListeners() -> Bool
     func add(listener: Consumer<ListenableType>)
     func remove(listener: Consumer<ListenableType>)
@@ -35,8 +35,8 @@ extension Listenable {
         return c
     }
     
-    public func listener() -> ListenableSequence<Self, ListenableType> {
-        return ListenableSequence<Self, ListenableType>(self) { (listener: Consumer<ListenableType>) in
+    public func listener() -> Listener<Self, ListenableType> {
+        return Listener<Self, ListenableType>(self) { (listener: Consumer<ListenableType>) in
             self.add(listener: listener)
         }
     }
@@ -54,9 +54,9 @@ public struct ListenerProxy<T> where T: Listenable {
     }
 }
 
-public protocol ListenableSequenceProtocol: ReallyLazySequenceProtocol {
+public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     associatedtype ListenableType: Listenable
-    func listen(_ delivery: @escaping (OutputType?) -> Void) -> ListenerProxy<ListenableType>
+    func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<ListenableType>
     func proxy() -> ListenerProxy<ListenableType>
     func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType>
     func collect<T>(
@@ -74,25 +74,25 @@ public protocol ListenableSequenceProtocol: ReallyLazySequenceProtocol {
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType>
 }
 
-public struct ListenableSequence<T, U>: ListenableSequenceProtocol where T: Listenable {
+public struct Listener<T, U>: ListenerProtocol where T: Listenable {
     public typealias InputType = U
     public typealias OutputType = U
     public typealias ListenableType = T
     
-    public var description: String = "ListenableSequence<\(type(of:T.self), type(of:U.self))>"
+    public var description: String = "Listener<\(type(of:T.self), type(of:U.self))>"
         .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
 
     public var compositionHandler: (Consumer<U>) -> Void
-    private weak var head: ListenableType?
+    private weak var listenable: ListenableType?
     private var identifier = UUID()
     
-    init(_ head: T, compositionHandler: @escaping (Consumer<U>) -> Void) {
-        self.head = head
+    init(_ listenable: T, compositionHandler: @escaping (Consumer<U>) -> Void) {
+        self.listenable = listenable
         self.compositionHandler = compositionHandler
     }
     
     public func proxy() -> ListenerProxy<T> {
-        return ListenerProxy(identifier: identifier, listenable: head)
+        return ListenerProxy(identifier: identifier, listenable: listenable)
     }
     
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
@@ -101,18 +101,15 @@ public struct ListenableSequence<T, U>: ListenableSequenceProtocol where T: List
         return { _ in throw ReallyLazySequenceError.nonPushable }
     }
     
-    public func listen(_ delivery: @escaping (U?) -> Void) -> ListenerProxy<T> {
-        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
-            delivery(value)
-            return .done(.canContinue)
-        }
+    public func listen(_ delivery: @escaping (U?) -> ContinuationTermination) -> ListenerProxy<T> {
+        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in return .done(delivery(value)) }
         let _ = compose(deliveryWrapper)
-        return ListenerProxy(identifier: identifier, listenable: head)
+        return ListenerProxy(identifier: identifier, listenable: listenable)
     }
 }
 
-public protocol ListenableChainedSequence: ListenableSequenceProtocol where ListenableType == PredecessorType.ListenableType {
-    associatedtype PredecessorType: ListenableSequenceProtocol
+public protocol ListenableChainedSequence: ListenerProtocol where ListenableType == PredecessorType.ListenableType {
+    associatedtype PredecessorType: ListenerProtocol
     typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery
     var predecessor: PredecessorType { get set }

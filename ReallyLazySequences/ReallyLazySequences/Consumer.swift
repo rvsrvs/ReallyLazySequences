@@ -78,13 +78,11 @@ public struct Consumer<T>: Equatable {
         composition = { value in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }
             if value == nil { isComplete = true }
-            var result = ContinuationResult.done(.canContinue)
             do {
-                result = ContinuationResult.complete(try delivery(value))
+                return ContinuationResult.complete(try delivery(value))
             } catch {
-                print(error)
+                throw error
             }
-            return result
         }
     }
     
