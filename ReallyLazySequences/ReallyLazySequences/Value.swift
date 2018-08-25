@@ -16,9 +16,9 @@ public final class ListenableValue<T>: Listenable {
     
     var value: T {
         didSet {
-            listeners.values.forEach { listener in
-                do { _ = try listener.process(value) }
-                catch { _ = remove(consumer: listener) }
+            listeners.keys.forEach { uuid in
+                do { _ = try listeners[uuid]?.process(value) }
+                catch { _ = remove(consumerWith: uuid) }
             }
         }
     }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct ListenableMap<Predecessor: ListenerProtocol, Output>: ChainedListenerProtocol {    
+public struct ListenableMap<Predecessor: ListenerProtocol, Output>: ChainedListenerProtocol {
     public typealias ListenableType = Predecessor.ListenableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType

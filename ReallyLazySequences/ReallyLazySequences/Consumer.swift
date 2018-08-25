@@ -37,12 +37,7 @@ public protocol ChainedConsumableProtocol: ConsumableProtocol {
     init(predecessor: PredecessorType, composer: @escaping Composer)
 }
 
-public struct Consumer<T>: Equatable {
-    public static func == (lhs: Consumer<T>, rhs: Consumer<T>) -> Bool {
-        return lhs.identifier == rhs.identifier
-    }
-
-    public var identifier: UUID = UUID()
+public struct Consumer<T> {
     public var description: String
     private var composition: (T?) throws -> ContinuationResult
     

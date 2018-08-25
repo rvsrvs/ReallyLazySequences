@@ -25,6 +25,7 @@ public enum ReallyLazySequenceOperationType: Equatable {
     case compactMap
     case reduce
     case filter
+    case dispatch
 }
 
 public enum ReallyLazySequenceError: Error {

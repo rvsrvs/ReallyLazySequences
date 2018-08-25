@@ -14,10 +14,6 @@ public extension ConsumableProtocol {
     }
 }
 
-public extension ListenerProtocol {
-    
-}
-
 // Implement Composition
 public extension ReallyLazySequenceProtocol {
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
@@ -102,7 +98,7 @@ extension ChainedListenerProtocol {
         return predecessor.compose(composer(delivery)) as! ContinuableInputDelivery
     }
 
-    public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<ListenableType> {
+    public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<Self.ListenableType> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in  return .done(delivery(value)) }
         let _ = predecessor.compose(composer(deliveryWrapper))
         return predecessor.proxy()

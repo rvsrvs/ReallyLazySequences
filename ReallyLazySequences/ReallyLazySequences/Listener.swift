@@ -13,44 +13,33 @@ public protocol Listenable: class {
     var listeners: [UUID: Consumer<ListenableType>] { get set }
     func listener() -> Listener<Self, ListenableType>
     var hasListeners: Bool { get }
-    func add(_ consumer: Consumer<ListenableType>) -> ListenerProxy<Self>
-    func remove(consumer: Consumer<ListenableType>) -> Consumer<ListenableType>?
-    func remove(proxy: ListenerProxy<Self>) -> Consumer<ListenableType>?
+    func add(consumer: Consumer<ListenableType>, with: UUID) -> ListenerProxy<Self>
+    func remove(consumerWith: UUID) -> Consumer<ListenableType>?
     func terminate()
 }
 
 extension Listenable {
     public var hasListeners: Bool { return listeners.count > 0 }
     
-    public func add(_ consumer: Consumer<ListenableType>)  -> ListenerProxy<Self> {
-        let uuid = UUID()
+    public func add(consumer: Consumer<ListenableType>, with uuid: UUID)  -> ListenerProxy<Self> {
         listeners[uuid] = consumer
-        return ListenerProxy<Self>(identifier: uuid, listenable: self)
+        return ListenerProxy(identifier: uuid, listenable: self)
     }
     
-    public func remove(consumer: Consumer<ListenableType>) -> Consumer<ListenableType>? {
-        let c = listeners[consumer.identifier]
-        listeners.removeValue(forKey: consumer.identifier)
-        return c
+    public func remove(consumerWith: UUID) -> Consumer<ListenableType>? {
+        return listeners.removeValue(forKey: consumerWith)
     }
-    
-    public func remove(proxy: ListenerProxy<Self>) -> Consumer<ListenableType>? {
-        let c = listeners[proxy.identifier]
-        listeners.removeValue(forKey: proxy.identifier)
-        return c
-    }
-    
     
     public func terminate() {
-        listeners.values.forEach { listener in
-            _ = try? listener.process(nil)
-            _ = remove(consumer: listener)
+        listeners.keys.forEach { uuid in
+            _ = try? listeners[uuid]?.process(nil)
+            _ = remove(consumerWith: uuid)
         }
     }
 
     public func listener() -> Listener<Self, ListenableType> {
-        return Listener<Self, ListenableType>(self) { (consumer: Consumer<ListenableType>) in
-            _ = self.add(consumer)
+        return Listener<Self, ListenableType>(self) { (uuid: UUID, consumer: Consumer<ListenableType>) in
+            _ = self.add(consumer: consumer, with: uuid)
         }
     }
 }
@@ -60,17 +49,16 @@ public struct ListenerProxy<T> where T: Listenable {
     var listenable: T?
     
     public mutating func terminate() {
-        guard let l = listenable else { return }
-        let c = l.remove(proxy:self)
-        _ = try? c?.process(nil)
+        guard let m = listenable else { return }
+        _ = m.remove(consumerWith: identifier)
         listenable = nil
     }
 }
 
 public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     associatedtype ListenableType: Listenable
-    func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<ListenableType>
-    func proxy() -> ListenerProxy<ListenableType>
+    func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<Self.ListenableType>
+    func proxy() -> ListenerProxy<Self.ListenableType>
     
     // Listenable Chaining
     func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType>
@@ -89,19 +77,18 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType>
 }
 
-public struct Listener<T, U>: ListenerProtocol where T: Listenable {
+public struct Listener<T, U>: ListenerProtocol where T: Listenable, T.ListenableType == U {
     public typealias ListenableType = T
     public typealias InputType = U
     public typealias OutputType = U
     
-    public var description: String = "Listener<\(type(of:T.self), type(of:U.self))>"
-        .replacingOccurrences(of: ".Type", with: "").replacingOccurrences(of: "Swift.", with: "")
+    public var description: String = standardize("Listener<\(type(of: T.self)), \(type(of: U.self))>")
 
-    public var installer: (Consumer<U>) -> Void
-    private weak var listenable: ListenableType?
+    public var installer: (UUID, Consumer<U>) -> Void
+    private weak var listenable: T?
     private var identifier = UUID()
     
-    init(_ listenable: T, installer: @escaping (Consumer<U>) -> Void) {
+    init(_ listenable: T, installer: @escaping (UUID, Consumer<U>) -> Void) {
         self.listenable = listenable
         self.installer = installer
     }
@@ -112,7 +99,7 @@ public struct Listener<T, U>: ListenerProtocol where T: Listenable {
     
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
         let listener = Consumer<U>(delivery: delivery)
-        installer(listener)
+        installer(identifier, listener)
         return { _ in throw ReallyLazySequenceError.nonPushable }
     }
     

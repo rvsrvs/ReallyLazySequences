@@ -79,16 +79,16 @@ struct Composers {
         return { (input: U?) -> ContinuationResult in
             guard let input = input else { return delivery(nil) }
             do {
-                let generator = try transform(input)
+                let subsequence = try transform(input)
                     .consume { value in
                         guard let value = value else { return .canContinue }
                         _ = ContinuationResult.complete(.more({ delivery(value) }))
                         return .terminate
                     }
                 if let queue = queue {
-                    queue.addOperation { _ = try? generator.process(input) }
+                    queue.addOperation { _ = try? subsequence.process(input) }
                 } else {
-                    _ = try? generator.process(input)
+                    _ = try? subsequence.process(input)
                 }
                 return .done(.canContinue)
             } catch {
