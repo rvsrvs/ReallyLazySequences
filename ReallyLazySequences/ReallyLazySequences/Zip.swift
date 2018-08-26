@@ -11,7 +11,7 @@ import Foundation
 //func zip<Sequence1, Sequence2>(_ sequence1: Sequence1, _ sequence2: Sequence2) -> Zip2Sequence<Sequence1, Sequence2> where Sequence1 : Sequence, Sequence2 : Sequence
 
 public final class Zip2<T0, T1>: Listenable where T0: ListenerProtocol, T1: ListenerProtocol {
-    public typealias ListenableType = (T0.OutputType, T1.OutputType)
+    public typealias ListenableOutputType = (T0.OutputType, T1.OutputType)
     
     public var listeners = [UUID: Consumer<(T0.OutputType, T1.OutputType)>]()
     public var hasListeners: Bool { return listeners.count > 0 }

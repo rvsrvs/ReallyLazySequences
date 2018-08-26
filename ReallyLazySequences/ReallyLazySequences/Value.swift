@@ -9,7 +9,7 @@
 import Foundation
 
 public final class ListenableValue<T>: Listenable {
-    public typealias ListenableType = T
+    public typealias ListenableOutputType = T
     
     public var listeners = [UUID: Consumer<T>]()
     public var hasListeners: Bool { return listeners.count > 0 }

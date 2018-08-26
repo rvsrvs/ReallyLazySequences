@@ -9,24 +9,24 @@
 import Foundation
 
 public protocol Listenable: class {
-    associatedtype ListenableType
-    var listeners: [UUID: Consumer<ListenableType>] { get set }
-    func listener() -> Listener<Self, ListenableType>
+    associatedtype ListenableOutputType
+    var listeners: [UUID: Consumer<ListenableOutputType>] { get set }
+    func listener() -> Listener<Self>
     var hasListeners: Bool { get }
-    func add(consumer: Consumer<ListenableType>, with: UUID) -> ListenerProxy<Self>
-    func remove(consumerWith: UUID) -> Consumer<ListenableType>?
+    func add(consumer: Consumer<ListenableOutputType>, with: UUID) -> ListenerProxy<Self>
+    func remove(consumerWith: UUID) -> Consumer<ListenableOutputType>?
     func terminate()
 }
 
 extension Listenable {
     public var hasListeners: Bool { return listeners.count > 0 }
     
-    public func add(consumer: Consumer<ListenableType>, with uuid: UUID)  -> ListenerProxy<Self> {
+    public func add(consumer: Consumer<ListenableOutputType>, with uuid: UUID)  -> ListenerProxy<Self> {
         listeners[uuid] = consumer
         return ListenerProxy(identifier: uuid, listenable: self)
     }
     
-    public func remove(consumerWith: UUID) -> Consumer<ListenableType>? {
+    public func remove(consumerWith: UUID) -> Consumer<ListenableOutputType>? {
         return listeners.removeValue(forKey: consumerWith)
     }
     
@@ -37,8 +37,8 @@ extension Listenable {
         }
     }
 
-    public func listener() -> Listener<Self, ListenableType> {
-        return Listener<Self, ListenableType>(self) { (uuid: UUID, consumer: Consumer<ListenableType>) in
+    public func listener() -> Listener<Self> {
+        return Listener<Self>(self) { (uuid: UUID, consumer: Consumer<ListenableOutputType>) in
             _ = self.add(consumer: consumer, with: uuid)
         }
     }
@@ -77,18 +77,18 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType>
 }
 
-public struct Listener<T, U>: ListenerProtocol where T: Listenable, T.ListenableType == U {
+public struct Listener<T>: ListenerProtocol where T: Listenable {
     public typealias ListenableType = T
-    public typealias InputType = U
-    public typealias OutputType = U
+    public typealias InputType = T.ListenableOutputType
+    public typealias OutputType = T.ListenableOutputType
     
-    public var description: String = standardize("Listener<\(type(of: T.self)), \(type(of: U.self))>")
+    public var description: String = standardize("Listener<\(type(of: T.self)) -> \(type(of: T.ListenableOutputType.self))>")
 
-    public var installer: (UUID, Consumer<U>) -> Void
+    public var installer: (UUID, Consumer<T.ListenableOutputType>) -> Void
     private weak var listenable: T?
     private var identifier = UUID()
     
-    init(_ listenable: T, installer: @escaping (UUID, Consumer<U>) -> Void) {
+    init(_ listenable: T, installer: @escaping (UUID, Consumer<T.ListenableOutputType>) -> Void) {
         self.listenable = listenable
         self.installer = installer
     }
@@ -98,12 +98,12 @@ public struct Listener<T, U>: ListenerProtocol where T: Listenable, T.Listenable
     }
     
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
-        let listener = Consumer<U>(delivery: delivery)
+        let listener = Consumer<T.ListenableOutputType>(delivery: delivery)
         installer(identifier, listener)
         return { _ in throw ReallyLazySequenceError.nonPushable }
     }
     
-    public func listen(_ delivery: @escaping (U?) -> ContinuationTermination) -> ListenerProxy<T> {
+    public func listen(_ delivery: @escaping (T.ListenableOutputType?) -> ContinuationTermination) -> ListenerProxy<T> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in return .done(delivery(value)) }
         let _ = compose(deliveryWrapper)
         return ListenerProxy(identifier: identifier, listenable: listenable)
@@ -121,14 +121,14 @@ public protocol ChainedListenerProtocol: ListenerProtocol where ListenableType =
 
 public protocol ListenableSequenceProtocol: Listenable {
     associatedtype InputType
-    var sequenceGenerator: (InputType, @escaping (ListenableType?) -> Void) -> Void { get set }
-    init(_ generator: @escaping (InputType, @escaping (ListenableType?) -> Void) -> Void)
+    var sequenceGenerator: (InputType, @escaping (ListenableOutputType?) -> Void) -> Void { get set }
+    init(_ generator: @escaping (InputType, @escaping (ListenableOutputType?) -> Void) -> Void)
     func generate(for: InputType) -> Void
 }
 
 extension ListenableSequenceProtocol {
     public func generate(for value: InputType) {
-        let delivery = { (input: ListenableType?) -> Void in
+        let delivery = { (input: ListenableOutputType?) -> Void in
             guard self.hasListeners else { return }
             self.listeners.forEach { (pair) in
                 let (identifier, listener) = pair
@@ -143,7 +143,7 @@ extension ListenableSequenceProtocol {
 public final class ListenableSequence<T, U>: ListenableSequenceProtocol {
     public var listeners: [UUID : Consumer<U>] = [ : ]
     public typealias InputType = T
-    public typealias ListenableType = U
+    public typealias ListenableOutputType = U
     public var sequenceGenerator: (T, @escaping (U?) -> Void) -> Void
     
     public init(_ sequenceGenerator: @escaping (T, @escaping (U?) -> Void) -> Void) {
