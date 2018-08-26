@@ -7,6 +7,7 @@
 //
 
 import XCTest
+@testable import ReallyLazySequences
 
 class ZipTests: XCTestCase {
 
@@ -19,8 +20,39 @@ class ZipTests: XCTestCase {
     }
 
     func testZip() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        let expectation = self.expectation(description: "Expectation")
+        
+        let testGenerator = ListenableSequence<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
+            (0 ... value).forEach { delivery($0) }
+            delivery(nil)
+        }
+        
+        let t1 = testGenerator
+            .listener()
+            .map {  $0 * 2 }
+        
+        let t2 = testGenerator
+            .listener()
+            .map {  $0 * 4 }
+        
+        var count = 0
+        let z = zip(t1, t2)
+            .listener()
+            .map { ($0.0 / 2, $0.1 / 2) }
+            .listen { (t: (Int, Int)?) -> ContinuationTermination in
+                guard let t = t else {
+                    expectation.fulfill()
+                    XCTAssert(count == 6, "Terminating after having received wrong count of: \(count) values")
+                    return .terminate
+                }
+                XCTAssert(t.1 == 2 * t.0, "Terminating after incorrect computation")
+                count += 1
+                return .canContinue
+            }
+        print(z.description)
+        testGenerator.generate(for: 5)
+        
+        waitForExpectations(timeout: 2.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
 
 }

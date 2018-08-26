@@ -8,50 +8,58 @@
 
 import Foundation
 
-public protocol Listenable: class {
+public protocol Listenable: class, CustomStringConvertible {
     associatedtype ListenableOutputType
 
     var listeners: [UUID: Consumer<ListenableOutputType>] { get set }
     var hasListeners: Bool { get }
 
     func listener() -> Listener<Self>
-    func add(consumer: Consumer<ListenableOutputType>, with: UUID)
-    func remove(consumerWith: UUID) -> Consumer<ListenableOutputType>?
+    func add(listener: Consumer<ListenableOutputType>, with: UUID)
+    func remove(listenerWith: UUID) -> Consumer<ListenableOutputType>?
     func terminate()
 }
 
 extension Listenable {
     public var hasListeners: Bool { return listeners.count > 0 }
     
-    public func add(consumer: Consumer<ListenableOutputType>, with uuid: UUID) {
-        listeners[uuid] = consumer
+    public func add(listener: Consumer<ListenableOutputType>, with uuid: UUID) {
+        listeners[uuid] = listener
     }
     
-    public func remove(consumerWith: UUID) -> Consumer<ListenableOutputType>? {
-        return listeners.removeValue(forKey: consumerWith)
+    public func remove(listenerWith: UUID) -> Consumer<ListenableOutputType>? {
+        return listeners.removeValue(forKey: listenerWith)
     }
     
     public func terminate() {
         listeners.keys.forEach { uuid in
             _ = try? listeners[uuid]?.process(nil)
-            _ = remove(consumerWith: uuid)
+            _ = remove(listenerWith: uuid)
         }
     }
 
     public func listener() -> Listener<Self> {
         return Listener<Self>(self) { (uuid: UUID, consumer: Consumer<ListenableOutputType>) in
-            self.add(consumer: consumer, with: uuid)
+            self.add(listener: consumer, with: uuid)
         }
     }
 }
 
-public struct ListenerHandle<T> where T: Listenable {
+public struct ListenerHandle<T>: CustomStringConvertible where T: Listenable {
+    public var description: String
+    
     var identifier: UUID
     var listenable: T?
     
+    public init(identifier: UUID, listenable: T?) {
+        self.identifier = identifier
+        self.listenable = listenable
+        self.description = standardize("\(listenable?.description ?? "nil")   >> ListenerHandle<identifier = \"\(identifier)>\"")
+    }
+    
     public mutating func terminate() -> Consumer<T.ListenableOutputType>? {
         guard let m = listenable else { return nil }
-        let c = m.remove(consumerWith: identifier)
+        let c = m.remove(listenerWith: identifier)
         listenable = nil
         return c
     }
@@ -84,7 +92,7 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
     public typealias InputType = T.ListenableOutputType
     public typealias OutputType = T.ListenableOutputType
     
-    public var description: String = standardize("\(type(of: T.self)) >> Listener<\(type(of: T.ListenableOutputType.self))>")
+    public var description: String
 
     public var installer: (UUID, Consumer<T.ListenableOutputType>) -> Void
     private weak var listenable: T?
@@ -93,6 +101,7 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
     init(_ listenable: T, installer: @escaping (UUID, Consumer<T.ListenableOutputType>) -> Void) {
         self.listenable = listenable
         self.installer = installer
+        self.description = standardize("\(listenable.description) >> Listener<\(type(of: T.ListenableOutputType.self))>")
     }
     
     public func proxy() -> ListenerHandle<T> {
@@ -143,12 +152,15 @@ extension ListenableSequenceProtocol {
 }
 
 public final class ListenableSequence<T, U>: ListenableSequenceProtocol {
+    public var description: String
+    
     public var listeners: [UUID : Consumer<U>] = [ : ]
     public typealias InputType = T
     public typealias ListenableOutputType = U
     public var sequenceGenerator: (T, @escaping (U?) -> Void) -> Void
     
     public init(_ sequenceGenerator: @escaping (T, @escaping (U?) -> Void) -> Void) {
+        self.description = standardize("ListenableSequence<\(type(of: T.self)) -> \(type(of: U.self))>")
         self.sequenceGenerator = sequenceGenerator
     }
 }

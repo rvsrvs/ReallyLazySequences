@@ -9,6 +9,8 @@
 import Foundation
 
 public final class ListenableValue<T>: Listenable {
+    public var description: String
+    
     public typealias ListenableOutputType = T
     
     public var listeners = [UUID: Consumer<T>]()
@@ -18,12 +20,13 @@ public final class ListenableValue<T>: Listenable {
         didSet {
             listeners.keys.forEach { uuid in
                 do { _ = try listeners[uuid]?.process(value) }
-                catch { _ = remove(consumerWith: uuid) }
+                catch { _ = remove(listenerWith: uuid) }
             }
         }
     }
     
     init(_ value: T) {
+        self.description = standardize("ListenableValue<\(type(of: T.self))>")
         self.value = value
     }
 }

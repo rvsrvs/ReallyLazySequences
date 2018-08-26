@@ -68,12 +68,15 @@ public struct URLDataSubsequence: SubsequenceProtocol {
 }
 
 public final class URLDataGenerator: ListenableSequenceProtocol {
+    public var description: String
+    
     public typealias InputType = (URL, URLSession)
     public typealias ListenableOutputType = Result<Data>
     public var listeners = [UUID: Consumer<Result<Data>>]()
     public var sequenceGenerator: (InputType, @escaping (ListenableOutputType?) -> Void) -> Void
 
     public init(_ generator: @escaping (InputType, @escaping (ListenableOutputType?) -> Void) -> Void) {
+        self.description = standardize("URLDataGenerator<\(type(of: InputType.self), type(of:ListenableOutputType.self))>")
         self.sequenceGenerator = generator
     }
 
