@@ -21,7 +21,7 @@ public struct ListenableMap<Predecessor: ListenerProtocol, Output>: ChainedListe
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardize("\(predecessor.description) >> LMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = standardizeRLSDescription("\(predecessor.description) >> LMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -38,7 +38,7 @@ public struct ListenableReduce<Predecessor: ListenerProtocol, Output>: ChainedLi
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardize("\(predecessor.description) >> LReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = standardizeRLSDescription("\(predecessor.description) >> LReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -55,7 +55,7 @@ public struct ListenableFilter<Predecessor: ListenerProtocol, Output>: ChainedLi
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardize("\(predecessor.description) >> LFilter<\(type(of:Predecessor.OutputType.self))>")
+        self.description = standardizeRLSDescription("\(predecessor.description) >> LFilter<\(type(of:Predecessor.OutputType.self))>")
     }
 }
 
@@ -72,7 +72,7 @@ public struct ListenableFlatMap<Predecessor: ListenerProtocol, Output>: ChainedL
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardize("\(predecessor.description) >> LFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = standardizeRLSDescription("\(predecessor.description) >> LFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -89,7 +89,7 @@ public struct ListenableCompactMap<Predecessor: ListenerProtocol, Output>: Chain
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardize("\(predecessor.description) >> LCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = standardizeRLSDescription("\(predecessor.description) >> LCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -106,6 +106,6 @@ public struct ListenableDispatch<Predecessor: ListenerProtocol, Output>: Chained
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardize("\(predecessor.description) >> LDispatchMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = standardizeRLSDescription("\(predecessor.description) >> LDispatchMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }

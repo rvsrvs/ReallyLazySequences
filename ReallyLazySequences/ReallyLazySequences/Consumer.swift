@@ -42,7 +42,7 @@ public struct Consumer<T> {
     private var composition: (T?) throws -> ContinuationResult
     
     public init(delivery: @escaping (T?) throws -> ContinuationResult) {
-        self.description = standardize("Consumer<\(type(of:T.self))>")
+        self.description = standardizeRLSDescription("Consumer<\(type(of:T.self))>")
         var isComplete = false
         composition = { value in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }
@@ -57,7 +57,7 @@ public struct Consumer<T> {
     
     public init<Predecessor>(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> ContinuationTermination))
         where Predecessor: ReallyLazySequenceProtocol, Predecessor.InputType == T {
-        self.description = standardize("\(predecessor.description) >> Consume<\(type(of:Predecessor.OutputType.self))>")
+        self.description = standardizeRLSDescription("\(predecessor.description) >> Consume<\(type(of:Predecessor.OutputType.self))>")
         let deliveryWrapper = { (value: Predecessor.OutputType?) -> ContinuationResult in
             return .done(delivery(value))
         }

@@ -67,7 +67,7 @@ public final class Zip2<T0, T1>: Listenable where
     
     init(_ t0: T0, _ t1: T1) {
         self.value = (nil, nil) as (T0.OutputType?, T1.OutputType?)
-        self.description = standardize("Zip2<\n\t\(t0.description),\n\t\(t1.description)\n>")
+        self.description = standardizeRLSDescription("Zip2<\n\t\(t0.description),\n\t\(t1.description)\n>")
         self.t0Proxy = nil
         self.t1Proxy = nil
         self.t0Proxy = t0.listen { [weak self] (t0: T0.OutputType?) -> ContinuationTermination in

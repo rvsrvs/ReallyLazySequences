@@ -45,7 +45,7 @@ public enum ReallyLazySequenceError: Error {
     }
 }
 
-func standardize(_ description: String) -> String {
+func standardizeRLSDescription(_ description: String) -> String {
     return description
         .replacingOccurrences(of: ".Type", with: "")
         .replacingOccurrences(of: "Swift.", with: "")

@@ -76,7 +76,7 @@ public final class URLDataGenerator: ListenableSequenceProtocol {
     public var sequenceGenerator: (InputType, @escaping (ListenableOutputType?) -> Void) -> Void
 
     public init(_ generator: @escaping (InputType, @escaping (ListenableOutputType?) -> Void) -> Void) {
-        self.description = standardize("URLDataGenerator<\(type(of: InputType.self), type(of:ListenableOutputType.self))>")
+        self.description = standardizeRLSDescription("URLDataGenerator<\(type(of: InputType.self), type(of:ListenableOutputType.self))>")
         self.sequenceGenerator = generator
     }
 

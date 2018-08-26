@@ -26,7 +26,7 @@ public final class ListenableValue<T>: Listenable {
     }
     
     init(_ value: T) {
-        self.description = standardize("ListenableValue<\(type(of: T.self))>")
+        self.description = standardizeRLSDescription("ListenableValue<\(type(of: T.self))>")
         self.value = value
     }
 }

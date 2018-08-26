@@ -54,7 +54,7 @@ public struct ListenerHandle<T>: CustomStringConvertible where T: Listenable {
     public init(identifier: UUID, listenable: T?) {
         self.identifier = identifier
         self.listenable = listenable
-        self.description = standardize("\(listenable?.description ?? "nil")   >> ListenerHandle<identifier = \"\(identifier)>\"")
+        self.description = standardizeRLSDescription("\(listenable?.description ?? "nil")   >> ListenerHandle<identifier = \"\(identifier)>\"")
     }
     
     public mutating func terminate() -> Consumer<T.ListenableOutputType>? {
@@ -101,7 +101,7 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
     init(_ listenable: T, installer: @escaping (UUID, Consumer<T.ListenableOutputType>) -> Void) {
         self.listenable = listenable
         self.installer = installer
-        self.description = standardize("\(listenable.description) >> Listener<\(type(of: T.ListenableOutputType.self))>")
+        self.description = standardizeRLSDescription("\(listenable.description) >> Listener<\(type(of: T.ListenableOutputType.self))>")
     }
     
     public func proxy() -> ListenerHandle<T> {
@@ -160,7 +160,7 @@ public final class ListenableSequence<T, U>: ListenableSequenceProtocol {
     public var sequenceGenerator: (T, @escaping (U?) -> Void) -> Void
     
     public init(_ sequenceGenerator: @escaping (T, @escaping (U?) -> Void) -> Void) {
-        self.description = standardize("ListenableSequence<\(type(of: T.self)) -> \(type(of: U.self))>")
+        self.description = standardizeRLSDescription("ListenableSequence<\(type(of: T.self)) -> \(type(of: U.self))>")
         self.sequenceGenerator = sequenceGenerator
     }
 }
