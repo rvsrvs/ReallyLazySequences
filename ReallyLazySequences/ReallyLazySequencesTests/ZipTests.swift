@@ -27,25 +27,25 @@ class ZipTests: XCTestCase {
             delivery(nil)
         }
         
-        let t1 = testGenerator
+        let t0 = testGenerator
             .listener()
             .map {  $0 * 2 }
         
-        let t2 = testGenerator
+        let t1 = testGenerator
             .listener()
-            .map {  $0 * 4 }
+            .map { Double($0 * 4) }
         
         var count = 0
-        let z = zip(t1, t2)
+        let z = zip(t0, t1)
             .listener()
-            .map { ($0.0 / 2, $0.1 / 2) }
-            .listen { (t: (Int, Int)?) -> ContinuationTermination in
+            .map { ($0.0 / 2, $0.1 / 2.0) }
+            .listen { (t: (Int, Double)?) -> ContinuationTermination in
                 guard let t = t else {
                     expectation.fulfill()
                     XCTAssert(count == 6, "Terminating after having received wrong count of: \(count) values")
                     return .terminate
                 }
-                XCTAssert(t.1 == 2 * t.0, "Terminating after incorrect computation")
+                XCTAssert(t.1 == Double(2 * t.0), "Terminating after incorrect computation")
                 count += 1
                 return .canContinue
             }

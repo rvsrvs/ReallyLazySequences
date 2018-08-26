@@ -10,11 +10,15 @@ import Foundation
 
 //func zip<Sequence1, Sequence2>(_ sequence1: Sequence1, _ sequence2: Sequence2) -> Zip2Sequence<Sequence1, Sequence2> where Sequence1 : Sequence, Sequence2 : Sequence
 
-public func zip<T0, T1>(_ t0: T0, _ t1: T1) -> Zip2<T0, T1> where T0: ListenerProtocol, T1: ListenerProtocol {
+public func zip<T0, T1>(_ t0: T0, _ t1: T1) -> Zip2<T0, T1> where
+    T0: ListenerProtocol,
+    T1: ListenerProtocol {
     return Zip2(t0, t1)
 }
 
-public final class Zip2<T0, T1>: Listenable where T0: ListenerProtocol, T1: ListenerProtocol {
+public final class Zip2<T0, T1>: Listenable where
+    T0: ListenerProtocol,
+    T1: ListenerProtocol {
     public var description: String
     
     public typealias ListenableOutputType = (T0.OutputType, T1.OutputType)
@@ -67,32 +71,16 @@ public final class Zip2<T0, T1>: Listenable where T0: ListenerProtocol, T1: List
         self.t0Proxy = nil
         self.t1Proxy = nil
         self.t0Proxy = t0.listen { [weak self] (t0: T0.OutputType?) -> ContinuationTermination in
-            guard let strongSelf = self else {
-                return .terminate
-            }
-            guard let t0 = t0 else {
-                strongSelf.value = nil
-                return .terminate
-            }
-            guard strongSelf.value?.0 == nil else {
-                strongSelf.t0Queue.append(t0)
-                return .canContinue
-            }
+            guard let strongSelf = self else { return .terminate }
+            guard let t0 = t0 else { strongSelf.value = nil; return .terminate }
+            guard strongSelf.value?.0 == nil else { strongSelf.t0Queue.append(t0); return .canContinue }
             strongSelf.value = (t0, self?.value?.1)
             return .canContinue
         }
         self.t1Proxy = t1.listen { [weak self] (t1: T1.OutputType?) -> ContinuationTermination in
-            guard let strongSelf = self else {
-                return .terminate
-            }
-            guard let t1 = t1 else {
-                strongSelf.value = nil
-                return .terminate
-            }
-            guard strongSelf.value?.1 == nil else {
-                strongSelf.t1Queue.append(t1)
-                return .canContinue
-            }
+            guard let strongSelf = self else { return .terminate }
+            guard let t1 = t1 else { strongSelf.value = nil; return .terminate }
+            guard strongSelf.value?.1 == nil else { strongSelf.t1Queue.append(t1); return .canContinue }
             strongSelf.value = (self?.value?.0, t1)
             return .canContinue
         }
