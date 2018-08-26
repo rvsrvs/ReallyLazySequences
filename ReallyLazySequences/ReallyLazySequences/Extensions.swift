@@ -90,7 +90,7 @@ public extension ConsumableProtocol {
 }
 
 extension ChainedListenerProtocol {
-    public func proxy() -> ListenerProxy<ListenableType> {
+    public func proxy() -> ListenerHandle<ListenableType> {
         return predecessor.proxy()
     }
     
@@ -98,8 +98,10 @@ extension ChainedListenerProtocol {
         return predecessor.compose(composer(delivery)) as! ContinuableInputDelivery
     }
 
-    public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<Self.ListenableType> {
-        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in  return .done(delivery(value)) }
+    public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerHandle<Self.ListenableType> {
+        let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
+            return .done(delivery(value))
+        }
         let _ = predecessor.compose(composer(deliveryWrapper))
         return predecessor.proxy()
     }

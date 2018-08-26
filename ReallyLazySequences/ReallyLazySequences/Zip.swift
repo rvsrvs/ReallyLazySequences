@@ -16,8 +16,8 @@ public final class Zip2<T0, T1>: Listenable where T0: ListenerProtocol, T1: List
     public var listeners = [UUID: Consumer<(T0.OutputType, T1.OutputType)>]()
     public var hasListeners: Bool { return listeners.count > 0 }
     
-    private var t0Proxy: ListenerProxy<T0.ListenableType>?
-    private var t1Proxy: ListenerProxy<T1.ListenableType>?
+    private var t0Proxy: ListenerHandle<T0.ListenableType>?
+    private var t1Proxy: ListenerHandle<T1.ListenableType>?
 
     var value: (T0.OutputType?, T1.OutputType?)? {
         didSet {

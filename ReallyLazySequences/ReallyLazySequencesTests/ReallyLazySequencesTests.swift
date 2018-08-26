@@ -80,7 +80,7 @@ class ReallyLazySequencesTests: XCTestCase {
         generator.generate(for: 3)
         
         waitForExpectations(timeout: 1.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
-        proxy.terminate()
+        _ = proxy.terminate()
     }
     
     func testDispatch() {

@@ -10,10 +10,12 @@ import Foundation
 
 public protocol Listenable: class {
     associatedtype ListenableOutputType
+
     var listeners: [UUID: Consumer<ListenableOutputType>] { get set }
-    func listener() -> Listener<Self>
     var hasListeners: Bool { get }
-    func add(consumer: Consumer<ListenableOutputType>, with: UUID) -> ListenerProxy<Self>
+
+    func listener() -> Listener<Self>
+    func add(consumer: Consumer<ListenableOutputType>, with: UUID)
     func remove(consumerWith: UUID) -> Consumer<ListenableOutputType>?
     func terminate()
 }
@@ -21,9 +23,8 @@ public protocol Listenable: class {
 extension Listenable {
     public var hasListeners: Bool { return listeners.count > 0 }
     
-    public func add(consumer: Consumer<ListenableOutputType>, with uuid: UUID)  -> ListenerProxy<Self> {
+    public func add(consumer: Consumer<ListenableOutputType>, with uuid: UUID) {
         listeners[uuid] = consumer
-        return ListenerProxy(identifier: uuid, listenable: self)
     }
     
     public func remove(consumerWith: UUID) -> Consumer<ListenableOutputType>? {
@@ -39,26 +40,27 @@ extension Listenable {
 
     public func listener() -> Listener<Self> {
         return Listener<Self>(self) { (uuid: UUID, consumer: Consumer<ListenableOutputType>) in
-            _ = self.add(consumer: consumer, with: uuid)
+            self.add(consumer: consumer, with: uuid)
         }
     }
 }
 
-public struct ListenerProxy<T> where T: Listenable {
+public struct ListenerHandle<T> where T: Listenable {
     var identifier: UUID
     var listenable: T?
     
-    public mutating func terminate() {
-        guard let m = listenable else { return }
-        _ = m.remove(consumerWith: identifier)
+    public mutating func terminate() -> Consumer<T.ListenableOutputType>? {
+        guard let m = listenable else { return nil }
+        let c = m.remove(consumerWith: identifier)
         listenable = nil
+        return c
     }
 }
 
 public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     associatedtype ListenableType: Listenable
-    func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerProxy<Self.ListenableType>
-    func proxy() -> ListenerProxy<Self.ListenableType>
+    func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerHandle<Self.ListenableType>
+    func proxy() -> ListenerHandle<Self.ListenableType>
     
     // Listenable Chaining
     func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType>
@@ -82,7 +84,7 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
     public typealias InputType = T.ListenableOutputType
     public typealias OutputType = T.ListenableOutputType
     
-    public var description: String = standardize("Listener<\(type(of: T.self)) -> \(type(of: T.ListenableOutputType.self))>")
+    public var description: String = standardize("\(type(of: T.self)) >> Listener<\(type(of: T.ListenableOutputType.self))>")
 
     public var installer: (UUID, Consumer<T.ListenableOutputType>) -> Void
     private weak var listenable: T?
@@ -93,8 +95,8 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
         self.installer = installer
     }
     
-    public func proxy() -> ListenerProxy<T> {
-        return ListenerProxy(identifier: identifier, listenable: listenable)
+    public func proxy() -> ListenerHandle<T> {
+        return ListenerHandle(identifier: identifier, listenable: listenable)
     }
     
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
@@ -103,10 +105,10 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
         return { _ in throw ReallyLazySequenceError.nonPushable }
     }
     
-    public func listen(_ delivery: @escaping (T.ListenableOutputType?) -> ContinuationTermination) -> ListenerProxy<T> {
+    public func listen(_ delivery: @escaping (T.ListenableOutputType?) -> ContinuationTermination) -> ListenerHandle<T> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in return .done(delivery(value)) }
         let _ = compose(deliveryWrapper)
-        return ListenerProxy(identifier: identifier, listenable: listenable)
+        return ListenerHandle(identifier: identifier, listenable: listenable)
     }
 }
 
