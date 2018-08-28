@@ -10,14 +10,18 @@ import Foundation
 // Implement Consume
 public extension ConsumableProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType> {
-        return Consumer<Self.InputType>(predecessor: self, delivery:  delivery )
+        let deliveryWrapper = {  (output: Self.OutputType?) -> ContinuationResult in
+            let result = delivery(output)
+            return .done(result)
+        }
+        return compose(deliveryWrapper)!
     }
 }
 
 // Implement Composition
 public extension ReallyLazySequenceProtocol {
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
-        return { (value: InputType?) -> ContinuationResult in
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> Consumer<InputType>? {
+        return Consumer<InputType> { (value: InputType?) -> ContinuationResult in
             guard let value = value as? OutputType? else { return .done(.terminate) }
             return .more({ delivery(value) })
         }
@@ -25,8 +29,8 @@ public extension ReallyLazySequenceProtocol {
 }
 
 public extension ChainedConsumableProtocol {
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery  {
-        return predecessor.compose(composer(delivery)) as! ContinuableInputDelivery
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> Consumer<InputType>?  {
+        return predecessor.compose(composer(delivery)) as! Consumer<InputType>?
     }
 }
 
@@ -94,8 +98,8 @@ extension ChainedListenerProtocol {
         return predecessor.proxy()
     }
     
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery  {
-        return predecessor.compose(composer(delivery)) as! ContinuableInputDelivery
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> Consumer<InputType>?  {
+        return predecessor.compose(composer(delivery)) as? Consumer<Self.InputType>
     }
 
     public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerHandle<Self.ListenableType> {

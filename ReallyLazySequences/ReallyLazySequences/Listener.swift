@@ -108,10 +108,10 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
         return ListenerHandle(identifier: identifier, listenable: listenable)
     }
     
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> Consumer<InputType>? {
         let listener = Consumer<T.ListenableOutputType>(delivery: delivery)
         installer(identifier, listener)
-        return { _ in throw ReallyLazySequenceError.nonPushable }
+        return nil
     }
     
     public func listen(_ delivery: @escaping (T.ListenableOutputType?) -> ContinuationTermination) -> ListenerHandle<T> {

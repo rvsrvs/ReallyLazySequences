@@ -61,7 +61,7 @@ public protocol ReallyLazySequenceProtocol: CustomStringConvertible {
 
     // The function which is called from the tail of an RLS chain to cause it
     // to create its composed function  
-    func compose(_ output: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery
+    func compose(_ output: @escaping ContinuableOutputDelivery) -> Consumer<InputType>?
 }
 
 public struct SimpleSequence<T>: ConsumableProtocol {
@@ -78,12 +78,12 @@ public protocol SubsequenceProtocol: ConsumableProtocol {
 }
 
 public extension SubsequenceProtocol {
-    func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery {
+    func compose(_ delivery: @escaping ContinuableOutputDelivery) -> Consumer<InputType>? {
         let deliveryWrapper = { (output: OutputType?) -> Void in
             _ = ContinuationResult.complete(delivery(output));
             return
         }
-        return { (input: InputType?) throws -> ContinuationResult in
+        return Consumer { (input: InputType?) throws -> ContinuationResult in
             guard let input = input else { return delivery(nil) }
             return .more ({ self.generator(input, deliveryWrapper); return ContinuationResult.done(.canContinue) })
         }

@@ -55,33 +55,5 @@ public struct Consumer<T> {
         }
     }
     
-    public init<Predecessor>(predecessor:Predecessor, delivery: @escaping ((Predecessor.OutputType?) -> ContinuationTermination))
-        where Predecessor: ReallyLazySequenceProtocol, Predecessor.InputType == T {
-        self.description = standardizeRLSDescription("\(predecessor.description) >> Consume<\(type(of:Predecessor.OutputType.self))>")
-        let deliveryWrapper = { (value: Predecessor.OutputType?) -> ContinuationResult in
-            return .done(delivery(value))
-        }
-        // Have the predecessor compose its operation with ours
-        // Different types of predecessors compose differently
-        // This call eventually recurses through all predecessors
-        // terminating at an RLS structure.
-        let composedInputFunction = predecessor.compose(deliveryWrapper)
-        
-        var isComplete = false
-            
-        // Consumer composes the final push function here.
-        composition = { value in
-            guard !isComplete else { throw ReallyLazySequenceError.isComplete }
-            if value == nil { isComplete = true }
-            var result: ContinuationResult = .done(.canContinue)
-            do {
-                result = ContinuationResult.complete(try composedInputFunction(value))
-            } catch {
-                print(error)
-            }
-            return result
-        }
-    }
-    
     public func process(_ value: T?) throws -> ContinuationResult { return try composition(value) }
 }
