@@ -19,6 +19,8 @@
 		FB6599E42124B7A500357D8D /* ContinuationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6599E32124B7A500357D8D /* ContinuationTests.swift */; };
 		FB6599E6212A1DF400357D8D /* Composers.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6599E5212A1DF400357D8D /* Composers.swift */; };
 		FB680F46211154350089A710 /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB680F45211154350089A710 /* NetworkingTests.swift */; };
+		FB7E18E8213700A600008A0D /* Select.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7E18E7213700A600008A0D /* Select.swift */; };
+		FB7E18EA21377BE900008A0D /* SelectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7E18E921377BE900008A0D /* SelectTests.swift */; };
 		FBCA36AC2117A83400984A5B /* Listener.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCA36AB2117A83400984A5B /* Listener.swift */; };
 		FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD6133211940C2001C0BE3 /* ListenerTests.swift */; };
 		FBDD61362119C6E4001C0BE3 /* ListenableSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD61352119C6E4001C0BE3 /* ListenableSequenceTests.swift */; };
@@ -54,6 +56,8 @@
 		FB6599E32124B7A500357D8D /* ContinuationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuationTests.swift; sourceTree = "<group>"; };
 		FB6599E5212A1DF400357D8D /* Composers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Composers.swift; sourceTree = "<group>"; };
 		FB680F45211154350089A710 /* NetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
+		FB7E18E7213700A600008A0D /* Select.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Select.swift; sourceTree = "<group>"; };
+		FB7E18E921377BE900008A0D /* SelectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectTests.swift; sourceTree = "<group>"; };
 		FBCA36AB2117A83400984A5B /* Listener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listener.swift; sourceTree = "<group>"; };
 		FBDD6133211940C2001C0BE3 /* ListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerTests.swift; sourceTree = "<group>"; };
 		FBDD61352119C6E4001C0BE3 /* ListenableSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenableSequenceTests.swift; sourceTree = "<group>"; };
@@ -111,6 +115,7 @@
 				FBCA36AB2117A83400984A5B /* Listener.swift */,
 				FBDD6139211B8E7F001C0BE3 /* Value.swift */,
 				FB5C9790212F460400E48544 /* Zip.swift */,
+				FB7E18E7213700A600008A0D /* Select.swift */,
 				FB3F3AC71ED5C1AC0005EFB4 /* Extensions.swift */,
 				FB6599E5212A1DF400357D8D /* Composers.swift */,
 				FBDD6137211B0652001C0BE3 /* Networking.swift */,
@@ -129,6 +134,7 @@
 				FBDD6133211940C2001C0BE3 /* ListenerTests.swift */,
 				FBDD61352119C6E4001C0BE3 /* ListenableSequenceTests.swift */,
 				FB5C97922130AD4D00E48544 /* ZipTests.swift */,
+				FB7E18E921377BE900008A0D /* SelectTests.swift */,
 				FB680F45211154350089A710 /* NetworkingTests.swift */,
 				FB33E03A1EBE7E85009CA3AC /* Info.plist */,
 			);
@@ -259,6 +265,7 @@
 				FB628AF721109CC6009A56F9 /* Consumer.swift in Sources */,
 				FB628AC5210C9263009A56F9 /* ConsumableChainingDeclarations.swift in Sources */,
 				FB6599E6212A1DF400357D8D /* Composers.swift in Sources */,
+				FB7E18E8213700A600008A0D /* Select.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +273,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB7E18EA21377BE900008A0D /* SelectTests.swift in Sources */,
 				FB6599E42124B7A500357D8D /* ContinuationTests.swift in Sources */,
 				FBDD6134211940C2001C0BE3 /* ListenerTests.swift in Sources */,
 				FBDD61362119C6E4001C0BE3 /* ListenableSequenceTests.swift in Sources */,

@@ -108,7 +108,7 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
         return ListenerHandle(identifier: identifier, listenable: listenable)
     }
     
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> Consumer<InputType>? {
+    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
         let listener = Consumer<T.ListenableOutputType>(delivery: delivery)
         installer(identifier, listener)
         return nil

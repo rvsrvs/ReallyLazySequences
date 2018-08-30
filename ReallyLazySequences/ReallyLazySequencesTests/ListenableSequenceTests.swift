@@ -50,7 +50,7 @@ class ProducerTests: XCTestCase {
         
         testGenerator.generate(for: 5)
         
-        waitForExpectations(timeout: 30.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        waitForExpectations(timeout: 5.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
         _ = proxy1.terminate()
         _ = proxy2.terminate()
     }

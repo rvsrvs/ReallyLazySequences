@@ -74,7 +74,7 @@ class NetworkingTests: XCTestCase {
 
         producer.generate(for: (url: url, session: SessionSupport().session()))
         
-        waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        waitForExpectations(timeout: 5.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
         _ = proxy1.terminate()
         _ = proxy2.terminate()
     }
