@@ -70,6 +70,11 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerHandle<Self.ListenableType>
     func proxy() -> ListenerHandle<Self.ListenableType>
     
+    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T>
+    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T>
+    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
+
     // Listenable Chaining
     func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType>
     func collect<T>(
@@ -77,11 +82,7 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
     ) -> ListenableReduce<Self, T>
-    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T>
-    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T>
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
-    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ListenableReduce<Self, T>
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType>

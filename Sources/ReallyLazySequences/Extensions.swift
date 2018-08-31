@@ -28,6 +28,24 @@ public extension ReallyLazySequenceProtocol {
     }
 }
 
+public extension SubsequenceProtocol {
+    func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
+        let deliveryWrapper = { (output: OutputType?) -> Void in
+            _ = ContinuationResult.complete(
+                .afterThen(
+                    .more({ delivery(output) }),
+                    .more({ delivery(nil) })
+                )
+            );
+            return
+        }
+        return { (input: InputType?) throws -> ContinuationResult in
+            guard let input = input else { return delivery(nil) }
+            return .more ({ self.generator(input, deliveryWrapper); return ContinuationResult.done(.canContinue) })
+        }
+    }
+}
+
 public extension ChainedConsumableProtocol {
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery?  {
         return predecessor.compose(composer(delivery)) as? (Self.InputType?) throws -> ContinuationResult

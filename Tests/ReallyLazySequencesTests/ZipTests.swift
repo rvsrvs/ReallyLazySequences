@@ -54,5 +54,4 @@ class ZipTests: XCTestCase {
         
         waitForExpectations(timeout: 2.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
-
 }

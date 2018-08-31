@@ -11,6 +11,11 @@ import Foundation
 public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType>
     
+    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T>
+    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ConsumableCompactMap<Self, T>
+    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
+
     // Consumable chaining
     func dispatch(_ queue: OperationQueue) -> ConsumableDispatch<Self, OutputType>
     func collect<T>(
@@ -20,10 +25,7 @@ public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
     ) -> ConsumableReduce<Self, T>
     func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
         where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
-    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T>
-    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ConsumableCompactMap<Self, T>
-    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
+    
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ConsumableReduce<Self, T>
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ConsumableFilter<Self, OutputType>
 }

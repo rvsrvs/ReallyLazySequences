@@ -34,7 +34,7 @@ class NetworkingTests: XCTestCase {
             let toFetch = (url, session)
             _ = try? fetcher.process(toFetch)
         }
-        waitForExpectations(timeout: 40.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
+        waitForExpectations(timeout: 5.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }
     
     func testNetworkProcessing() {
