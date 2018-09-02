@@ -41,6 +41,33 @@ struct Composers {
         }
     }
     
+    static func flatMapComposer<T, U, V> (
+        delivery: @escaping (T?) -> ContinuationResult,
+        queue: OperationQueue?,
+        transform: @escaping (U) throws -> V
+    ) -> (U?) -> ContinuationResult where V: SubsequenceProtocol, V.InputType == U, V.OutputType == T {
+        return { (input: U?) -> ContinuationResult in
+            guard let input = input else { return delivery(nil) }
+            do {
+                let subsequence = try transform(input)
+                    .consume { value in
+                        guard let value = value else { return .canContinue }
+                        _ = ContinuationResult.complete(.more({ delivery(value) }))
+                        return .terminate
+                    }
+                if let queue = queue {
+                    queue.addOperation { _ = try? subsequence.process(input) }
+                } else {
+                    _ = try? subsequence.process(input)
+                }
+                return .done(.canContinue)
+            } catch {
+                let rlsError = ContinuationErrorContext(opType: .flatMap, value: input, delivery: delivery, error: error)
+                return ContinuationResult.error(rlsError)
+            }
+        }
+    }
+    
     static func collectComposer<T,U> (
         delivery: @escaping (T?) -> ContinuationResult,
         initialValue: @autoclosure @escaping () -> T,
@@ -66,33 +93,6 @@ struct Composers {
                 return .done(.canContinue)
             } catch {
                 let rlsError = ContinuationErrorContext(opType: .reduce, value: input, delivery: delivery, error: error)
-                return ContinuationResult.error(rlsError)
-            }
-        }
-    }
-    
-    static func flatMapComposer<T, U, V> (
-        delivery: @escaping (T?) -> ContinuationResult,
-        queue: OperationQueue?,
-        transform: @escaping (U) throws -> V
-    ) -> (U?) -> ContinuationResult where V: SubsequenceProtocol, V.InputType == U, V.OutputType == T {
-        return { (input: U?) -> ContinuationResult in
-            guard let input = input else { return delivery(nil) }
-            do {
-                let subsequence = try transform(input)
-                    .consume { value in
-                        guard let value = value else { return .canContinue }
-                        _ = ContinuationResult.complete(.more({ delivery(value) }))
-                        return .terminate
-                    }
-                if let queue = queue {
-                    queue.addOperation { _ = try? subsequence.process(input) }
-                } else {
-                    _ = try? subsequence.process(input)
-                }
-                return .done(.canContinue)
-            } catch {
-                let rlsError = ContinuationErrorContext(opType: .flatMap, value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
             }
         }

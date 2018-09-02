@@ -41,3 +41,12 @@ public struct Subsequence<T, U>: SubsequenceProtocol {
         self.generator = generator
     }
 }
+
+public protocol StatefulSubsequenceProtocol: ConsumableProtocol {
+    associatedtype State
+    var state: State { get set }
+    var generator: (InputType, State, @escaping (OutputType?) -> Void) -> Void { get set }
+    init(_ initialState: State, _ generator: @escaping (InputType, State, @escaping (OutputType?) -> Void) -> Void)
+}
+
+

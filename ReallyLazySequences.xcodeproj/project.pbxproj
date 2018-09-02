@@ -163,15 +163,15 @@
 		OBJ_8 /* ReallyLazySequences */ = {
 			isa = PBXGroup;
 			children = (
+				OBJ_17 /* ReallyLazySequence.swift */,
+				OBJ_11 /* Consumer.swift */,
+				OBJ_15 /* Listener.swift */,
+				OBJ_13 /* Extensions.swift */,
 				OBJ_9 /* Composers.swift */,
 				OBJ_10 /* ConsumableChainingDeclarations.swift */,
-				OBJ_11 /* Consumer.swift */,
 				OBJ_12 /* Continuation.swift */,
-				OBJ_13 /* Extensions.swift */,
 				OBJ_14 /* ListenableChainingDeclarations.swift */,
-				OBJ_15 /* Listener.swift */,
 				OBJ_16 /* Networking.swift */,
-				OBJ_17 /* ReallyLazySequence.swift */,
 				OBJ_18 /* Select.swift */,
 				OBJ_19 /* Utilities.swift */,
 				OBJ_20 /* Value.swift */,
