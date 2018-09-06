@@ -14,7 +14,12 @@ public extension ConsumableProtocol {
             let result = delivery(output)
             return .done(result)
         }
-        return Consumer(delivery: compose(deliveryWrapper)!)
+        let output: Self.OutputType?
+        let consumeType = "\(type(of: output))"
+            .replacingOccurrences(of: "Optional<", with: "")
+            .replacingOccurrences(of: ">", with: "")
+        let desc = self.description + " >> consume<\(consumeType)>"
+        return Consumer(delivery: compose(deliveryWrapper)!, description: desc)
     }
 
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {

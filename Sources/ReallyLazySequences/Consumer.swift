@@ -40,8 +40,8 @@ public struct Consumer<T> {
     public var description: String
     private var composition: (T?) throws -> ContinuationResult
     
-    public init(delivery: @escaping (T?) throws -> ContinuationResult) {
-        self.description = standardizeRLSDescription("Consumer<\(type(of:T.self))>")
+    public init(delivery: @escaping (T?) throws -> ContinuationResult, description: String = "") {
+        self.description = standardizeRLSDescription(description)
         var isComplete = false
         composition = { value in
             guard !isComplete else { throw ReallyLazySequenceError.isComplete }

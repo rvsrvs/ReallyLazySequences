@@ -1,20 +1,25 @@
 import ReallyLazySequences
 
-let consumed = [24, 4, 6]
+let consumedArray = [24, 4, 6]
     .filter { $0 < 10 }
     .map { Double($0) * 2.0 }
 
-print (type(of: consumed))
-print (consumed.description)
+print (type(of: consumedArray))
+print (consumedArray.description)
 
-let consumer = SimpleSequence<Int>()
+let unconsumedSequence = SimpleSequence<Int>()
     .filter { $0 < 10 }
     .map { Double($0) * 2.0 }
+    
+print(type(of:unconsumedSequence))
+print(unconsumedSequence.description)
+
+let consumer = unconsumedSequence
     .consume { (value: Double?) -> ContinuationTermination in
         guard let value = value else { return .stop }
         print(type(of:value), value)
         return .canContinue
-}
+    }
 
 print(type(of:consumer))
 print(consumer.description)
@@ -22,5 +27,5 @@ print(consumer.description)
 do {
     try [24, 4, 6, nil, 14].forEach {_ = try consumer.process($0) }
 } catch {
-    print(error)
+    print("Error in processing: \(error)")
 }
