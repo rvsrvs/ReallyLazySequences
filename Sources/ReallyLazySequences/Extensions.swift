@@ -16,10 +16,7 @@ public extension ConsumableProtocol {
         }
         return Consumer(delivery: compose(deliveryWrapper)!)
     }
-}
 
-// Implement Composition
-public extension ReallyLazySequenceProtocol {
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
         return { (value: InputType?) -> ContinuationResult in
             guard let value = value as? OutputType? else { return .done(.terminate) }
@@ -54,6 +51,13 @@ public extension ConsumableProtocol {
         }
     }
 
+    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
+            return ConsumableFlatMap<Self, T>(predecessor: self) { delivery in
+                Composers.flatMapComposer(delivery: delivery, transform: transform)
+            }
+    }
+    
     public func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
@@ -64,13 +68,6 @@ public extension ConsumableProtocol {
         }
     }
     
-    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
-            return ConsumableFlatMap<Self, T>(predecessor: self) { delivery in
-                Composers.flatMapComposer(delivery: delivery, transform: transform)
-            }
-    }
-
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ConsumableReduce<Self, T> {
         return collect(initialValue: initialValue, combine: combine, until: { $1 == nil })
     }
@@ -119,6 +116,13 @@ public extension ListenerProtocol {
         }
     }
 
+    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
+        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
+            return ListenableFlatMap<Self, T>(predecessor: self) { delivery in
+                Composers.flatMapComposer(delivery: delivery, transform: transform)
+            }
+    }
+    
     public func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
@@ -127,13 +131,6 @@ public extension ListenerProtocol {
         return ListenableReduce<Self, T>(predecessor: self) { delivery in
             Composers.collectComposer(delivery: delivery, initialValue: initialValue, combine: combine, until: until)
         }
-    }
-    
-    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
-            return ListenableFlatMap<Self, T>(predecessor: self) { delivery in
-                Composers.flatMapComposer(delivery: delivery, transform: transform)
-            }
     }
     
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ListenableReduce<Self, T> {
@@ -152,6 +149,3 @@ public extension ListenerProtocol {
         }
     }
 }
-
-
-
