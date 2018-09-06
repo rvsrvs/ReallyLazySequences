@@ -1,4 +1,3 @@
-
 import ReallyLazySequences
 
 let consumed = [24, 4, 6]
@@ -15,7 +14,7 @@ let consumer = SimpleSequence<Int>()
         guard let value = value else { return .stop }
         print(type(of:value), value)
         return .canContinue
-    }
+}
 
 print(type(of:consumer))
 print(consumer.description)

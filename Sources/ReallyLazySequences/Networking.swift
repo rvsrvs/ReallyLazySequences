@@ -35,34 +35,28 @@ extension URLSession {
     }
 }
 
-public struct URLDataSubsequence: SubsequenceProtocol {
+public struct URLDataSubsequence: ConsumableProtocol {
     public typealias InputType = (url: URL, session: URLSession)
     public typealias OutputType = Result<Data>
     public var description: String = "URLDataFetcher"
-    public var generator: (InputType, @escaping (OutputType?) -> Void) -> Void
-    
-    public init(_ generator: @escaping ((url: URL, session: URLSession), @escaping (Result<Data>?) -> Void) -> Void) {
-        self.generator = generator
-    }
-    
-    public init() {
-        self.init { (fetch: InputType, delivery: @escaping ((OutputType?) -> Void)) -> Void in
-            let c = SimpleSequence<Result<Data>>()
-                .consume { result in
-                    let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
-                        delivery(value)
-                        return .done(.canContinue)
-                    }
-                    _ = ContinuationResult.complete(
-                        .afterThen(.more({ deliveryWrapper(result) }),
-                                   .more({ deliveryWrapper(nil) }))
-                    )
-                    return .canContinue
-                }
-            
-            let task = fetch.session.dataTask(with: fetch.url) { (result: Result<Data>) in _ = try? c.process(result) }
+
+    public init() { }
+    public func compose(
+        _ delivery: @escaping (OutputType?) -> ContinuationResult
+    ) -> ((InputType?) throws -> ContinuationResult)? {
+        return { (input: InputType?) throws -> ContinuationResult in
+            guard let input = input else { return delivery(nil) }
+            let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
+                return delivery(value)
+            }
+            var result: Result<Data>?
+            let task = input.session.dataTask(with: input.url) { result = $0 }
             task.resume()
             while task.state != .completed { RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.1)) }
+            return .afterThen(
+                .more({ deliveryWrapper(result) }),
+                .more({ deliveryWrapper(nil) })
+            )
         }
     }
 }
@@ -99,13 +93,14 @@ extension URLDataGenerator {
                         let configuration = try JSONDecoder().decode(decodingType, from: data)
                         return .success(configuration)
                     } catch {
-                        let wrappingError = NSError(domain: "ReallyLazySequences.URLDataProducer",
-                                                    code: 1002,
-                                                    userInfo: [
-                                                        "json": data,
-                                                        "msg": "Error decoding json as type: \(type(of: decodingType))",
-                                                        "error": error
-                                                    ]
+                        let wrappingError = NSError(
+                            domain: "ReallyLazySequences.URLDataProducer",
+                            code: 1002,
+                            userInfo: [
+                                "json": data,
+                                "msg": "Error decoding json as type: \(type(of: decodingType))",
+                                "error": error
+                            ]
                         )
                         return .failure(wrappingError)
                     }

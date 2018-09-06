@@ -29,13 +29,27 @@ class ReallyLazySequencesTests: XCTestCase {
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
             .flatMap { (input) in
-                Subsequence { (_, delivery) in input.forEach { delivery($0) } }
+                Subsequence { () -> Any? in
+                    var current: [Double] = input
+                    func iterator() -> (Double, () -> Any?)? {
+                        guard let value = current.first else { return nil }
+                        current = Array(current.dropFirst())
+                        return (value, iterator)
+                    }
+                    return iterator()
+                }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
             .flatMap { (input: Int) -> Subsequence<Int, Int> in
-                Subsequence { (_: Int, delivery: (Int?) -> Void)  in
-                    (0 ..< 3).forEach { delivery($0 * input) }
+                Subsequence { () -> Any? in
+                    var current = Array<Int>(0 ..< 3)
+                    func iterator() -> (Int, () -> Any?)? {
+                        guard let value = current.first else { return nil }
+                        current = Array(current.dropFirst())
+                        return (value * input, iterator)
+                    }
+                    return iterator()
                 }
             }
             .consume { if let value = $0 { accumulatedResults.append(value) }; return .canContinue }
@@ -121,8 +135,14 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) in
-                Subsequence<[Int],Int> { (input, delivery) in
-                    input.forEach { delivery($0) }
+                Subsequence<[Int],Int> { () -> Any? in
+                    var current: [Int] = collected
+                    func iterator() -> (Int, () -> Any?)? {
+                        guard let value = current.first else { return nil }
+                        current = Array(current.dropFirst())
+                        return (value, iterator)
+                    }
+                    return iterator()
                 }
             }
             .consume {

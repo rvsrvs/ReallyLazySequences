@@ -25,28 +25,34 @@ public struct SimpleSequence<T>: ConsumableProtocol {
     public init() { }    
 }
 
-public protocol SubsequenceProtocol: ConsumableProtocol {
-    var generator: (InputType, @escaping (OutputType?) -> Void) -> Void { get set }
-    init(_ generator: @escaping (InputType, @escaping (OutputType?) -> Void) -> Void)
+public protocol SubsequenceProtocol {
+    associatedtype InputType
+    associatedtype OutputType
+    typealias SubsequenceContinuation = () -> Any?
+    typealias SubsequenceResult = (OutputType, SubsequenceContinuation)
+    var generator: SubsequenceContinuation { get }
+    init(generator: @escaping SubsequenceContinuation)
 }
 
 public struct Subsequence<T, U>: SubsequenceProtocol {
     public typealias InputType = T
     public typealias OutputType = U
     
-    public var description: String = standardizeRLSDescription("GeneratingSubsequence<\(type(of:T.self), type(of:U.self))>")
-    public var generator: (T, @escaping (U?) -> Void) -> Void
+    public var description: String = standardizeRLSDescription("Subsequence<\(type(of:T.self), type(of:U.self))>")
+    public var generator: SubsequenceContinuation
     
-    public init(_ generator: @escaping (T, @escaping (U?) -> Void) -> Void) {
+    public init(generator:@escaping SubsequenceContinuation) {
         self.generator = generator
     }
 }
 
-public protocol StatefulSubsequenceProtocol: ConsumableProtocol {
+public protocol StatefulSubsequenceProtocol {
+    associatedtype InputType
+    associatedtype OutputType
+    typealias SubsequenceContinuation = () -> Any?
+    typealias StatefulSubsequenceResult = (State, OutputType, SubsequenceContinuation)
     associatedtype State
     var state: State { get set }
-    var generator: (InputType, State, @escaping (OutputType?) -> Void) -> Void { get set }
-    init(_ initialState: State, _ generator: @escaping (InputType, State, @escaping (OutputType?) -> Void) -> Void)
+    var generator: (State, InputType) -> (State, OutputType, SubsequenceContinuation)? { get }
+    init(_ generator: @escaping (State, InputType) -> StatefulSubsequenceResult?)
 }
-
-

@@ -23,9 +23,7 @@ public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
     ) -> ConsumableReduce<Self, T>
-    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
-    
+
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ConsumableReduce<Self, T>
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ConsumableFilter<Self, OutputType>
 }

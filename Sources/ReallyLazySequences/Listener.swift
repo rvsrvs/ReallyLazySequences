@@ -82,8 +82,6 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
     ) -> ListenableReduce<Self, T>
-    func flatMap<T, U>(queue: OperationQueue?, _ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
     func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ListenableReduce<Self, T>
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType>
 }
