@@ -97,7 +97,6 @@ struct Composers {
         }
     }
     
-    typealias SubsequenceContinuation = () -> Any?
     static func flatMapComposer<T, U, V> (
         delivery: @escaping (T?) -> ContinuationResult,
         transform: @escaping (U) throws -> V
