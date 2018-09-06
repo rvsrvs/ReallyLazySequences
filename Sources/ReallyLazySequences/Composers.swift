@@ -105,15 +105,15 @@ struct Composers {
         return { (input: U?) -> ContinuationResult in
             guard let input = input else { return delivery(nil) }
             do {
-                let generator = try transform(input).generator
-                func iterator(generator: SubsequenceContinuation) -> ContinuationResult {
-                    guard let value = generator() as? (T, SubsequenceContinuation) else { return .done(.canContinue) }
+                let iterator = try transform(input).iterator
+                func iterate(_ iterator: @escaping () -> T?) -> ContinuationResult {
+                    guard let value = iterator() else { return .done(.canContinue) }
                     return .afterThen(
-                        .more({ delivery(value.0) }),
-                        .more({ iterator(generator: value.1) })
+                        .more({ delivery(value) }),
+                        .more({ iterate(iterator) })
                     )
                 }
-                return iterator(generator: generator)
+                return iterate(iterator)
             } catch {
                 let rlsError = ContinuationErrorContext(opType: .flatMap, value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)

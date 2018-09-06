@@ -28,10 +28,8 @@ public struct SimpleSequence<T>: ConsumableProtocol {
 public protocol SubsequenceProtocol {
     associatedtype InputType
     associatedtype OutputType
-    typealias SubsequenceContinuation = () -> Any?
-    typealias SubsequenceResult = (OutputType, SubsequenceContinuation)
-    var generator: SubsequenceContinuation { get }
-    init(generator: @escaping SubsequenceContinuation)
+    var iterator: () -> OutputType? { get }
+    init(iterator: @escaping () -> OutputType?)
 }
 
 public struct Subsequence<T, U>: SubsequenceProtocol {
@@ -39,20 +37,18 @@ public struct Subsequence<T, U>: SubsequenceProtocol {
     public typealias OutputType = U
     
     public var description: String = standardizeRLSDescription("Subsequence<\(type(of:T.self), type(of:U.self))>")
-    public var generator: SubsequenceContinuation
-    
-    public init(generator:@escaping SubsequenceContinuation) {
-        self.generator = generator
+    public var iterator: () -> OutputType?
+
+    public init(iterator: @escaping () -> OutputType?) {
+        self.iterator = iterator
     }
 }
 
 public protocol StatefulSubsequenceProtocol {
+    associatedtype State
     associatedtype InputType
     associatedtype OutputType
-    typealias SubsequenceContinuation = () -> Any?
-    typealias StatefulSubsequenceResult = (State, OutputType, SubsequenceContinuation)
-    associatedtype State
     var state: State { get set }
-    var generator: (State, InputType) -> (State, OutputType, SubsequenceContinuation)? { get }
-    init(_ generator: @escaping (State, InputType) -> StatefulSubsequenceResult?)
+    var iterator: (State) -> (State, OutputType)? { get }
+    init(_ iterator: @escaping (State) -> (State, OutputType)?)
 }

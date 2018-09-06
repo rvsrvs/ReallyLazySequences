@@ -28,28 +28,22 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { $0 * 2 }
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
-            .flatMap { (input) in
-                Subsequence { () -> Any? in
-                    var current: [Double] = input
-                    func iterator() -> (Double, () -> Any?)? {
-                        guard let value = current.first else { return nil }
-                        current = Array(current.dropFirst())
-                        return (value, iterator)
-                    }
-                    return iterator()
+            .flatMap { (input: [Double]) -> Subsequence<[Double], Double> in
+                var current: [Double] = input
+                return Subsequence<[Double], Double> { () -> Double? in
+                    guard let value = current.first else { return nil }
+                    current = Array(current.dropFirst())
+                    return value
                 }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
             .flatMap { (input: Int) -> Subsequence<Int, Int> in
-                Subsequence { () -> Any? in
-                    var current = Array<Int>(0 ..< 3)
-                    func iterator() -> (Int, () -> Any?)? {
-                        guard let value = current.first else { return nil }
-                        current = Array(current.dropFirst())
-                        return (value * input, iterator)
-                    }
-                    return iterator()
+                var current = Array<Int>(0 ..< 3)
+                return Subsequence<Int, Int> { () -> Int? in
+                    guard let value = current.first else { return nil }
+                    current = Array(current.dropFirst())
+                    return value * input
                 }
             }
             .consume { if let value = $0 { accumulatedResults.append(value) }; return .canContinue }
@@ -131,18 +125,15 @@ class ReallyLazySequencesTests: XCTestCase {
         let c = SimpleSequence<Int>()
             .collect(
                 initialValue: [Int](),
-                combine: { (partialValue, input) -> [Int] in return partialValue + [input] },
+                combine: { (partialValue, input) in return partialValue + [input] },
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
-            .flatMap { (collected: [Int]) in
-                Subsequence<[Int],Int> { () -> Any? in
-                    var current: [Int] = collected
-                    func iterator() -> (Int, () -> Any?)? {
-                        guard let value = current.first else { return nil }
-                        current = Array(current.dropFirst())
-                        return (value, iterator)
-                    }
-                    return iterator()
+            .flatMap { (collected: [Int]) -> Subsequence<[Int],Int> in
+                var current: [Int] = collected
+                return Subsequence { () -> Int? in
+                    guard let value = current.first else { return nil }
+                    current = Array(current.dropFirst())
+                    return value
                 }
             }
             .consume {
