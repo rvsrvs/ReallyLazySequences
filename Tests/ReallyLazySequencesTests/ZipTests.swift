@@ -22,17 +22,22 @@ class ZipTests: XCTestCase {
     func testZip() {
         let expectation = self.expectation(description: "Expectation")
         
-        let testGenerator = ListenableSequence<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
-            (0 ... value).forEach { delivery($0) }
-            delivery(nil)
-        }
+        let listenable = ListenableSequence<Int>()
         
-        let t0 = testGenerator
+        let t0 = listenable
             .listener()
+            .flatMap { (value) -> Subsequence<Int,Int> in
+                var iterator = (0 ..< value).makeIterator()
+                return Subsequence { iterator.next() }
+            }
             .map {  $0 * 2 }
         
-        let t1 = testGenerator
+        let t1 = listenable
             .listener()
+            .flatMap { (value) -> Subsequence<Int,Int> in
+                var iterator = (0 ..< value).makeIterator()
+                return Subsequence { iterator.next() }
+            }
             .map { Double($0 * 4) }
         
         var count = 0
@@ -42,7 +47,7 @@ class ZipTests: XCTestCase {
             .listen { (t: (Int, Double)?) -> ContinuationTermination in
                 guard let t = t else {
                     expectation.fulfill()
-                    XCTAssert(count == 6, "Terminating after having received wrong count of: \(count) values")
+                    XCTAssert(count == 5, "Terminating after having received wrong count of: \(count) values")
                     return .terminate
                 }
                 XCTAssert(t.1 == Double(2 * t.0), "Terminating after incorrect computation")
@@ -50,7 +55,12 @@ class ZipTests: XCTestCase {
                 return .canContinue
             }
         print(z.description)
-        testGenerator.generate(for: 5)
+        do {
+            try listenable.process(5)
+            try listenable.process(nil)
+        } catch {
+            XCTFail("Failed testZip processing")
+        }
         
         waitForExpectations(timeout: 2.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
     }

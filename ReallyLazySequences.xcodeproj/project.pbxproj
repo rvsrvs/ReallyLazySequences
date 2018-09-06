@@ -28,7 +28,6 @@
 		OBJ_44 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Extensions.swift */; };
 		OBJ_45 /* ListenableChainingDeclarations.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* ListenableChainingDeclarations.swift */; };
 		OBJ_46 /* Listener.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* Listener.swift */; };
-		OBJ_47 /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* Networking.swift */; };
 		OBJ_48 /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* ReallyLazySequence.swift */; };
 		OBJ_49 /* Select.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* Select.swift */; };
 		OBJ_50 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Utilities.swift */; };
@@ -38,7 +37,6 @@
 		OBJ_70 /* ContinuationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ContinuationTests.swift */; };
 		OBJ_71 /* ListenableSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* ListenableSequenceTests.swift */; };
 		OBJ_72 /* ListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* ListenerTests.swift */; };
-		OBJ_73 /* NetworkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* NetworkingTests.swift */; };
 		OBJ_74 /* ReallyLazySequencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* ReallyLazySequencesTests.swift */; };
 		OBJ_75 /* SelectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* SelectTests.swift */; };
 		OBJ_76 /* XCTestManifests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* XCTestManifests.swift */; };
@@ -70,7 +68,6 @@
 		OBJ_13 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		OBJ_14 /* ListenableChainingDeclarations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenableChainingDeclarations.swift; sourceTree = "<group>"; };
 		OBJ_15 /* Listener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listener.swift; sourceTree = "<group>"; };
-		OBJ_16 /* Networking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		OBJ_17 /* ReallyLazySequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReallyLazySequence.swift; sourceTree = "<group>"; };
 		OBJ_18 /* Select.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Select.swift; sourceTree = "<group>"; };
 		OBJ_19 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
@@ -79,7 +76,6 @@
 		OBJ_24 /* ContinuationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuationTests.swift; sourceTree = "<group>"; };
 		OBJ_25 /* ListenableSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenableSequenceTests.swift; sourceTree = "<group>"; };
 		OBJ_26 /* ListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerTests.swift; sourceTree = "<group>"; };
-		OBJ_27 /* NetworkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingTests.swift; sourceTree = "<group>"; };
 		OBJ_28 /* ReallyLazySequencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReallyLazySequencesTests.swift; sourceTree = "<group>"; };
 		OBJ_29 /* SelectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectTests.swift; sourceTree = "<group>"; };
 		OBJ_30 /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestManifests.swift; sourceTree = "<group>"; };
@@ -123,7 +119,6 @@
 				OBJ_24 /* ContinuationTests.swift */,
 				OBJ_25 /* ListenableSequenceTests.swift */,
 				OBJ_26 /* ListenerTests.swift */,
-				OBJ_27 /* NetworkingTests.swift */,
 				OBJ_28 /* ReallyLazySequencesTests.swift */,
 				OBJ_29 /* SelectTests.swift */,
 				OBJ_30 /* XCTestManifests.swift */,
@@ -171,7 +166,6 @@
 				OBJ_10 /* ConsumableChainingDeclarations.swift */,
 				OBJ_12 /* Continuation.swift */,
 				OBJ_14 /* ListenableChainingDeclarations.swift */,
-				OBJ_16 /* Networking.swift */,
 				OBJ_18 /* Select.swift */,
 				OBJ_19 /* Utilities.swift */,
 				OBJ_20 /* Value.swift */,
@@ -279,7 +273,6 @@
 				OBJ_44 /* Extensions.swift in Sources */,
 				OBJ_45 /* ListenableChainingDeclarations.swift in Sources */,
 				OBJ_46 /* Listener.swift in Sources */,
-				OBJ_47 /* Networking.swift in Sources */,
 				OBJ_48 /* ReallyLazySequence.swift in Sources */,
 				OBJ_49 /* Select.swift in Sources */,
 				OBJ_50 /* Utilities.swift in Sources */,
@@ -303,7 +296,6 @@
 				OBJ_70 /* ContinuationTests.swift in Sources */,
 				OBJ_71 /* ListenableSequenceTests.swift in Sources */,
 				OBJ_72 /* ListenerTests.swift in Sources */,
-				OBJ_73 /* NetworkingTests.swift in Sources */,
 				OBJ_74 /* ReallyLazySequencesTests.swift in Sources */,
 				OBJ_75 /* SelectTests.swift in Sources */,
 				OBJ_76 /* XCTestManifests.swift in Sources */,

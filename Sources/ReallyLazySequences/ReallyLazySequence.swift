@@ -43,12 +43,3 @@ public struct Subsequence<T, U>: SubsequenceProtocol {
         self.iterator = iterator
     }
 }
-
-public protocol StatefulSubsequenceProtocol {
-    associatedtype State
-    associatedtype InputType
-    associatedtype OutputType
-    var state: State { get set }
-    var iterator: (State) -> (State, OutputType)? { get }
-    init(_ iterator: @escaping (State) -> (State, OutputType)?)
-}

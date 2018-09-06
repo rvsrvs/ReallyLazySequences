@@ -130,36 +130,28 @@ public protocol ChainedListenerProtocol: ListenerProtocol where ListenableType =
 }
 
 public protocol ListenableSequenceProtocol: Listenable {
-    associatedtype InputType
-    var sequenceGenerator: (InputType, @escaping (ListenableOutputType?) -> Void) -> Void { get set }
-    init(_ generator: @escaping (InputType, @escaping (ListenableOutputType?) -> Void) -> Void)
-    func generate(for: InputType) -> Void
+    init()
+    func process(_ value: ListenableOutputType?) throws -> Void
 }
 
 extension ListenableSequenceProtocol {
-    public func generate(for value: InputType) {
-        let delivery = { (input: ListenableOutputType?) -> Void in
-            guard self.hasListeners else { return }
-            self.listeners.forEach { (pair) in
-                let (identifier, listener) = pair
-                do { _ = try listener.process(input) }
-                catch { self.listeners.removeValue(forKey: identifier) }
-            }
+    public func process(_ value: ListenableOutputType?) throws -> Void {
+        guard self.hasListeners else { return }
+        self.listeners.forEach { (pair) in
+            let (identifier, listener) = pair
+            do { _ = try listener.process(value) }
+            catch { self.listeners.removeValue(forKey: identifier) }
         }
-        sequenceGenerator(value, delivery)
     }
 }
 
-public final class ListenableSequence<T, U>: ListenableSequenceProtocol {
+public final class ListenableSequence<T>: ListenableSequenceProtocol {
     public var description: String
     
-    public var listeners: [UUID : Consumer<U>] = [ : ]
-    public typealias InputType = T
-    public typealias ListenableOutputType = U
-    public var sequenceGenerator: (T, @escaping (U?) -> Void) -> Void
+    public var listeners: [UUID : Consumer<T>] = [ : ]
+    public typealias ListenableOutputType = T
     
-    public init(_ sequenceGenerator: @escaping (T, @escaping (U?) -> Void) -> Void) {
-        self.description = standardizeRLSDescription("ListenableSequence<\(type(of: T.self)) -> \(type(of: U.self))>")
-        self.sequenceGenerator = sequenceGenerator
+    public init() {
+        self.description = standardizeRLSDescription("ListenableSequence<\(type(of: T.self))>")
     }
 }

@@ -108,8 +108,12 @@ struct Composers {
                 func iterate(_ iterator: @escaping () -> T?) -> ContinuationResult {
                     guard let value = iterator() else { return .done(.canContinue) }
                     return .afterThen(
-                        .more({ delivery(value) }),
-                        .more({ iterate(iterator) })
+                        .more({
+                            delivery(value)
+                        }),
+                        .more({
+                            iterate(iterator)
+                        })
                     )
                 }
                 return iterate(iterator)

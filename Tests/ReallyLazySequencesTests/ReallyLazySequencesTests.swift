@@ -28,25 +28,23 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { $0 * 2 }
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
-            .flatMap { (input: [Double]) -> Subsequence<[Double], Double> in
-                var current: [Double] = input
-                return Subsequence<[Double], Double> { () -> Double? in
-                    guard let value = current.first else { return nil }
-                    current = Array(current.dropFirst())
-                    return value
-                }
+            .flatMap { (input) -> Subsequence<[Double], Double> in
+                var iterator = input.makeIterator()
+                return Subsequence { () -> Double? in iterator.next() }
             }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
-            .flatMap { (input: Int) -> Subsequence<Int, Int> in
-                var current = Array<Int>(0 ..< 3)
-                return Subsequence<Int, Int> { () -> Int? in
-                    guard let value = current.first else { return nil }
-                    current = Array(current.dropFirst())
+            .flatMap { (input) -> Subsequence<Int, Int> in
+                var iterator = (0 ..< 3).makeIterator()
+                return Subsequence { () -> Int? in
+                    guard let value = iterator.next() else { return nil }
                     return value * input
                 }
             }
-            .consume { if let value = $0 { accumulatedResults.append(value) }; return .canContinue }
+            .consume {
+                if let value = $0 { accumulatedResults.append(value) }
+                return .canContinue
+            }
         
         XCTAssertNotNil(c as Consumer<Int>, "Consumer c is wrong type!")
         
@@ -66,13 +64,14 @@ class ReallyLazySequencesTests: XCTestCase {
     func testSimpleListener() {
         let expectation = self.expectation(description: "First Listener")
         
-        let listenable = ListenableSequence<Int, Int> { (value: Int, delivery: @escaping (Int?) -> Void) -> Void in
-            (0 ..< value).forEach { delivery($0) }
-            delivery(nil)
-        }
+        let listenable = ListenableSequence<Int>()
         
         var listernHandle = listenable
             .listener()
+            .flatMap { (value) -> Subsequence<Int,Int> in
+                var iterator = (0 ..< value).makeIterator()
+                return Subsequence { iterator.next() }
+            }
             .listen {
                 guard $0 != nil else {
                     expectation.fulfill()
@@ -81,7 +80,12 @@ class ReallyLazySequencesTests: XCTestCase {
                 return .canContinue 
             }
         
-        listenable.generate(for: 3)
+        do {
+            try listenable.process(3)
+            try listenable.process(nil)
+        } catch {
+            XCTFail("Failed while processing")
+        }
         
         waitForExpectations(timeout: 1.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
         _ = listernHandle.terminate()
@@ -129,12 +133,8 @@ class ReallyLazySequencesTests: XCTestCase {
                 until: { (partialValue, input) -> Bool in partialValue.count > 4 }
             )
             .flatMap { (collected: [Int]) -> Subsequence<[Int],Int> in
-                var current: [Int] = collected
-                return Subsequence { () -> Int? in
-                    guard let value = current.first else { return nil }
-                    current = Array(current.dropFirst())
-                    return value
-                }
+                var iterator = collected.makeIterator()
+                return Subsequence { () -> Int? in iterator.next() }
             }
             .consume {
                 guard $0 != nil else {
