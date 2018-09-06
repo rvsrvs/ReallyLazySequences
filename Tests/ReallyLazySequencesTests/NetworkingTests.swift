@@ -43,9 +43,9 @@ class NetworkingTests: XCTestCase {
 
         guard let url = URL(string: ConfigurationURL) else { return }
         
-        let producer = URLDataGenerator()
+        let generator = URLDataGenerator()
         
-        var proxy1 = producer
+        var proxy1 = generator
             .jsonListener(decodingType: [Configuration].self)
             .dispatch(OperationQueue.main)
             .listen {
@@ -59,7 +59,7 @@ class NetworkingTests: XCTestCase {
                 return .canContinue
             }
         
-        var proxy2 = producer
+        var proxy2 = generator
             .jsonListener(decodingType: [Configuration].self)
             .listen {
                 guard let result = $0 else { return .canContinue  }
@@ -72,7 +72,7 @@ class NetworkingTests: XCTestCase {
                 return .canContinue 
             }
 
-        producer.generate(for: (url: url, session: SessionSupport().session()))
+        generator.generate(for: (url: url, session: SessionSupport().session()))
         
         waitForExpectations(timeout: 5.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
         _ = proxy1.terminate()
