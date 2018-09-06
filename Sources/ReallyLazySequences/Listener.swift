@@ -72,8 +72,7 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T>
-    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
+    func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ListenableFlatMap<Self, T> 
 
     // Listenable Chaining
     func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType>

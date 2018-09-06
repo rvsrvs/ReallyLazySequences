@@ -25,14 +25,7 @@ public struct SimpleSequence<T>: ConsumableProtocol {
     public init() { }    
 }
 
-public protocol SubsequenceProtocol {
-    associatedtype InputType
-    associatedtype OutputType
-    var iterator: () -> OutputType? { get }
-    init(iterator: @escaping () -> OutputType?)
-}
-
-public struct Subsequence<T, U>: SubsequenceProtocol {
+public struct Subsequence<T, U> {
     public typealias InputType = T
     public typealias OutputType = U
     

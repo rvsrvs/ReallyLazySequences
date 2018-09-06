@@ -97,10 +97,10 @@ struct Composers {
         }
     }
     
-    static func flatMapComposer<T, U, V> (
+    static func flatMapComposer<T, U> (
         delivery: @escaping (T?) -> ContinuationResult,
-        transform: @escaping (U) throws -> V
-    ) -> (U?) -> ContinuationResult where V: SubsequenceProtocol, V.InputType == U, V.OutputType == T {
+        transform: @escaping (U) throws -> Subsequence<U, T>
+    ) -> (U?) -> ContinuationResult {
         return { (input: U?) -> ContinuationResult in
             guard let input = input else { return delivery(nil) }
             do {
@@ -108,12 +108,8 @@ struct Composers {
                 func iterate(_ iterator: @escaping () -> T?) -> ContinuationResult {
                     guard let value = iterator() else { return .done(.canContinue) }
                     return .afterThen(
-                        .more({
-                            delivery(value)
-                        }),
-                        .more({
-                            iterate(iterator)
-                        })
+                        .more({ delivery(value) }),
+                        .more({ iterate(iterator) })
                     )
                 }
                 return iterate(iterator)

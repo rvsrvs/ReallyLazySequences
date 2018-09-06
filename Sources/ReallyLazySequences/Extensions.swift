@@ -51,11 +51,10 @@ public extension ConsumableProtocol {
         }
     }
 
-    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
-            return ConsumableFlatMap<Self, T>(predecessor: self) { delivery in
-                Composers.flatMapComposer(delivery: delivery, transform: transform)
-            }
+    func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ConsumableFlatMap<Self, T> {
+        return ConsumableFlatMap<Self, T>(predecessor: self) { delivery in
+            Composers.flatMapComposer(delivery: delivery, transform: transform)
+        }
     }
     
     public func collect<T>(
@@ -116,11 +115,10 @@ public extension ListenerProtocol {
         }
     }
 
-    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ListenableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T {
-            return ListenableFlatMap<Self, T>(predecessor: self) { delivery in
-                Composers.flatMapComposer(delivery: delivery, transform: transform)
-            }
+    func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ListenableFlatMap<Self, T> {
+        return ListenableFlatMap<Self, T>(predecessor: self) { delivery in
+            Composers.flatMapComposer(delivery: delivery, transform: transform)
+        }
     }
     
     public func collect<T>(

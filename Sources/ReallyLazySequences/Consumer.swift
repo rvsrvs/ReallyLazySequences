@@ -13,8 +13,7 @@ public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
     
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ConsumableCompactMap<Self, T>
-    func flatMap<T, U>(_ transform: @escaping (OutputType) throws -> U) -> ConsumableFlatMap<Self, T>
-        where U: SubsequenceProtocol, U.InputType == Self.OutputType, U.OutputType == T
+    func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ConsumableFlatMap<Self, T>
 
     // Consumable chaining
     func dispatch(_ queue: OperationQueue) -> ConsumableDispatch<Self, OutputType>
