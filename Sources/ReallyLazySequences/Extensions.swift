@@ -36,13 +36,6 @@ public extension ChainedConsumableProtocol {
     }
 }
 
-// Implement Sequencing
-// Each of the methods below composes a function from 3 different elements
-// 1. Its predecessors composed function
-// 2. It's own associated function which takes the predecessors output type and operates on it to produce its own output type
-// 3. a particular function which is specific to the action being taken
-// Number 3 is what is being passed in to the initializer of the specific types returned below
-
 public extension ConsumableProtocol {
     public func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T> {
         return ConsumableMap<Self, T>(predecessor: self) { delivery in
@@ -52,7 +45,7 @@ public extension ConsumableProtocol {
     
     public func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ConsumableCompactMap<Self, T> {
         return ConsumableCompactMap<Self, T>(predecessor: self) { delivery in
-            Composers.compactMapComposer(delivery: delivery, transform: transform)
+            return Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
     }
 
@@ -68,7 +61,18 @@ public extension ConsumableProtocol {
         until: @escaping (T, OutputType?) -> Bool
     ) -> ConsumableReduce<Self, T> {
         return ConsumableReduce<Self, T>(predecessor: self) { delivery in
-            Composers.collectComposer(delivery: delivery, initialValue: initialValue, combine: combine, until: until)
+            return Composers.statefulCompactMapComposer(
+                delivery: delivery,
+                initialState: initialValue,
+                updateState: { (state: T, input: OutputType?) throws -> T in
+                    guard let input = input else { return state }
+                    return try combine(state, input)
+                },
+                transform: { (state: T, input: OutputType?) -> T? in
+                    guard until(state, input) else { return nil }
+                    return state
+                }
+            )
         }
     }
     
@@ -78,7 +82,8 @@ public extension ConsumableProtocol {
 
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ConsumableFilter<Self, OutputType> {
         return ConsumableFilter<Self, OutputType>(predecessor: self) { delivery in
-            Composers.filterComposer(delivery: delivery, filter: filter)
+            let transform = { (value: OutputType) throws -> OutputType? in try filter(value) ? value : nil }
+            return Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
     }
     
@@ -116,7 +121,7 @@ public extension ListenerProtocol {
 
     public func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T> {
         return ListenableCompactMap<Self, T>(predecessor: self) { delivery in
-            Composers.compactMapComposer(delivery: delivery, transform: transform)
+            return Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
     }
 
@@ -132,7 +137,18 @@ public extension ListenerProtocol {
         until: @escaping (T, OutputType?) -> Bool
     ) -> ListenableReduce<Self, T> {
         return ListenableReduce<Self, T>(predecessor: self) { delivery in
-            Composers.collectComposer(delivery: delivery, initialValue: initialValue, combine: combine, until: until)
+            return Composers.statefulCompactMapComposer(
+                delivery: delivery,
+                initialState: initialValue,
+                updateState: { (state: T, input: OutputType?) throws -> T in
+                    guard let input = input else { return state }
+                    return try combine(state, input)
+                },
+                transform: { (state: T, input: OutputType?) -> T? in
+                    guard until(state, input) else { return nil }
+                    return state
+                }
+            )
         }
     }
     
@@ -142,10 +158,11 @@ public extension ListenerProtocol {
     
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType> {
         return ListenableFilter<Self, OutputType>(predecessor: self) { delivery in
-            Composers.filterComposer(delivery: delivery, filter: filter)
+            let transform = { (value: OutputType) throws -> OutputType? in try filter(value) ? value : nil }
+            return Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
     }
-    
+
     public func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType> {
         return ListenableDispatch<Self, OutputType>(predecessor: self) { delivery in
             Composers.dispatchComposer(delivery: delivery, queue: queue)
