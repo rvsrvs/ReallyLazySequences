@@ -6,11 +6,13 @@
 //  Copyright © 2018 ComputeCycles, LLC. All rights reserved.
 //
 
-// Continuations represent at computation which can be continued at a later time
+// Continuations represent a computation which can be continued at a later time
 // They are a way of avoiding enormous convoluted stack frames that emerge from
 // composing a chain of functions in an RLS and of attaching error handling
 // in-line when processing an RLS. They continue the current computation
-// in a stack frame much closer to the users invocation.
+// in a stack frame much closer to the users invocation.  This, most importantly,
+// allows the consumer to handle errors as they arise rather than well
+// after the fact.
 
 public protocol ContinuationErrorContextProtocol: Error { }
 
@@ -20,7 +22,6 @@ public enum ContinuationTermination: Equatable {
 }
 
 public struct ContinuationErrorContext<T, U>: ContinuationErrorContextProtocol {
-    var opType: ReallyLazySequenceOperationType
     var value: T
     var delivery: (U?) throws -> ContinuationResult
     var error: Error

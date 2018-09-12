@@ -106,7 +106,10 @@ class ContinuationTests: XCTestCase {
         }
         let continuation2 = { (value: Int?) throws -> ContinuationResult in
             throw ContinuationErrorContext(
-                opType: .map, value: value, delivery: continuation1, error: ContinuationTestError.test("continuation2") )
+                value: value,
+                delivery: continuation1,
+                error: ContinuationTestError.test("continuation2")
+            )
         }
         let continuation2a = { (_: Int?) throws -> ContinuationResult in ContinuationResult.more({try continuation1a(nil)}) }
         let continuation3 = { (_: Int?) throws -> ContinuationResult in
@@ -139,7 +142,6 @@ class ContinuationTests: XCTestCase {
             }
             guard let error = context.error as? ContinuationTestError,
                 case .test(let message) = error,
-                context.opType == .map,
                 message == "continuation2"
                 else {
                     XCTFail("Error from wrong location")

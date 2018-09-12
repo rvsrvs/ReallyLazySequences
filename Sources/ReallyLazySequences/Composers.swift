@@ -19,7 +19,7 @@ struct Composers {
                 let transformed = try transform(input)
                 return .more({ delivery(transformed) })
             } catch {
-                let rlsError = ContinuationErrorContext(opType: .map, value: input, delivery: delivery, error: error)
+                let rlsError = ContinuationErrorContext(value: input, delivery: delivery, error: error)
                 return .error(rlsError)
             }
         }
@@ -47,7 +47,7 @@ struct Composers {
                 let output = try transform(state, input)
                 return .more({ delivery(output) })
             } catch {
-                let rlsError = ContinuationErrorContext(opType: .reduce, value: input, delivery: delivery, error: error)
+                let rlsError = ContinuationErrorContext(value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
             }
         }
@@ -70,7 +70,7 @@ struct Composers {
                 }
                 return iterate(iterator)
             } catch {
-                let rlsError = ContinuationErrorContext(opType: .flatMap, value: input, delivery: delivery, error: error)
+                let rlsError = ContinuationErrorContext(value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
             }
         }
@@ -104,7 +104,7 @@ struct Composers {
                 }
                 return iterate(iterator)
             } catch {
-                let rlsError = ContinuationErrorContext(opType: .reduce, value: input, delivery: delivery, error: error)
+                let rlsError = ContinuationErrorContext(value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
             }
         }
@@ -121,7 +121,7 @@ struct Composers {
                 guard let output = try transform(input) else { return .done(.canContinue) }
                 return .more({ delivery(output) })
             } catch {
-                let rlsError = ContinuationErrorContext(opType: .reduce, value: input, delivery: delivery, error: error)
+                let rlsError = ContinuationErrorContext(value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
             }
         }
@@ -159,7 +159,7 @@ struct Composers {
                     return .more({ delivery(output) })
                 }
             } catch {
-                let rlsError = ContinuationErrorContext(opType: .reduce, value: input, delivery: delivery, error: error)
+                let rlsError = ContinuationErrorContext(value: input, delivery: delivery, error: error)
                 return ContinuationResult.error(rlsError)
             }
         }
