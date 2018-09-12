@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "PromiseKit",
+        "repositoryURL": "https://github.com/ComputeCycles/PromiseKit.git",
+        "state": {
+          "branch": "Swift-Only",
+          "revision": "990bf74622691d56ca39e34614e39d319b0eedb8",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -32,7 +32,22 @@ public struct Subsequence<T, U> {
     public var description: String = standardizeRLSDescription("Subsequence<\(type(of:T.self), type(of:U.self))>")
     public var iterator: () -> OutputType?
 
-    public init(iterator: @escaping () -> OutputType?) {
+    public init(_ iterator: @escaping () -> OutputType?) {
         self.iterator = iterator
+    }
+    
+    public init<V>(_ sequence: V) where V: Sequence, V.Element == OutputType {
+        var iterator = sequence.makeIterator()
+        self.iterator = { () -> OutputType? in
+            return iterator.next()
+        }
+    }
+
+    public init<V: Sequence>(_ sequence: V, transform: @escaping (V.Element) -> OutputType) {
+        var iterator = sequence.makeIterator()
+        self.iterator = { () -> OutputType? in
+            guard let next = iterator.next() else { return nil }
+            return transform(next)
+        }
     }
 }

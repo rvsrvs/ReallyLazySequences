@@ -9,11 +9,10 @@ let package = Package(
         .library(name: "ReallyLazySequences", targets: ["ReallyLazySequences"]),
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+	.package(url: "https://github.com/ComputeCycles/PromiseKit.git", .branch("Swift-Only")),
     ],
     targets: [
-        .target(name: "ReallyLazySequences", dependencies: []),
+        .target(name: "ReallyLazySequences", dependencies: ["PromiseKit"]),
         .testTarget(name: "ReallyLazySequencesTests", dependencies: ["ReallyLazySequences"]),
     ]
 )

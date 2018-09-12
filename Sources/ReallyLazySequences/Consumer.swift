@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import PromiseKit
 
 public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType>

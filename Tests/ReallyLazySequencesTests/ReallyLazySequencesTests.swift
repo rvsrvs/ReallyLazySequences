@@ -28,19 +28,10 @@ class ReallyLazySequencesTests: XCTestCase {
             .map { $0 * 2 }
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
-            .flatMap { (input) -> Subsequence<[Double], Double> in
-                var iterator = input.makeIterator()
-                return Subsequence { () -> Double? in iterator.next() }
-            }
+            .flatMap { (input) -> Subsequence<[Double], Double> in Subsequence(input) }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
-            .flatMap { (input) -> Subsequence<Int, Int> in
-                var iterator = (0 ..< 3).makeIterator()
-                return Subsequence { () -> Int? in
-                    guard let value = iterator.next() else { return nil }
-                    return value * input
-                }
-            }
+            .flatMap { (input) -> Subsequence<Int, Int> in Subsequence(0 ..< 3) { $0 * input } }
             .consume {
                 if let value = $0 { accumulatedResults.append(value) }
                 return .canContinue
@@ -68,10 +59,7 @@ class ReallyLazySequencesTests: XCTestCase {
         
         var listernHandle = listenable
             .listener()
-            .flatMap { (value) -> Subsequence<Int,Int> in
-                var iterator = (0 ..< value).makeIterator()
-                return Subsequence { iterator.next() }
-            }
+            .flatMap { (value) -> Subsequence<Int,Int> in Subsequence(0 ..< value) }
             .listen {
                 guard $0 != nil else {
                     expectation.fulfill()

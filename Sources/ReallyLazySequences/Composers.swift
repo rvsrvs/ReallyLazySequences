@@ -31,9 +31,17 @@ struct Composers {
         updateState: @escaping (State, Input) throws -> State,
         transform: @escaping (State, Input) throws -> Output
     ) -> (Input?) -> ContinuationResult {
+        let stateLock = NSLock()
         var state = initialState()
         return { (input: Input?) -> ContinuationResult in
             guard let input = input else { return .more({ delivery(nil) }) }
+            stateLock.lock()
+            do {
+                state = try updateState(state, input)
+            } catch {
+                return .done(.terminate)
+            }
+            stateLock.unlock()
             do {
                 state = try updateState(state, input)
                 let output = try transform(state, input)
@@ -74,11 +82,18 @@ struct Composers {
         updateState: @escaping (State, Input) throws -> State,
         transform: @escaping (State, Input) throws -> Subsequence<Input, Output>
     ) -> (Input?) -> ContinuationResult {
+        var stateLock = NSLock()
         var state = initialState()
         return { (input: Input?) -> ContinuationResult in
+            guard let input = input else { return .more({ delivery(nil) }) }
+            stateLock.lock()
             do {
-                guard let input = input else { return .more({ delivery(nil) }) }
                 state = try updateState(state, input)
+            } catch {
+                return .done(.terminate)
+            }
+            stateLock.unlock()
+            do {
                 let iterator = try transform(state, input).iterator
                 func iterate(_ iterator: @escaping () -> Output?) -> ContinuationResult {
                     guard let value = iterator() else { return .done(.canContinue) }
@@ -118,10 +133,17 @@ struct Composers {
         updateState: @escaping (State, Input?) throws -> State,
         transform: @escaping (State, Input?) throws -> Output?
     ) -> (Input?) -> ContinuationResult {
+        let stateLock = NSLock()
         var state = initialState()
         return { (input: Input?) -> ContinuationResult in
+            stateLock.lock()
             do {
                 state = try updateState(state, input)
+            } catch {
+                return .done(.terminate)
+            }
+            stateLock.unlock()
+            do {
                 let output = try transform(state, input)
                 switch (input, output) {
                 case (.none, .none):
