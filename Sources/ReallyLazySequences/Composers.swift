@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import PromiseKit
 
 struct Composers {
     static func mapComposer<T, U>(
@@ -110,6 +111,23 @@ struct Composers {
         }
     }
     
+
+    static func awaitMapComposer<Input, Output> (
+        delivery: @escaping (Output?) -> ContinuationResult,
+        transform: @escaping (Input) throws -> Promise<Output>
+    ) -> (Input?) -> ContinuationResult {
+        return { (input: Input?) -> ContinuationResult in
+            guard let input = input else { return delivery(nil) }
+            do {
+                let promise = try transform(input)
+                let output = try promise.wait()
+                return .more({ delivery(output) })
+            } catch {
+                let rlsError = ContinuationErrorContext(value: input, delivery: delivery, error: error)
+                return .error(rlsError)
+            }
+        }
+    }
 
     static func compactMapComposer<Input, Output>(
         delivery: @escaping (Output?) -> ContinuationResult,

@@ -92,6 +92,22 @@ public struct ConsumableCompactMap<Predecessor: ConsumableProtocol, Output>: Cha
     }
 }
 
+public struct ConsumableAsyncMap<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
+    public typealias PredecessorType = Predecessor
+    public typealias InputType = Predecessor.InputType
+    public typealias OutputType = Output
+    
+    public var description: String
+    public var predecessor: Predecessor
+    public var composer: Composer
+    
+    public init(predecessor: PredecessorType, composer: @escaping Composer) {
+        self.predecessor = predecessor
+        self.composer = composer
+        self.description = standardizeRLSDescription("\(predecessor.description) >> CAsyncMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+    }
+}
+
 public struct ConsumableDispatch<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType

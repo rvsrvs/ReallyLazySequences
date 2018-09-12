@@ -6,6 +6,7 @@
 //  Copyright © 2017 ComputeCycles, LLC. All rights reserved.
 //
 import Foundation
+import PromiseKit
 
 // Implement Consume
 public extension ConsumableProtocol {
@@ -54,6 +55,13 @@ public extension ConsumableProtocol {
             Composers.flatMapComposer(delivery: delivery, transform: transform)
         }
     }
+    
+    func asyncMap<T>(_ transform: @escaping (OutputType) throws -> Promise<T>) -> ConsumableAsyncMap<Self, T> {
+        return ConsumableAsyncMap<Self, T>(predecessor: self) { delivery in
+            Composers.awaitMapComposer(delivery: delivery, transform: transform)
+        }
+    }
+
     
     public func collect<T>(
         initialValue: @autoclosure @escaping () -> T,

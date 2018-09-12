@@ -16,7 +16,7 @@ print(unconsumedSequence.description)
 
 let consumer = unconsumedSequence
     .consume { (value: Double?) -> ContinuationTermination in
-        guard let value = value else { return .stop }
+        guard let value = value else { return .terminate }
         print(type(of:value), value)
         return .canContinue
     }
