@@ -17,8 +17,6 @@ public protocol ContinuationErrorContextProtocol: Error { }
 public enum ContinuationTermination: Equatable {
     case canContinue
     case terminate
-    case stop
-    case pause
 }
 
 public struct ContinuationErrorContext<T, U>: ContinuationErrorContextProtocol {
