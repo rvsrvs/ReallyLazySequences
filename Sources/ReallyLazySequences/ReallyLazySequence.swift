@@ -29,7 +29,7 @@ public struct Subsequence<T, U> {
     public typealias InputType = T
     public typealias OutputType = U
     
-    public var description: String = standardizeRLSDescription("Subsequence<\(type(of:T.self), type(of:U.self))>")
+    public var description: String = standardizeRLSDescription("Subsequence<\((type(of:T.self), type(of:U.self)))>")
     public var iterator: () -> OutputType?
 
     public init(_ iterator: @escaping () -> OutputType?) {

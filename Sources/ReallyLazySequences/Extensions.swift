@@ -23,7 +23,7 @@ public extension ConsumableProtocol {
         return Consumer(delivery: compose(deliveryWrapper)!, description: desc)
     }
 
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
+    func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
         return { (value: InputType?) -> ContinuationResult in
             guard let value = value as? OutputType? else { return .done(.terminate) }
             return .more({ delivery(value) })
@@ -32,19 +32,19 @@ public extension ConsumableProtocol {
 }
 
 public extension ChainedConsumableProtocol {
-    public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery?  {
+    func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery?  {
         return predecessor.compose(composer(delivery)) as? (Self.InputType?) throws -> ContinuationResult
     }
 }
 
 public extension ConsumableProtocol {
-    public func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T> {
+    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T> {
         return ConsumableMap<Self, T>(predecessor: self) { delivery in
             Composers.mapComposer(delivery: delivery, transform: transform)
         }
     }
     
-    public func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ConsumableCompactMap<Self, T> {
+    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ConsumableCompactMap<Self, T> {
         return ConsumableCompactMap<Self, T>(predecessor: self) { delivery in
             return Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
@@ -63,7 +63,7 @@ public extension ConsumableProtocol {
     }
 
     
-    public func collect<T>(
+    func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
@@ -95,7 +95,7 @@ public extension ConsumableProtocol {
         }
     }
     
-    public func dispatch(_ queue: OperationQueue) -> ConsumableDispatch<Self, OutputType> {
+    func dispatch(_ queue: OperationQueue) -> ConsumableDispatch<Self, OutputType> {
         return ConsumableDispatch<Self, OutputType>(predecessor: self) { delivery in
             Composers.dispatchComposer(delivery: delivery, queue: queue)
         }
@@ -121,13 +121,13 @@ extension ChainedListenerProtocol {
 }
 
 public extension ListenerProtocol {
-    public func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T> {
+    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T> {
         return ListenableMap<Self, T>(predecessor: self) { delivery in
             Composers.mapComposer(delivery: delivery, transform: transform)
         }
     }
 
-    public func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T> {
+    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T> {
         return ListenableCompactMap<Self, T>(predecessor: self) { delivery in
             return Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
@@ -139,7 +139,7 @@ public extension ListenerProtocol {
         }
     }
     
-    public func collect<T>(
+    func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
@@ -171,7 +171,7 @@ public extension ListenerProtocol {
         }
     }
 
-    public func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType> {
+    func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType> {
         return ListenableDispatch<Self, OutputType>(predecessor: self) { delivery in
             Composers.dispatchComposer(delivery: delivery, queue: queue)
         }
