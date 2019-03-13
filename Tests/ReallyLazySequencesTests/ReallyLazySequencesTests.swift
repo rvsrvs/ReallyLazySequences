@@ -22,14 +22,12 @@ class ReallyLazySequencesTests: XCTestCase {
     func testSimpleSequence() {
         var accumulatedResults: [Int] = []
         
-        let c1 = SimpleSequence<Int>()
+        let c = SimpleSequence<Int>()
             .filter { $0 < 10 }
             .map { Double($0) }
             .map { $0 * 2 }
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
-            
-        let c = c1
             .flatMap { (input) -> Subsequence<[Double], Double> in Subsequence(input) }
             .map { (value: Double) -> Int in Int(value) }
             .reduce(0, +)
