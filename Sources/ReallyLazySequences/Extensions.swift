@@ -8,7 +8,7 @@
 import Foundation
 
 // Implement Consume
-public extension ConsumableProtocol {
+public extension ConsumableSequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType> {
         let deliveryWrapper = {  (output: Self.OutputType?) -> ContinuationResult in
             let result = delivery(output)
@@ -36,7 +36,7 @@ public extension ChainedConsumableProtocol {
     }
 }
 
-public extension ConsumableProtocol {
+public extension ConsumableSequenceProtocol {
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T> {
         return ConsumableMap<Self, T>(predecessor: self) { delivery in
             Composers.mapComposer(delivery: delivery, transform: transform)
@@ -112,7 +112,7 @@ extension ChainedListenerProtocol {
     }
 }
 
-public extension ListenerProtocol {
+public extension ListenableSequenceProtocol {
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T> {
         return ListenableMap<Self, T>(predecessor: self) { delivery in
             Composers.mapComposer(delivery: delivery, transform: transform)

@@ -12,7 +12,7 @@
 // make this not require all the boilerplate. 
 //===================================================================================
 
-public struct ConsumableMap<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -28,7 +28,7 @@ public struct ConsumableMap<Predecessor: ConsumableProtocol, Output>: ChainedCon
     }
 }
 
-public struct ConsumableReduce<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableReduce<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -44,7 +44,7 @@ public struct ConsumableReduce<Predecessor: ConsumableProtocol, Output>: Chained
     }
 }
 
-public struct ConsumableFilter<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableFilter<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -60,7 +60,7 @@ public struct ConsumableFilter<Predecessor: ConsumableProtocol, Output>: Chained
     }
 }
 
-public struct ConsumableFlatMap<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableFlatMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -76,7 +76,7 @@ public struct ConsumableFlatMap<Predecessor: ConsumableProtocol, Output>: Chaine
     }
 }
 
-public struct ConsumableCompactMap<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableCompactMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -92,7 +92,7 @@ public struct ConsumableCompactMap<Predecessor: ConsumableProtocol, Output>: Cha
     }
 }
 
-public struct ConsumableAsyncMap<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableAsyncMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -108,7 +108,7 @@ public struct ConsumableAsyncMap<Predecessor: ConsumableProtocol, Output>: Chain
     }
 }
 
-public struct ConsumableDispatch<Predecessor: ConsumableProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableDispatch<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output

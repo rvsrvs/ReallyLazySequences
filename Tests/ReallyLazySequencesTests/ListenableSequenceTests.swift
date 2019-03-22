@@ -25,7 +25,7 @@ class ProducerTests: XCTestCase {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let testGenerator = ListenableSequence<Int>()
+        let testGenerator = Observer<Int>()
         
         var proxy1 = testGenerator
             .listener

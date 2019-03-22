@@ -22,7 +22,7 @@ class ZipTests: XCTestCase {
     func testZip() {
         let expectation = self.expectation(description: "Expectation")
         
-        let listenable = ListenableSequence<Int>()
+        let listenable = Observer<Int>()
         
         let t0 = listenable
             .listener

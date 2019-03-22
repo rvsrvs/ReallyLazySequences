@@ -55,7 +55,7 @@ class ReallyLazySequencesTests: XCTestCase {
     func testSimpleListener() {
         let expectation = self.expectation(description: "First Listener")
         
-        let listenable = ListenableSequence<Int>()
+        let listenable = Observer<Int>()
         
         var listernHandle = listenable
             .listener

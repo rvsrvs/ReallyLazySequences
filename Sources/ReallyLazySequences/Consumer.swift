@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
+public protocol ConsumableSequenceProtocol: ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType>
     
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T>
@@ -27,8 +27,8 @@ public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ConsumableFilter<Self, OutputType>
 }
 
-public protocol ChainedConsumableProtocol: ConsumableProtocol {
-    associatedtype PredecessorType: ConsumableProtocol
+public protocol ChainedConsumableProtocol: ConsumableSequenceProtocol {
+    associatedtype PredecessorType: ConsumableSequenceProtocol
     typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery
     var predecessor: PredecessorType { get set }

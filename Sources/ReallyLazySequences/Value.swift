@@ -20,7 +20,7 @@ public final class ListenableValue<T>: Listenable {
         didSet {
             listeners.keys.forEach { uuid in
                 do { _ = try listeners[uuid]?.process(value) }
-                catch { _ = remove(listenerWith: uuid) }
+                catch { _ = remove(uuid) }
             }
         }
     }

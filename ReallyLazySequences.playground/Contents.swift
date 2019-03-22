@@ -10,7 +10,7 @@ print (consumedArray.description)
 let unconsumedSequence = SimpleSequence<Int>()
     .filter { $0 < 10 }
     .map { Double($0) * 2.0 }
-    
+
 print(type(of:unconsumedSequence))
 print(unconsumedSequence.description)
 
@@ -19,7 +19,7 @@ let consumer = unconsumedSequence
         guard let value = value else { return .terminate }
         print(type(of:value), value)
         return .canContinue
-    }
+}
 
 print(type(of:consumer))
 print(consumer.description)

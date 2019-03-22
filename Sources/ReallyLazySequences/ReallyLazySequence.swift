@@ -18,7 +18,7 @@ public protocol ReallyLazySequenceProtocol: CustomStringConvertible {
     func compose(_ output: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery?
 }
 
-public struct SimpleSequence<T>: ConsumableProtocol {
+public struct SimpleSequence<T>: ConsumableSequenceProtocol {
     public var description: String = standardizeRLSDescription("SimpleSequence<\(type(of:T.self))>")
     public typealias InputType = T
     public typealias OutputType = T

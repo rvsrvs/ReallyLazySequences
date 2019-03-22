@@ -13,10 +13,10 @@ public protocol Listenable: class, CustomStringConvertible {
 
     var listeners: [UUID: Consumer<ListenableOutputType>] { get set }
     var hasListeners: Bool { get }
-    var listener: Listener<Self> { get }
+    var listener: ListenableSequence<Self> { get }
 
     func add(listener: Consumer<ListenableOutputType>, with: UUID)
-    func remove(listenerWith: UUID) -> Consumer<ListenableOutputType>?
+    func remove(_ listenerID: UUID) -> Consumer<ListenableOutputType>?
     func terminate()
 }
 
@@ -27,19 +27,19 @@ extension Listenable {
         listeners[uuid] = listener
     }
     
-    public func remove(listenerWith: UUID) -> Consumer<ListenableOutputType>? {
-        return listeners.removeValue(forKey: listenerWith)
+    public func remove(_ listenerID: UUID) -> Consumer<ListenableOutputType>? {
+        return listeners.removeValue(forKey: listenerID)
     }
     
     public func terminate() {
         listeners.keys.forEach { uuid in
             _ = ((try? listeners[uuid]?.process(nil)) as ContinuationResult??)
-            _ = remove(listenerWith: uuid)
+            _ = remove(uuid)
         }
     }
 
-    public var listener: Listener<Self> {
-        return Listener<Self>(self) { (uuid: UUID, consumer: Consumer<ListenableOutputType>) in
+    public var listener: ListenableSequence<Self> {
+        return ListenableSequence<Self>(self) { (uuid: UUID, consumer: Consumer<ListenableOutputType>) in
             self.add(listener: consumer, with: uuid)
         }
     }
@@ -59,13 +59,13 @@ public struct ListenerHandle<T>: CustomStringConvertible where T: Listenable {
     
     public mutating func terminate() -> Consumer<T.ListenableOutputType>? {
         guard let m = listenable else { return nil }
-        let c = m.remove(listenerWith: identifier)
+        let c = m.remove(identifier)
         listenable = nil
         return c
     }
 }
 
-public protocol ListenerProtocol: ReallyLazySequenceProtocol {
+public protocol ListenableSequenceProtocol: ReallyLazySequenceProtocol {
     associatedtype ListenableType: Listenable
     func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerHandle<Self.ListenableType>
     func proxy() -> ListenerHandle<Self.ListenableType>
@@ -85,7 +85,7 @@ public protocol ListenerProtocol: ReallyLazySequenceProtocol {
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType>
 }
 
-public struct Listener<T>: ListenerProtocol where T: Listenable {
+public struct ListenableSequence<T>: ListenableSequenceProtocol where T: Listenable {
     public typealias ListenableType = T
     public typealias InputType = T.ListenableOutputType
     public typealias OutputType = T.ListenableOutputType
@@ -119,8 +119,8 @@ public struct Listener<T>: ListenerProtocol where T: Listenable {
     }
 }
 
-public protocol ChainedListenerProtocol: ListenerProtocol where ListenableType == PredecessorType.ListenableType {
-    associatedtype PredecessorType: ListenerProtocol
+public protocol ChainedListenerProtocol: ListenableSequenceProtocol where ListenableType == PredecessorType.ListenableType {
+    associatedtype PredecessorType: ListenableSequenceProtocol
     typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery
     var predecessor: PredecessorType { get set }
@@ -128,12 +128,11 @@ public protocol ChainedListenerProtocol: ListenerProtocol where ListenableType =
     init(predecessor: PredecessorType, composer: @escaping Composer)
 }
 
-public protocol ListenableSequenceProtocol: Listenable {
-    init()
+public protocol ObserverProtocol: Listenable {
     func process(_ value: ListenableOutputType?) throws -> Void
 }
 
-extension ListenableSequenceProtocol {
+extension ObserverProtocol {
     public func process(_ value: ListenableOutputType?) throws -> Void {
         guard self.hasListeners else { return }
         self.listeners.forEach { (pair) in
@@ -144,7 +143,7 @@ extension ListenableSequenceProtocol {
     }
 }
 
-public final class ListenableSequence<T>: ListenableSequenceProtocol {
+public final class Observer<T>: ObserverProtocol {
     public var description: String
     
     public var listeners: [UUID : Consumer<T>] = [ : ]

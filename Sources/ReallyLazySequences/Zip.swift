@@ -11,14 +11,14 @@ import Foundation
 //func zip<Sequence1, Sequence2>(_ sequence1: Sequence1, _ sequence2: Sequence2) -> Zip2Sequence<Sequence1, Sequence2> where Sequence1 : Sequence, Sequence2 : Sequence
 
 public func zip<T0, T1>(_ t0: T0, _ t1: T1) -> Zip2<T0, T1> where
-    T0: ListenerProtocol,
-    T1: ListenerProtocol {
+    T0: ListenableSequenceProtocol,
+    T1: ListenableSequenceProtocol {
     return Zip2(t0, t1)
 }
 
 public final class Zip2<T0, T1>: Listenable where
-    T0: ListenerProtocol,
-    T1: ListenerProtocol {
+    T0: ListenableSequenceProtocol,
+    T1: ListenableSequenceProtocol {
     public var description: String
     
     public typealias ListenableOutputType = (T0.OutputType, T1.OutputType)
@@ -37,7 +37,7 @@ public final class Zip2<T0, T1>: Listenable where
             let v = (v0, v1)
             listeners.keys.forEach { uuid in
                 do { _ = try listeners[uuid]?.process(v) }
-                catch { _ = remove(listenerWith: uuid) }
+                catch { _ = remove(uuid) }
             }
             return true
         }
@@ -49,7 +49,7 @@ public final class Zip2<T0, T1>: Listenable where
             guard value != nil else {
                 listeners.keys.forEach { uuid in
                     do { _ = try listeners[uuid]?.process(nil) }
-                    catch { _ = remove(listenerWith: uuid) }
+                    catch { _ = remove(uuid) }
                 }
                 return
             }
