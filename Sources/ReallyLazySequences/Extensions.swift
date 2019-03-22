@@ -6,7 +6,6 @@
 //  Copyright © 2017 ComputeCycles, LLC. All rights reserved.
 //
 import Foundation
-import PromiseKit
 
 // Implement Consume
 public extension ConsumableProtocol {
@@ -56,13 +55,6 @@ public extension ConsumableProtocol {
         }
     }
     
-    func asyncMap<T>(_ transform: @escaping (OutputType) throws -> Promise<T>) -> ConsumableAsyncMap<Self, T> {
-        return ConsumableAsyncMap<Self, T>(predecessor: self) { delivery in
-            Composers.awaitMapComposer(delivery: delivery, transform: transform)
-        }
-    }
-
-    
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
@@ -71,7 +63,7 @@ public extension ConsumableProtocol {
         return ConsumableReduce<Self, T>(predecessor: self) { delivery in
             return Composers.statefulCompactMapComposer(
                 delivery: delivery,
-                initialState: initialValue,
+                initialState: initialValue(),
                 updateState: { (state: T, input: OutputType?) throws -> T in
                     guard let input = input else { return state }
                     return try combine(state, input)
@@ -147,7 +139,7 @@ public extension ListenerProtocol {
         return ListenableReduce<Self, T>(predecessor: self) { delivery in
             return Composers.statefulCompactMapComposer(
                 delivery: delivery,
-                initialState: initialValue,
+                initialState: initialValue(),
                 updateState: { (state: T, input: OutputType?) throws -> T in
                     guard let input = input else { return state }
                     return try combine(state, input)

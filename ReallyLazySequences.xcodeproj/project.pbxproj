@@ -30,22 +30,6 @@
 		OBJ_119 /* XCTestManifests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* XCTestManifests.swift */; };
 		OBJ_120 /* ZipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* ZipTests.swift */; };
 		OBJ_122 /* ReallyLazySequences.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "ReallyLazySequences::ReallyLazySequences::Product" /* ReallyLazySequences.framework */; };
-		OBJ_123 /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "PromiseKit::PromiseKit::Product" /* PromiseKit.framework */; };
-		OBJ_57 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_34 /* Box.swift */; };
-		OBJ_58 /* Catchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* Catchable.swift */; };
-		OBJ_59 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* Configuration.swift */; };
-		OBJ_60 /* CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* CustomStringConvertible.swift */; };
-		OBJ_61 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* Error.swift */; };
-		OBJ_62 /* Guarantee.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* Guarantee.swift */; };
-		OBJ_63 /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* Promise.swift */; };
-		OBJ_64 /* Resolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_41 /* Resolver.swift */; };
-		OBJ_65 /* Thenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* Thenable.swift */; };
-		OBJ_66 /* after.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_43 /* after.swift */; };
-		OBJ_67 /* firstly.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_44 /* firstly.swift */; };
-		OBJ_68 /* hang.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_45 /* hang.swift */; };
-		OBJ_69 /* race.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_46 /* race.swift */; };
-		OBJ_70 /* when.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_47 /* when.swift */; };
-		OBJ_77 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* Package.swift */; };
 		OBJ_83 /* Composers.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Composers.swift */; };
 		OBJ_84 /* ConsumableChainingDeclarations.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* ConsumableChainingDeclarations.swift */; };
 		OBJ_85 /* Consumer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* Consumer.swift */; };
@@ -58,30 +42,15 @@
 		OBJ_92 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* Utilities.swift */; };
 		OBJ_93 /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Value.swift */; };
 		OBJ_94 /* Zip.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Zip.swift */; };
-		OBJ_96 /* PromiseKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "PromiseKit::PromiseKit::Product" /* PromiseKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		FB0039A921455D8200D4E400 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "PromiseKit::PromiseKit";
-			remoteInfo = PromiseKit;
-		};
 		FB0039AA21455D8200D4E400 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = "ReallyLazySequences::ReallyLazySequences";
 			remoteInfo = ReallyLazySequences;
-		};
-		FB0039AB21455D8200D4E400 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = OBJ_1 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = "PromiseKit::PromiseKit";
-			remoteInfo = PromiseKit;
 		};
 		FB0039AC21455D8500D4E400 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -112,24 +81,8 @@
 		OBJ_28 /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestManifests.swift; sourceTree = "<group>"; };
 		OBJ_29 /* ZipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipTests.swift; sourceTree = "<group>"; };
 		OBJ_30 /* ReallyLazySequences.xcworkspace */ = {isa = PBXFileReference; lastKnownFileType = wrapper.workspace; path = ReallyLazySequences.xcworkspace; sourceTree = SOURCE_ROOT; };
-		OBJ_33 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; name = Package.swift; path = "/Users/rvs/Development/Projects/computecycles/ReallyLazySequences/.build/checkouts/PromiseKit.git--5020882989880449504/Package.swift"; sourceTree = "<group>"; };
-		OBJ_34 /* Box.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
-		OBJ_35 /* Catchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Catchable.swift; sourceTree = "<group>"; };
-		OBJ_36 /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
-		OBJ_37 /* CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomStringConvertible.swift; sourceTree = "<group>"; };
-		OBJ_38 /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
-		OBJ_39 /* Guarantee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guarantee.swift; sourceTree = "<group>"; };
-		OBJ_40 /* Promise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
-		OBJ_41 /* Resolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resolver.swift; sourceTree = "<group>"; };
-		OBJ_42 /* Thenable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thenable.swift; sourceTree = "<group>"; };
-		OBJ_43 /* after.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = after.swift; sourceTree = "<group>"; };
-		OBJ_44 /* firstly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = firstly.swift; sourceTree = "<group>"; };
-		OBJ_45 /* hang.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hang.swift; sourceTree = "<group>"; };
-		OBJ_46 /* race.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = race.swift; sourceTree = "<group>"; };
-		OBJ_47 /* when.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = when.swift; sourceTree = "<group>"; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		OBJ_9 /* Composers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Composers.swift; sourceTree = "<group>"; };
-		"PromiseKit::PromiseKit::Product" /* PromiseKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = PromiseKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"ReallyLazySequences::ReallyLazySequences::Product" /* ReallyLazySequences.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = ReallyLazySequences.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"ReallyLazySequences::ReallyLazySequencesTests::Product" /* ReallyLazySequencesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = ReallyLazySequencesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -140,14 +93,6 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_122 /* ReallyLazySequences.framework in Frameworks */,
-				OBJ_123 /* PromiseKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_71 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 0;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -155,7 +100,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_96 /* PromiseKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,39 +132,14 @@
 		OBJ_31 /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_32 /* PromiseKit */,
 			);
 			name = Dependencies;
 			sourceTree = "<group>";
-		};
-		OBJ_32 /* PromiseKit */ = {
-			isa = PBXGroup;
-			children = (
-				OBJ_33 /* Package.swift */,
-				OBJ_34 /* Box.swift */,
-				OBJ_35 /* Catchable.swift */,
-				OBJ_36 /* Configuration.swift */,
-				OBJ_37 /* CustomStringConvertible.swift */,
-				OBJ_38 /* Error.swift */,
-				OBJ_39 /* Guarantee.swift */,
-				OBJ_40 /* Promise.swift */,
-				OBJ_41 /* Resolver.swift */,
-				OBJ_42 /* Thenable.swift */,
-				OBJ_43 /* after.swift */,
-				OBJ_44 /* firstly.swift */,
-				OBJ_45 /* hang.swift */,
-				OBJ_46 /* race.swift */,
-				OBJ_47 /* when.swift */,
-			);
-			name = PromiseKit;
-			path = ".build/checkouts/PromiseKit.git--5020882989880449504/Sources";
-			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_48 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				"ReallyLazySequences::ReallyLazySequencesTests::Product" /* ReallyLazySequencesTests.xctest */,
-				"PromiseKit::PromiseKit::Product" /* PromiseKit.framework */,
 				"ReallyLazySequences::ReallyLazySequences::Product" /* ReallyLazySequences.framework */,
 			);
 			name = Products;
@@ -269,36 +188,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		"PromiseKit::PromiseKit" /* PromiseKit */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_53 /* Build configuration list for PBXNativeTarget "PromiseKit" */;
-			buildPhases = (
-				OBJ_56 /* Sources */,
-				OBJ_71 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = PromiseKit;
-			productName = PromiseKit;
-			productReference = "PromiseKit::PromiseKit::Product" /* PromiseKit.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		"PromiseKit::SwiftPMPackageDescription" /* PromiseKitPackageDescription */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_73 /* Build configuration list for PBXNativeTarget "PromiseKitPackageDescription" */;
-			buildPhases = (
-				OBJ_76 /* Sources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = PromiseKitPackageDescription;
-			productName = PromiseKitPackageDescription;
-			productType = "com.apple.product-type.framework";
-		};
 		"ReallyLazySequences::ReallyLazySequences" /* ReallyLazySequences */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = OBJ_79 /* Build configuration list for PBXNativeTarget "ReallyLazySequences" */;
@@ -309,7 +198,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				OBJ_97 /* PBXTargetDependency */,
 			);
 			name = ReallyLazySequences;
 			productName = ReallyLazySequences;
@@ -327,7 +215,6 @@
 			);
 			dependencies = (
 				OBJ_124 /* PBXTargetDependency */,
-				OBJ_125 /* PBXTargetDependency */,
 			);
 			name = ReallyLazySequencesTests;
 			productName = ReallyLazySequencesTests;
@@ -356,14 +243,11 @@
 			attributes = {
 				LastUpgradeCheck = 1020;
 				TargetAttributes = {
-					"PromiseKit::PromiseKit" = {
-						LastSwiftMigration = 1000;
-					};
 					"ReallyLazySequences::ReallyLazySequences" = {
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1020;
 					};
 					"ReallyLazySequences::ReallyLazySequencesTests" = {
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1020;
 					};
 				};
 			};
@@ -380,8 +264,6 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				"PromiseKit::PromiseKit" /* PromiseKit */,
-				"PromiseKit::SwiftPMPackageDescription" /* PromiseKitPackageDescription */,
 				"ReallyLazySequences::ReallyLazySequences" /* ReallyLazySequences */,
 				"ReallyLazySequences::SwiftPMPackageDescription" /* ReallyLazySequencesPackageDescription */,
 				"ReallyLazySequences::ReallyLazySequencesPackageTests::ProductTarget" /* ReallyLazySequencesPackageTests */,
@@ -410,35 +292,6 @@
 				OBJ_118 /* SelectTests.swift in Sources */,
 				OBJ_119 /* XCTestManifests.swift in Sources */,
 				OBJ_120 /* ZipTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_56 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_57 /* Box.swift in Sources */,
-				OBJ_58 /* Catchable.swift in Sources */,
-				OBJ_59 /* Configuration.swift in Sources */,
-				OBJ_60 /* CustomStringConvertible.swift in Sources */,
-				OBJ_61 /* Error.swift in Sources */,
-				OBJ_62 /* Guarantee.swift in Sources */,
-				OBJ_63 /* Promise.swift in Sources */,
-				OBJ_64 /* Resolver.swift in Sources */,
-				OBJ_65 /* Thenable.swift in Sources */,
-				OBJ_66 /* after.swift in Sources */,
-				OBJ_67 /* firstly.swift in Sources */,
-				OBJ_68 /* hang.swift in Sources */,
-				OBJ_69 /* race.swift in Sources */,
-				OBJ_70 /* when.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		OBJ_76 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 0;
-			files = (
-				OBJ_77 /* Package.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,16 +326,6 @@
 			isa = PBXTargetDependency;
 			target = "ReallyLazySequences::ReallyLazySequences" /* ReallyLazySequences */;
 			targetProxy = FB0039AA21455D8200D4E400 /* PBXContainerItemProxy */;
-		};
-		OBJ_125 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "PromiseKit::PromiseKit" /* PromiseKit */;
-			targetProxy = FB0039AB21455D8200D4E400 /* PBXContainerItemProxy */;
-		};
-		OBJ_97 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = "PromiseKit::PromiseKit" /* PromiseKit */;
-			targetProxy = FB0039A921455D8200D4E400 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -520,7 +363,6 @@
 		OBJ_111 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
@@ -531,7 +373,7 @@
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = ReallyLazySequencesTests;
 			};
 			name = Debug;
@@ -539,7 +381,6 @@
 		OBJ_112 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
@@ -550,7 +391,7 @@
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = ReallyLazySequencesTests;
 			};
 			name = Release;
@@ -650,70 +491,6 @@
 			};
 			name = Release;
 		};
-		OBJ_54 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = ReallyLazySequences.xcodeproj/PromiseKit_Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = PromiseKit;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
-				TARGET_NAME = PromiseKit;
-			};
-			name = Debug;
-		};
-		OBJ_55 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = ReallyLazySequences.xcodeproj/PromiseKit_Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) $(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				OTHER_CFLAGS = "$(inherited)";
-				OTHER_LDFLAGS = "$(inherited)";
-				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = PromiseKit;
-				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
-				TARGET_NAME = PromiseKit;
-			};
-			name = Release;
-		};
-		OBJ_74 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -target x86_64-apple-macosx10.10 -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk";
-				SWIFT_VERSION = 4.0;
-			};
-			name = Debug;
-		};
-		OBJ_75 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				LD = /usr/bin/true;
-				OTHER_SWIFT_FLAGS = "-swift-version 4 -I $(TOOLCHAIN_DIR)/usr/lib/swift/pm/4 -target x86_64-apple-macosx10.10 -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk";
-				SWIFT_VERSION = 4.0;
-			};
-			name = Release;
-		};
 		OBJ_80 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -732,7 +509,7 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = ReallyLazySequences;
 			};
 			name = Debug;
@@ -755,7 +532,7 @@
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = ReallyLazySequences;
 			};
 			name = Release;
@@ -786,24 +563,6 @@
 			buildConfigurations = (
 				OBJ_3 /* Debug */,
 				OBJ_4 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_53 /* Build configuration list for PBXNativeTarget "PromiseKit" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_54 /* Debug */,
-				OBJ_55 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		OBJ_73 /* Build configuration list for PBXNativeTarget "PromiseKitPackageDescription" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				OBJ_74 /* Debug */,
-				OBJ_75 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

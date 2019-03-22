@@ -9,10 +9,9 @@ let package = Package(
         .library(name: "ReallyLazySequences", targets: ["ReallyLazySequences"]),
     ],
     dependencies: [
-	.package(url: "https://github.com/ComputeCycles/PromiseKit.git", .branch("Swift-Only")),
     ],
     targets: [
-        .target(name: "ReallyLazySequences", dependencies: ["PromiseKit"]),
+        .target(name: "ReallyLazySequences", dependencies: []),
         .testTarget(name: "ReallyLazySequencesTests", dependencies: ["ReallyLazySequences"]),
     ]
 )

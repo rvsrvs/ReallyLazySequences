@@ -28,7 +28,7 @@ class ProducerTests: XCTestCase {
         let testGenerator = ListenableSequence<Int>()
         
         var proxy1 = testGenerator
-            .listener()
+            .listener
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }
@@ -41,7 +41,7 @@ class ProducerTests: XCTestCase {
             }
         
         var proxy2 = testGenerator
-            .listener()
+            .listener
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }

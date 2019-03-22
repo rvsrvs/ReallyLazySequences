@@ -25,7 +25,7 @@ class ReallyLazySequencesTests: XCTestCase {
         let c = SimpleSequence<Int>()
             .filter { $0 < 10 }
             .map { Double($0) }
-            .map { $0 * 2 }
+            .map { (input: Double) -> Double in input * 2 }
             .reduce([Double]()) {  $0 + [$1] }
             .map { return $0.sorted() }
             .flatMap { (input) -> Subsequence<[Double], Double> in Subsequence(input) }
@@ -58,7 +58,7 @@ class ReallyLazySequencesTests: XCTestCase {
         let listenable = ListenableSequence<Int>()
         
         var listernHandle = listenable
-            .listener()
+            .listener
             .flatMap { (value) -> Subsequence<Int,Int> in Subsequence(0 ..< value) }
             .listen {
                 guard $0 != nil else {

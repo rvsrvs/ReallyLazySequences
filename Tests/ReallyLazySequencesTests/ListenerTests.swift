@@ -28,7 +28,7 @@ class ListenerTests: XCTestCase {
         let testValue = ListenableValue<Int>(2)
         
         var proxy1 = testValue
-            .listener()
+            .listener
             .map { $0 * 2 }
             .listen {
                 guard $0 != nil else { XCTFail(); return .canContinue  }
@@ -37,7 +37,7 @@ class ListenerTests: XCTestCase {
             }
         
         var proxy2 = testValue
-            .listener()
+            .listener
             .map { $0 * 4 }
             .listen {
                 guard $0 != nil else { XCTFail(); return .canContinue  }

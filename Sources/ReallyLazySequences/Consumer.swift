@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import PromiseKit
 
 public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType>
@@ -15,7 +14,6 @@ public protocol ConsumableProtocol: ReallyLazySequenceProtocol {
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T>
     func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ConsumableCompactMap<Self, T>
     func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ConsumableFlatMap<Self, T>
-    func asyncMap<T>(_ transform: @escaping (OutputType) throws -> Promise<T>) -> ConsumableAsyncMap<Self, T>
 
     // Consumable chaining
     func dispatch(_ queue: OperationQueue) -> ConsumableDispatch<Self, OutputType>

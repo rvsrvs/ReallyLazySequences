@@ -13,8 +13,8 @@ public protocol Listenable: class, CustomStringConvertible {
 
     var listeners: [UUID: Consumer<ListenableOutputType>] { get set }
     var hasListeners: Bool { get }
+    var listener: Listener<Self> { get }
 
-    func listener() -> Listener<Self>
     func add(listener: Consumer<ListenableOutputType>, with: UUID)
     func remove(listenerWith: UUID) -> Consumer<ListenableOutputType>?
     func terminate()
@@ -33,12 +33,12 @@ extension Listenable {
     
     public func terminate() {
         listeners.keys.forEach { uuid in
-            _ = try? listeners[uuid]?.process(nil)
+            _ = ((try? listeners[uuid]?.process(nil)) as ContinuationResult??)
             _ = remove(listenerWith: uuid)
         }
     }
 
-    public func listener() -> Listener<Self> {
+    public var listener: Listener<Self> {
         return Listener<Self>(self) { (uuid: UUID, consumer: Consumer<ListenableOutputType>) in
             self.add(listener: consumer, with: uuid)
         }
