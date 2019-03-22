@@ -3,8 +3,17 @@
 //  ReallyLazySequences
 //
 //  Created by Van Simmons on 7/28/18.
-//  Copyright © 2018 ComputeCycles, LLC. All rights reserved.
 //
+
+/*
+ Copyright 2019, Ronald V. Simmons
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 //===================================================================================
 // structs for Chaining.  These only make it easier to read the types of an RLS
@@ -12,7 +21,7 @@
 // make this not require all the boilerplate. 
 //===================================================================================
 
-public struct ConsumableMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -28,7 +37,7 @@ public struct ConsumableMap<Predecessor: ConsumableSequenceProtocol, Output>: Ch
     }
 }
 
-public struct ConsumableReduce<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableReduce<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -44,7 +53,7 @@ public struct ConsumableReduce<Predecessor: ConsumableSequenceProtocol, Output>:
     }
 }
 
-public struct ConsumableFilter<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableFilter<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -60,7 +69,7 @@ public struct ConsumableFilter<Predecessor: ConsumableSequenceProtocol, Output>:
     }
 }
 
-public struct ConsumableFlatMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableFlatMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -76,7 +85,7 @@ public struct ConsumableFlatMap<Predecessor: ConsumableSequenceProtocol, Output>
     }
 }
 
-public struct ConsumableCompactMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableCompactMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -92,7 +101,7 @@ public struct ConsumableCompactMap<Predecessor: ConsumableSequenceProtocol, Outp
     }
 }
 
-public struct ConsumableAsyncMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableAsyncMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -108,7 +117,7 @@ public struct ConsumableAsyncMap<Predecessor: ConsumableSequenceProtocol, Output
     }
 }
 
-public struct ConsumableDispatch<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableProtocol {
+public struct ConsumableDispatch<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output

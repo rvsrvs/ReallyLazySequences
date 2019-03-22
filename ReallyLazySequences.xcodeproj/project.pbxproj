@@ -38,7 +38,6 @@
 		OBJ_71 /* ListenableSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ListenableSequenceTests.swift */; };
 		OBJ_72 /* ListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* ListenerTests.swift */; };
 		OBJ_73 /* ReallyLazySequencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* ReallyLazySequencesTests.swift */; };
-		OBJ_74 /* SelectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* SelectTests.swift */; };
 		OBJ_75 /* XCTestManifests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* XCTestManifests.swift */; };
 		OBJ_76 /* ZipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* ZipTests.swift */; };
 		OBJ_78 /* ReallyLazySequences.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "ReallyLazySequences::ReallyLazySequences::Product" /* ReallyLazySequences.framework */; };
@@ -77,7 +76,6 @@
 		OBJ_24 /* ListenableSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenableSequenceTests.swift; sourceTree = "<group>"; };
 		OBJ_25 /* ListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerTests.swift; sourceTree = "<group>"; };
 		OBJ_26 /* ReallyLazySequencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReallyLazySequencesTests.swift; sourceTree = "<group>"; };
-		OBJ_27 /* SelectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectTests.swift; sourceTree = "<group>"; };
 		OBJ_28 /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestManifests.swift; sourceTree = "<group>"; };
 		OBJ_29 /* ZipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipTests.swift; sourceTree = "<group>"; };
 		OBJ_33 /* ReallyLazySequences.xcworkspace */ = {isa = PBXFileReference; lastKnownFileType = wrapper.workspace; path = ReallyLazySequences.xcworkspace; sourceTree = SOURCE_ROOT; };
@@ -123,7 +121,6 @@
 				OBJ_24 /* ListenableSequenceTests.swift */,
 				OBJ_25 /* ListenerTests.swift */,
 				OBJ_26 /* ReallyLazySequencesTests.swift */,
-				OBJ_27 /* SelectTests.swift */,
 				OBJ_28 /* XCTestManifests.swift */,
 				OBJ_29 /* ZipTests.swift */,
 			);
@@ -298,7 +295,6 @@
 				OBJ_71 /* ListenableSequenceTests.swift in Sources */,
 				OBJ_72 /* ListenerTests.swift in Sources */,
 				OBJ_73 /* ReallyLazySequencesTests.swift in Sources */,
-				OBJ_74 /* SelectTests.swift in Sources */,
 				OBJ_75 /* XCTestManifests.swift in Sources */,
 				OBJ_76 /* ZipTests.swift in Sources */,
 			);

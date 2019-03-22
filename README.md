@@ -23,12 +23,12 @@ Note how much simpler, flatMap in particular is, even though it accomplishes the
 
 1. Each Sequence when properly initialized accepts its values one at a time, asynchronously
 1. Every swift.Sequence function is implemented _as is_, only with a possibly different return value and executed asynchronously on only one object at a time
-1. All sequences are structs, not classes
+1. All sequences are non-mutating structs, not classes
 1. All RLS structs have no methods other than init. Sequence functions _all_ occur in protocol extensions. Ideally, the sequence classes would not have _init_ either, but you can't place struct initializers in protocol extensions
 1. Everything is asynchronous-capable and capable of thread-safety when specified rules are followed
-1. You should never see a 100 level deep stack trace (implies use of Continuations), each step of the sequence chain is executed by the head independently not by having each step invoke its successor on its own.
-1. The order of evaluation for each sequence can be read from the type name of the final sequence
-1. Transform functions may not throw, because which RunLoop we are executing in is not known beforehand.  Any errors in a transform must be caught and the transform should pass values indicating the error down the chain.
+1. You should never see a 100 level deep stack trace (implies use of Continuations), each step of the sequence chain is executed at the invocation site independently instead of by having each step invoke directly invoke its successor step.
+1. The order of evaluation for each sequence can be read from a description constructed at instantiation
+1. Transform functions which throw are caught at the invocation site, because which RunLoop we are executing in is not known beforehand.  Any errors in a transform must be caught and the transform should pass values indicating the error down the chain.
 1. flatMap returns specific subtypes of our Sequence called Producers
 
 ### Notes

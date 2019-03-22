@@ -3,8 +3,17 @@
 //  ReallyLazySequencesTests
 //
 //  Created by Van Simmons on 8/7/18.
-//  Copyright © 2018 ComputeCycles, LLC. All rights reserved.
 //
+
+/*
+ Copyright 2019, Ronald V. Simmons
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 import XCTest
 @testable import ReallyLazySequences
@@ -25,9 +34,9 @@ class ProducerTests: XCTestCase {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let testGenerator = Observer<Int>()
+        let observer = Observer<Int>()
         
-        var proxy1 = testGenerator
+        var proxy1 = observer
             .listener
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
@@ -40,7 +49,7 @@ class ProducerTests: XCTestCase {
                 return .canContinue
             }
         
-        var proxy2 = testGenerator
+        var proxy2 = observer
             .listener
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
@@ -54,8 +63,8 @@ class ProducerTests: XCTestCase {
             }
         
         do {
-            try testGenerator.process(5)
-            try testGenerator.process(nil)
+            try observer.process(5)
+            try observer.process(nil)
         } catch {
             XCTFail("Failed while processing")
         }
