@@ -16,7 +16,7 @@
 
 import Foundation
 
-public protocol ConsumableSequenceProtocol: ReallyLazySequenceProtocol {
+public protocol ConsumableSequenceProtocol: SequenceProtocol {
     func consume(_ delivery: @escaping (Self.OutputType?) -> ContinuationTermination) -> Consumer<Self.InputType>
     
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ConsumableMap<Self, T>
@@ -44,15 +44,19 @@ public protocol ChainedConsumableSequenceProtocol: ConsumableSequenceProtocol {
     init(predecessor: PredecessorType, composer: @escaping Composer)
 }
 
+public enum ConsumerError: Error {
+    case isComplete
+}
+
 public struct Consumer<T> {
     public var description: String
     private var composition: (T?) throws -> ContinuationResult
     
     public init(delivery: @escaping (T?) throws -> ContinuationResult, description: String = "") {
-        self.description = standardizeRLSDescription(description)
+        self.description = Utilities.standardizeDescription(description)
         var isComplete = false
         composition = { value in
-            guard !isComplete else { throw ReallyLazySequenceError.isComplete }
+            guard !isComplete else { throw ConsumerError.isComplete }
             if value == nil { isComplete = true }
             do {
                 return ContinuationResult.complete(try delivery(value))

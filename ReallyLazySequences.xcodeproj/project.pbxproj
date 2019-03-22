@@ -30,7 +30,6 @@
 		OBJ_47 /* ListenableSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* ListenableSequence.swift */; };
 		OBJ_48 /* ReallyLazySequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* ReallyLazySequence.swift */; };
 		OBJ_49 /* Select.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* Select.swift */; };
-		OBJ_50 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* Utilities.swift */; };
 		OBJ_51 /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Value.swift */; };
 		OBJ_52 /* Zip.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Zip.swift */; };
 		OBJ_59 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
@@ -69,7 +68,6 @@
 		OBJ_15 /* ListenableSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenableSequence.swift; sourceTree = "<group>"; };
 		OBJ_16 /* ReallyLazySequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReallyLazySequence.swift; sourceTree = "<group>"; };
 		OBJ_17 /* Select.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Select.swift; sourceTree = "<group>"; };
-		OBJ_18 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		OBJ_19 /* Value.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Value.swift; sourceTree = "<group>"; };
 		OBJ_20 /* Zip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zip.swift; sourceTree = "<group>"; };
 		OBJ_23 /* ContinuationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuationTests.swift; sourceTree = "<group>"; };
@@ -171,7 +169,6 @@
 				OBJ_15 /* ListenableSequence.swift */,
 				OBJ_16 /* ReallyLazySequence.swift */,
 				OBJ_17 /* Select.swift */,
-				OBJ_18 /* Utilities.swift */,
 				OBJ_19 /* Value.swift */,
 				OBJ_20 /* Zip.swift */,
 			);
@@ -273,7 +270,6 @@
 				OBJ_47 /* ListenableSequence.swift in Sources */,
 				OBJ_48 /* ReallyLazySequence.swift in Sources */,
 				OBJ_49 /* Select.swift in Sources */,
-				OBJ_50 /* Utilities.swift in Sources */,
 				OBJ_51 /* Value.swift in Sources */,
 				OBJ_52 /* Zip.swift in Sources */,
 			);

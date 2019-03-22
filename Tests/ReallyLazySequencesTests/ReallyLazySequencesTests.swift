@@ -52,7 +52,7 @@ class ReallyLazySequencesTests: XCTestCase {
             for i in [8, 12, 4, 3, 2] { _ = try c.process(i) }
             for _ in 0 ..< 100000 { _ = try c.process(200) }
             _ = try c.process(nil)
-        } catch ReallyLazySequenceError.isComplete {
+        } catch ConsumerError.isComplete {
             print("Can't push to a completed sequence")
         } catch {
             print(error.localizedDescription)
@@ -112,7 +112,7 @@ class ReallyLazySequencesTests: XCTestCase {
         
         do {
             try [1, 11, 2, 3, nil].forEach { _ = try c.process($0) }
-        } catch ReallyLazySequenceError.isComplete {
+        } catch ConsumerError.isComplete {
             XCTFail("Can't push to a completed sequence")
         } catch {
             XCTFail(error.localizedDescription)
@@ -145,7 +145,7 @@ class ReallyLazySequencesTests: XCTestCase {
         
         do {
             try [1, 2, 3, 4, 5, 10, 20, 30, 40, 50, nil].forEach { _ = try c.process($0) }
-        } catch ReallyLazySequenceError.isComplete {
+        } catch ConsumerError.isComplete {
             XCTFail("Can't push to a completed sequence")
         } catch {
             XCTFail(error.localizedDescription)

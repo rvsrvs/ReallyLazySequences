@@ -63,7 +63,7 @@ public struct ListenerHandle<T>: CustomStringConvertible where T: Listenable {
     public init(identifier: UUID, listenable: T?) {
         self.identifier = identifier
         self.listenable = listenable
-        self.description = standardizeRLSDescription("\(listenable?.description ?? "nil")   >> ListenerHandle<identifier = \"\(identifier)>\"")
+        self.description = Utilities.standardizeDescription("\(listenable?.description ?? "nil")   >> ListenerHandle<identifier = \"\(identifier)>\"")
     }
     
     public mutating func terminate() -> Consumer<T.ListenableOutputType>? {
@@ -74,7 +74,7 @@ public struct ListenerHandle<T>: CustomStringConvertible where T: Listenable {
     }
 }
 
-public protocol ListenableSequenceProtocol: ReallyLazySequenceProtocol {
+public protocol ListenableSequenceProtocol: SequenceProtocol {
     associatedtype ListenableType: Listenable
     func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerHandle<Self.ListenableType>
     func proxy() -> ListenerHandle<Self.ListenableType>
@@ -108,7 +108,7 @@ public struct ListenableSequence<T>: ListenableSequenceProtocol where T: Listena
     init(_ listenable: T, installer: @escaping (UUID, Consumer<T.ListenableOutputType>) -> Void) {
         self.listenable = listenable
         self.installer = installer
-        self.description = standardizeRLSDescription("\(listenable.description) >> Listener<\(type(of: T.ListenableOutputType.self))>")
+        self.description = Utilities.standardizeDescription("\(listenable.description) >> Listener<\(type(of: T.ListenableOutputType.self))>")
     }
     
     public func proxy() -> ListenerHandle<T> {
@@ -159,6 +159,6 @@ public final class Observer<T>: ObserverProtocol {
     public typealias ListenableOutputType = T
     
     public init() {
-        self.description = standardizeRLSDescription("ListenableSequence<\(type(of: T.self))>")
+        self.description = Utilities.standardizeDescription("ListenableSequence<\(type(of: T.self))>")
     }
 }

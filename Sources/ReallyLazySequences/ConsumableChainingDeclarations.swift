@@ -33,7 +33,7 @@ public struct ConsumableMap<Predecessor: ConsumableSequenceProtocol, Output>: Ch
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardizeRLSDescription("\(predecessor.description) >> CMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = Utilities.standardizeDescription("\(predecessor.description) >> CMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -49,7 +49,7 @@ public struct ConsumableReduce<Predecessor: ConsumableSequenceProtocol, Output>:
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardizeRLSDescription("\(predecessor.description) >> CReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = Utilities.standardizeDescription("\(predecessor.description) >> CReduce<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -65,7 +65,7 @@ public struct ConsumableFilter<Predecessor: ConsumableSequenceProtocol, Output>:
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardizeRLSDescription("\(predecessor.description) >> CFilter<\(type(of:Predecessor.OutputType.self))>")
+        self.description = Utilities.standardizeDescription("\(predecessor.description) >> CFilter<\(type(of:Predecessor.OutputType.self))>")
     }
 }
 
@@ -81,7 +81,7 @@ public struct ConsumableFlatMap<Predecessor: ConsumableSequenceProtocol, Output>
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardizeRLSDescription("\(predecessor.description) >> CFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = Utilities.standardizeDescription("\(predecessor.description) >> CFlatMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -97,7 +97,7 @@ public struct ConsumableCompactMap<Predecessor: ConsumableSequenceProtocol, Outp
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardizeRLSDescription("\(predecessor.description) >> CCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = Utilities.standardizeDescription("\(predecessor.description) >> CCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -113,7 +113,7 @@ public struct ConsumableAsyncMap<Predecessor: ConsumableSequenceProtocol, Output
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardizeRLSDescription("\(predecessor.description) >> CAsyncMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = Utilities.standardizeDescription("\(predecessor.description) >> CAsyncMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
@@ -129,7 +129,7 @@ public struct ConsumableDispatch<Predecessor: ConsumableSequenceProtocol, Output
     public init(predecessor: PredecessorType, composer: @escaping Composer) {
         self.predecessor = predecessor
         self.composer = composer
-        self.description = standardizeRLSDescription("\(predecessor.description) >> CDispatch<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
+        self.description = Utilities.standardizeDescription("\(predecessor.description) >> CDispatch<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 

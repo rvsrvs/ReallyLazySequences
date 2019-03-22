@@ -17,19 +17,27 @@
 
 import Foundation
 
-public protocol ReallyLazySequenceProtocol: CustomStringConvertible {
+public protocol SequenceProtocol: CustomStringConvertible {
     associatedtype InputType  // The _initial_ initial type for the head for a given RLS chain
     associatedtype OutputType // The type which is output from a given RLS
     
     typealias ContinuableInputDelivery  = (Self.InputType?) throws -> ContinuationResult
     typealias ContinuableOutputDelivery = (OutputType?) -> ContinuationResult
     typealias TerminalOutputDelivery    = (OutputType?) -> ContinuationTermination
-
+    
     func compose(_ output: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery?
 }
 
+public struct Utilities {
+    public static func standardizeDescription(_ description: String) -> String {
+        return description
+            .replacingOccurrences(of: ".Type", with: "")
+            .replacingOccurrences(of: "Swift.", with: "")
+    }
+}
+
 public struct SimpleSequence<T>: ConsumableSequenceProtocol {
-    public var description: String = standardizeRLSDescription("SimpleSequence<\(type(of:T.self))>")
+    public var description: String = Utilities.standardizeDescription("SimpleSequence<\(type(of:T.self))>")
     public typealias InputType = T
     public typealias OutputType = T
     public init() { }    
@@ -39,7 +47,7 @@ public struct Subsequence<T, U> {
     public typealias InputType = T
     public typealias OutputType = U
     
-    public var description: String = standardizeRLSDescription("Subsequence<\((type(of:T.self), type(of:U.self)))>")
+    public var description: String = Utilities.standardizeDescription("Subsequence<\((type(of:T.self), type(of:U.self)))>")
     public var iterator: () -> OutputType?
 
     public init(_ iterator: @escaping () -> OutputType?) {

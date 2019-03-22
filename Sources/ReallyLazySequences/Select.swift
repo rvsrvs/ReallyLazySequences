@@ -18,13 +18,13 @@
 import Foundation
 
 public func select<T0, T1>(_ t0: T0, _ t1: T1) -> Select2<T0, T1> where
-    T0: ReallyLazySequenceProtocol,
-    T1: ReallyLazySequenceProtocol {
+    T0: SequenceProtocol,
+    T1: SequenceProtocol {
         return Select2(t0, t1)
 }
 
-public struct Select2<T0, T1>: ReallyLazySequenceProtocol
-    where T0: ReallyLazySequenceProtocol, T1: ReallyLazySequenceProtocol {
+public struct Select2<T0, T1>: SequenceProtocol
+    where T0: SequenceProtocol, T1: SequenceProtocol {
     public typealias InputType = (T0.InputType?, T1.InputType?)
     public typealias OutputType = (T0.OutputType?, T1.OutputType?)
     
@@ -36,7 +36,7 @@ public struct Select2<T0, T1>: ReallyLazySequenceProtocol
     init(_ s0: T0, _ s1: T1) {
         self.s0 = s0
         self.s1 = s1
-        self.description = standardizeRLSDescription("Select2<\n\t\(s0.description),\n\t\(s1.description)\n>")
+        self.description = Utilities.standardizeDescription("Select2<\n\t\(s0.description),\n\t\(s1.description)\n>")
     }
     
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
