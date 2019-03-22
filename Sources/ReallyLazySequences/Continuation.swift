@@ -23,6 +23,9 @@
 // allows the consumer to handle errors as they arise rather than well
 // after the fact.
 
+public typealias Continuation = () throws -> ContinuationResult
+typealias ContinuationErrorHandler = (ContinuationErrorContextProtocol) -> ContinuationResult
+
 public protocol ContinuationErrorContextProtocol: Error { }
 
 public enum ContinuationTermination: Equatable {
@@ -35,9 +38,6 @@ public struct ContinuationErrorContext<T, U>: ContinuationErrorContextProtocol {
     var delivery: (U?) throws -> ContinuationResult
     var error: Error
 }
-
-public typealias Continuation = () throws -> ContinuationResult
-typealias ContinuationErrorHandler = (ContinuationErrorContextProtocol) -> ContinuationResult
 
 public indirect enum ContinuationResult {
     case more(Continuation)
