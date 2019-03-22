@@ -104,7 +104,7 @@ public extension ConsumableSequenceProtocol {
     }
 }
 
-extension ChainedListenerProtocol {
+extension ChainedListenableSequenceProtocol {
     public func proxy() -> ListenerHandle<ListenableType> {
         return predecessor.proxy()
     }

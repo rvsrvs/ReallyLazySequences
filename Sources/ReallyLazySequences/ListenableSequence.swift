@@ -128,7 +128,7 @@ public struct ListenableSequence<T>: ListenableSequenceProtocol where T: Listena
     }
 }
 
-public protocol ChainedListenerProtocol: ListenableSequenceProtocol where ListenableType == PredecessorType.ListenableType {
+public protocol ChainedListenableSequenceProtocol: ListenableSequenceProtocol where ListenableType == PredecessorType.ListenableType {
     associatedtype PredecessorType: ListenableSequenceProtocol
     typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery

@@ -17,7 +17,7 @@
 
 import Foundation
 
-public struct ListenableMap<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenerProtocol {
+public struct ListenableMap<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenableSequenceProtocol {
     public typealias ListenableType = Predecessor.ListenableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
@@ -34,7 +34,7 @@ public struct ListenableMap<Predecessor: ListenableSequenceProtocol, Output>: Ch
     }
 }
 
-public struct ListenableReduce<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenerProtocol {
+public struct ListenableReduce<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenableSequenceProtocol {
     public typealias ListenableType = Predecessor.ListenableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
@@ -51,7 +51,7 @@ public struct ListenableReduce<Predecessor: ListenableSequenceProtocol, Output>:
     }
 }
 
-public struct ListenableFilter<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenerProtocol {
+public struct ListenableFilter<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenableSequenceProtocol {
     public typealias ListenableType = Predecessor.ListenableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
@@ -68,7 +68,7 @@ public struct ListenableFilter<Predecessor: ListenableSequenceProtocol, Output>:
     }
 }
 
-public struct ListenableFlatMap<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenerProtocol {
+public struct ListenableFlatMap<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenableSequenceProtocol {
     public typealias ListenableType = Predecessor.ListenableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
@@ -85,7 +85,7 @@ public struct ListenableFlatMap<Predecessor: ListenableSequenceProtocol, Output>
     }
 }
 
-public struct ListenableCompactMap<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenerProtocol {
+public struct ListenableCompactMap<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenableSequenceProtocol {
     public typealias ListenableType = Predecessor.ListenableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
@@ -102,7 +102,7 @@ public struct ListenableCompactMap<Predecessor: ListenableSequenceProtocol, Outp
     }
 }
 
-public struct ListenableDispatch<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenerProtocol {
+public struct ListenableDispatch<Predecessor: ListenableSequenceProtocol, Output>: ChainedListenableSequenceProtocol {
     public typealias ListenableType = Predecessor.ListenableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
