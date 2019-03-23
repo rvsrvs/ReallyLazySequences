@@ -65,7 +65,11 @@ extension Listenable {
     }
 }
 
-public struct ListenerHandle<T>: CustomStringConvertible where T: Listenable {
+public struct ListenerHandle<T>: CustomStringConvertible, Equatable, Hashable where T: Listenable {
+    public static func == (lhs: ListenerHandle<T>, rhs: ListenerHandle<T>) -> Bool {
+        return lhs.identifier == rhs.identifier
+    }
+    
     public var description: String
     
     var identifier: UUID
@@ -75,6 +79,10 @@ public struct ListenerHandle<T>: CustomStringConvertible where T: Listenable {
         self.identifier = identifier
         self.listenable = listenable
         self.description = Utilities.standardizeDescription("\(listenable?.description ?? "nil")   >> ListenerHandle<identifier = \"\(identifier)>\"")
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        return hasher.combine(identifier)
     }
     
     public mutating func terminate() -> Consumer<T.ListenableOutputType>? {
@@ -109,29 +117,29 @@ public struct ListenableSequence<T>: ListenableSequenceProtocol where T: Listena
     public typealias ListenableType = T
     public typealias InputType = T.ListenableOutputType
     public typealias OutputType = T.ListenableOutputType
-    
+
     public var description: String
 
     public var installer: (UUID, Consumer<T.ListenableOutputType>) -> Void
     private weak var listenable: T?
     private var identifier = UUID()
-    
+
     init(_ listenable: T, installer: @escaping (UUID, Consumer<T.ListenableOutputType>) -> Void) {
         self.listenable = listenable
         self.installer = installer
         self.description = Utilities.standardizeDescription("\(listenable.description) >> Listener<\(type(of: T.ListenableOutputType.self))>")
     }
-    
+
     public func proxy() -> ListenerHandle<T> {
         return ListenerHandle(identifier: identifier, listenable: listenable)
     }
-    
+
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
         let listener = Consumer<T.ListenableOutputType>(delivery: delivery)
         installer(identifier, listener)
         return nil
     }
-    
+
     public func listen(_ delivery: @escaping (T.ListenableOutputType?) -> ContinuationTermination) -> ListenerHandle<T> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in return .done(delivery(value)) }
         let _ = compose(deliveryWrapper)

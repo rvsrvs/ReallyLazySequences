@@ -29,7 +29,7 @@
 import XCTest
 @testable import ReallyLazySequences
 
-class ListenerTests: XCTestCase {
+class ListenableValueTests: XCTestCase {
     
     override func setUp() {
         super.setUp()

@@ -29,7 +29,7 @@
 //===================================================================================
 // structs for Chaining.  These only make it easier to read the types of an RLS
 // using type(of:).  The introduction of higher kinded types (HKTs) in Swift would
-// make this not require all the boilerplate. 
+// make these structs not require all the boilerplate. 
 //===================================================================================
 
 public struct ConsumableMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
@@ -109,22 +109,6 @@ public struct ConsumableCompactMap<Predecessor: ConsumableSequenceProtocol, Outp
         self.predecessor = predecessor
         self.composer = composer
         self.description = Utilities.standardizeDescription("\(predecessor.description) >> CCompactMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
-    }
-}
-
-public struct ConsumableAsyncMap<Predecessor: ConsumableSequenceProtocol, Output>: ChainedConsumableSequenceProtocol {
-    public typealias PredecessorType = Predecessor
-    public typealias InputType = Predecessor.InputType
-    public typealias OutputType = Output
-    
-    public var description: String
-    public var predecessor: Predecessor
-    public var composer: Composer
-    
-    public init(predecessor: PredecessorType, composer: @escaping Composer) {
-        self.predecessor = predecessor
-        self.composer = composer
-        self.description = Utilities.standardizeDescription("\(predecessor.description) >> CAsyncMap<\(type(of:Predecessor.OutputType.self)) -> \(type(of:Output.self))>")
     }
 }
 
