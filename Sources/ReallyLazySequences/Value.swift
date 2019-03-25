@@ -26,8 +26,6 @@
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import Foundation
-
 public final class ObservableValue<T>: ObservableProtocol {
     public var description: String
     

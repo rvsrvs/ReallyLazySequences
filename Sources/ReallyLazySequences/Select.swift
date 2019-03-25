@@ -26,8 +26,6 @@
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import Foundation
-
 public func select<T0, T1>(_ t0: T0, _ t1: T1) -> Select2<T0, T1> where
     T0: SequenceProtocol,
     T1: SequenceProtocol {

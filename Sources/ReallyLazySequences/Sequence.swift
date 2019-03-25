@@ -26,8 +26,6 @@
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import Foundation
-
 public protocol SequenceProtocol: CustomStringConvertible {
     associatedtype InputType  // The _initial_ initial type for the head for a given RLS chain
     associatedtype OutputType // The type which is output from a given RLS

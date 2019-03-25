@@ -26,8 +26,6 @@
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import Foundation
-
 public struct ObservableMap<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
     public typealias ObservableType = Predecessor.ObservableType
     public typealias PredecessorType = Predecessor
