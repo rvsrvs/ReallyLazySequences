@@ -42,7 +42,7 @@ class SequenceTests: XCTestCase {
     func testSimpleSequence() {
         var accumulatedResults: [Int] = []
         
-        let c = SimpleSequence<Int>()
+        let c = SequenceHead<Int>()
             .filter { $0 < 10 }
             .map { Double($0) }
             .map { (input: Double) -> Double in input * 2 }
@@ -103,7 +103,7 @@ class SequenceTests: XCTestCase {
         let expectation = self.expectation(description: "Complete RLS processing")
         let opQueue = OperationQueue()
         
-        let c = SimpleSequence<Int>()
+        let c = SequenceHead<Int>()
             .filter { $0 < 10 }
             .dispatch(opQueue)
             .map { (value: Int) -> Double in
@@ -134,7 +134,7 @@ class SequenceTests: XCTestCase {
     
     func testCollect() {
         let expectation = self.expectation(description: "Complete RLS processing")
-        let c = SimpleSequence<Int>()
+        let c = SequenceHead<Int>()
             .collect(
                 initialValue: [Int](),
                 combine: { (partialValue, input) in return partialValue + [input] },

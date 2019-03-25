@@ -47,7 +47,7 @@ public struct Utilities {
     }
 }
 
-public struct SimpleSequence<T>: ConsumableSequenceProtocol {
+public struct SequenceHead<T>: ConsumableSequenceProtocol {
     public var description: String = Utilities.standardizeDescription("SimpleSequence<\(type(of:T.self))>")
     public typealias InputType = T
     public typealias OutputType = T
