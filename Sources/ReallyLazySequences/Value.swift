@@ -28,19 +28,19 @@
 
 import Foundation
 
-public final class ObservableValue<T>: Observable {
+public final class ObservableValue<T>: ObservableProtocol {
     public var description: String
     
     public typealias ObservableOutputType = T
     
-    public var observers = [UUID: Consumer<T>]()
+    public var observers = [ObserverHandle<ObservableValue<T>>: Consumer<T>]()
     public var hasObservers: Bool { return observers.count > 0 }
     
     var value: T {
         didSet {
-            observers.keys.forEach { uuid in
-                do { _ = try observers[uuid]?.process(value) }
-                catch { _ = remove(uuid) }
+            observers.forEach { handle, consumer in
+                do { _ = try consumer.process(value) }
+                catch { _ = remove(observer: handle) }
             }
         }
     }

@@ -42,7 +42,7 @@ class ZipTests: XCTestCase {
     func testZip() {
         let expectation = self.expectation(description: "Expectation")
         
-        let observable = SimpleObservable<Int>()
+        let observable = Observable<Int>()
         
         let t0 = observable
             .observer

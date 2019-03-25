@@ -46,7 +46,7 @@ class ProducerTests: XCTestCase {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let observable = SimpleObservable<Int>()
+        let observable = Observable<Int>()
         
         var proxy1 = observable
             .observer

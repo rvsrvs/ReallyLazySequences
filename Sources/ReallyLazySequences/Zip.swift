@@ -36,14 +36,14 @@ public func zip<T0, T1>(_ t0: T0, _ t1: T1) -> Zip2<T0, T1> where
     return Zip2(t0, t1)
 }
 
-public final class Zip2<T0, T1>: Observable where
+public final class Zip2<T0, T1>: ObservableProtocol where
     T0: ObservableSequenceProtocol,
     T1: ObservableSequenceProtocol {
     public var description: String
     
     public typealias ObservableOutputType = (T0.OutputType, T1.OutputType)
     
-    public var observers = [UUID: Consumer<(T0.OutputType, T1.OutputType)>]()
+    public var observers = [ObserverHandle<Zip2<T0, T1>>: Consumer<(T0.OutputType, T1.OutputType)>]()
     public var hasObservers: Bool { return observers.count > 0 }
     
     private var t0Proxy: ObserverHandle<T0.ObservableType>?
@@ -55,9 +55,9 @@ public final class Zip2<T0, T1>: Observable where
     private func sendIfNecessary(_ v0: T0.OutputType?, _ v1: T1.OutputType?) -> Bool {
         if  let v0 = value?.0, let v1 = value?.1 {
             let v = (v0, v1)
-            observers.keys.forEach { uuid in
-                do { _ = try observers[uuid]?.process(v) }
-                catch { _ = remove(uuid) }
+            observers.forEach { handle, consumer in
+                do { _ = try consumer.process(v) }
+                catch { _ = remove(observer: handle) }
             }
             return true
         }
@@ -67,9 +67,9 @@ public final class Zip2<T0, T1>: Observable where
     var value: (T0.OutputType?, T1.OutputType?)? {
         didSet {
             guard value != nil else {
-                observers.keys.forEach { uuid in
-                    do { _ = try observers[uuid]?.process(nil) }
-                    catch { _ = remove(uuid) }
+                observers.forEach { handle, consumer in
+                    do { _ = try consumer.process(nil) }
+                    catch { _ = remove(observer: handle) }
                 }
                 return
             }

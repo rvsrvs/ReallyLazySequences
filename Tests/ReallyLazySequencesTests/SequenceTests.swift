@@ -75,7 +75,7 @@ class SequenceTests: XCTestCase {
     func testSimpleObserver() {
         let expectation = self.expectation(description: "First Observer")
         
-        let observer = SimpleObservable<Int>()
+        let observer = Observable<Int>()
         
         var observerHandle = observer
             .observer

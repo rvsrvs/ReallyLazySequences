@@ -28,44 +28,38 @@
 
 import Foundation
 
-public protocol Observable: class, CustomStringConvertible {
+public protocol ObservableProtocol: class, CustomStringConvertible {
     associatedtype ObservableOutputType
 
-    var observers: [UUID: Consumer<ObservableOutputType>] { get set }
-    var hasObservers: Bool { get }
-    var observer: ObservableSequence<Self> { get }
-
-    func add(observer: Consumer<ObservableOutputType>, with: UUID)
-    func remove(_ observerId: UUID) -> Consumer<ObservableOutputType>?
+    var observers: [ObserverHandle<Self> : Consumer<ObservableOutputType>] { get set }
+    var observer: Observer<Self> { get }
+    
+    func remove(observer: ObserverHandle<Self>) -> Consumer<ObservableOutputType>?
     func terminate()
 }
 
-extension Observable {
-    public var hasObservers: Bool { return observers.count > 0 }
+public extension ObservableProtocol {
+    var hasObservers: Bool { return observers.count > 0 }
     
-    public func add(observer: Consumer<ObservableOutputType>, with uuid: UUID) {
-        observers[uuid] = observer
+    func remove(observer: ObserverHandle<Self>) -> Consumer<ObservableOutputType>? {
+        return observers.removeValue(forKey: observer)
     }
     
-    public func remove(_ observerId: UUID) -> Consumer<ObservableOutputType>? {
-        return observers.removeValue(forKey: observerId)
-    }
-    
-    public func terminate() {
-        observers.keys.forEach { uuid in
-            _ = ((try? observers[uuid]?.process(nil)) as ContinuationResult??)
-            _ = remove(uuid)
+    func terminate() {
+        observers.forEach { handle, observer in
+            _ = ((try? observers[handle]?.process(nil)) as ContinuationResult??)
+            _ = remove(observer: handle)
         }
     }
 
-    public var observer: ObservableSequence<Self> {
-        return ObservableSequence<Self>(self) { (uuid: UUID, consumer: Consumer<ObservableOutputType>) in
-            self.add(observer: consumer, with: uuid)
+    var observer: Observer<Self> {
+        return Observer<Self>(self) { (handle: ObserverHandle<Self>, consumer: Consumer<ObservableOutputType>) in
+            self.observers[handle] = consumer
         }
     }
 }
 
-public struct ObserverHandle<T>: CustomStringConvertible, Equatable, Hashable where T: Observable {
+public struct ObserverHandle<T>: CustomStringConvertible, Equatable, Hashable where T: ObservableProtocol {
     public static func == (lhs: ObserverHandle<T>, rhs: ObserverHandle<T>) -> Bool {
         return lhs.identifier == rhs.identifier
     }
@@ -75,10 +69,12 @@ public struct ObserverHandle<T>: CustomStringConvertible, Equatable, Hashable wh
     var identifier: UUID
     var observable: T?
     
-    public init(identifier: UUID, observable: T?) {
+    public init(identifier: UUID = UUID(), observable: T?) {
         self.identifier = identifier
         self.observable = observable
-        self.description = Utilities.standardizeDescription("\(observable?.description ?? "nil")   >> ObserverHandle<identifier = \"\(identifier)>\"")
+        self.description = Utilities.standardizeDescription(
+            "\(observable?.description ?? "nil")   >> ObserverHandle<identifier = \"\(identifier)>\""
+        )
     }
     
     public func hash(into hasher: inout Hasher) {
@@ -87,14 +83,14 @@ public struct ObserverHandle<T>: CustomStringConvertible, Equatable, Hashable wh
     
     public mutating func terminate() -> Consumer<T.ObservableOutputType>? {
         guard let m = observable else { return nil }
-        let c = m.remove(identifier)
+        let c = m.remove(observer: self)
         observable = nil
         return c
     }
 }
 
 public protocol ObservableSequenceProtocol: SequenceProtocol {
-    associatedtype ObservableType: Observable
+    associatedtype ObservableType: ObservableProtocol
     func observe(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ObserverHandle<Self.ObservableType>
     func proxy() -> ObserverHandle<Self.ObservableType>
     
@@ -113,37 +109,38 @@ public protocol ObservableSequenceProtocol: SequenceProtocol {
     func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ObservableFilter<Self, OutputType>
 }
 
-public struct ObservableSequence<T>: ObservableSequenceProtocol where T: Observable {
+public struct Observer<T>: ObservableSequenceProtocol where T: ObservableProtocol {
     public typealias ObservableType = T
     public typealias InputType = T.ObservableOutputType
     public typealias OutputType = T.ObservableOutputType
 
     public var description: String
 
-    public var installer: (UUID, Consumer<T.ObservableOutputType>) -> Void
+    public var installer: (ObserverHandle<T>, Consumer<T.ObservableOutputType>) -> Void
     private weak var observable: T?
-    private var identifier = UUID()
+    private let handle: ObserverHandle<T>
 
-    init(_ observable: T, installer: @escaping (UUID, Consumer<T.ObservableOutputType>) -> Void) {
+    init(_ observable: T, installer: @escaping (ObserverHandle<T>, Consumer<T.ObservableOutputType>) -> Void) {
         self.observable = observable
+        self.handle = ObserverHandle<T>(observable: observable)
         self.installer = installer
         self.description = Utilities.standardizeDescription("\(observable.description) >> Observer<\(type(of: T.ObservableOutputType.self))>")
     }
 
     public func proxy() -> ObserverHandle<T> {
-        return ObserverHandle(identifier: identifier, observable: observable)
+        return ObserverHandle(observable: observable)
     }
 
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
         let consumer = Consumer<T.ObservableOutputType>(delivery: delivery)
-        installer(identifier, consumer)
+        installer(handle, consumer)
         return nil
     }
 
     public func observe(_ delivery: @escaping (T.ObservableOutputType?) -> ContinuationTermination) -> ObserverHandle<T> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in return .done(delivery(value)) }
         let _ = compose(deliveryWrapper)
-        return ObserverHandle(identifier: identifier, observable: observable)
+        return ObserverHandle(observable: observable)
     }
 }
 
@@ -156,28 +153,21 @@ public protocol ChainedObservableSequenceProtocol: ObservableSequenceProtocol wh
     init(predecessor: PredecessorType, composer: @escaping Composer)
 }
 
-public protocol ObserverProtocol: Observable {
-    func process(_ value: ObservableOutputType?) throws -> Void
-}
+public final class Observable<T>: ObservableProtocol {
+    public var observers: [ObserverHandle<Observable<T>> : Consumer<T>] = [ : ]
+    
+    public typealias ObservableOutputType = T
 
-extension ObserverProtocol {
-    public func process(_ value: ObservableOutputType?) throws -> Void {
+    public var description: String {
+        return Utilities.standardizeDescription("ObservableSequence<\(type(of: T.self))>")
+    }
+    
+    func process(_ value: ObservableOutputType?) throws -> Void {
         guard self.hasObservers else { return }
         self.observers.forEach { (pair) in
             let (identifier, observer) = pair
             do { _ = try observer.process(value) }
             catch { self.observers.removeValue(forKey: identifier) }
         }
-    }
-}
-
-public final class SimpleObservable<T>: ObserverProtocol {
-    public var description: String
-    
-    public var observers: [UUID : Consumer<T>] = [ : ]
-    public typealias ObservableOutputType = T
-    
-    public init() {
-        self.description = Utilities.standardizeDescription("ObservableSequence<\(type(of: T.self))>")
     }
 }
