@@ -27,14 +27,14 @@
 		OBJ_44 /* Continuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* Continuation.swift */; };
 		OBJ_45 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* Extensions.swift */; };
 		OBJ_46 /* ObservableChainingDeclarations.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* ObservableChainingDeclarations.swift */; };
-		OBJ_47 /* Observer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* Observer.swift */; };
+		OBJ_47 /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* Observable.swift */; };
 		OBJ_48 /* Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* Sequence.swift */; };
 		OBJ_49 /* Select.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* Select.swift */; };
 		OBJ_51 /* Value.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* Value.swift */; };
 		OBJ_52 /* Zip.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* Zip.swift */; };
 		OBJ_59 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_70 /* ContinuationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* ContinuationTests.swift */; };
-		OBJ_71 /* ObservableSequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ObservableSequenceTests.swift */; };
+		OBJ_71 /* ObservableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* ObservableTests.swift */; };
 		OBJ_72 /* ObservableValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* ObservableValueTests.swift */; };
 		OBJ_73 /* SequenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* SequenceTests.swift */; };
 		OBJ_75 /* XCTestManifests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* XCTestManifests.swift */; };
@@ -65,13 +65,13 @@
 		OBJ_12 /* Continuation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Continuation.swift; sourceTree = "<group>"; };
 		OBJ_13 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		OBJ_14 /* ObservableChainingDeclarations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableChainingDeclarations.swift; sourceTree = "<group>"; };
-		OBJ_15 /* Observer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observer.swift; sourceTree = "<group>"; };
+		OBJ_15 /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		OBJ_16 /* Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sequence.swift; sourceTree = "<group>"; };
 		OBJ_17 /* Select.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Select.swift; sourceTree = "<group>"; };
 		OBJ_19 /* Value.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Value.swift; sourceTree = "<group>"; };
 		OBJ_20 /* Zip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zip.swift; sourceTree = "<group>"; };
 		OBJ_23 /* ContinuationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuationTests.swift; sourceTree = "<group>"; };
-		OBJ_24 /* ObservableSequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableSequenceTests.swift; sourceTree = "<group>"; };
+		OBJ_24 /* ObservableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableTests.swift; sourceTree = "<group>"; };
 		OBJ_25 /* ObservableValueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableValueTests.swift; sourceTree = "<group>"; };
 		OBJ_26 /* SequenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceTests.swift; sourceTree = "<group>"; };
 		OBJ_28 /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestManifests.swift; sourceTree = "<group>"; };
@@ -116,7 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_23 /* ContinuationTests.swift */,
-				OBJ_24 /* ObservableSequenceTests.swift */,
+				OBJ_24 /* ObservableTests.swift */,
 				OBJ_25 /* ObservableValueTests.swift */,
 				OBJ_26 /* SequenceTests.swift */,
 				OBJ_28 /* XCTestManifests.swift */,
@@ -165,7 +165,7 @@
 				OBJ_12 /* Continuation.swift */,
 				OBJ_13 /* Extensions.swift */,
 				OBJ_14 /* ObservableChainingDeclarations.swift */,
-				OBJ_15 /* Observer.swift */,
+				OBJ_15 /* Observable.swift */,
 				OBJ_16 /* Sequence.swift */,
 				OBJ_17 /* Select.swift */,
 				OBJ_19 /* Value.swift */,
@@ -266,7 +266,7 @@
 				OBJ_44 /* Continuation.swift in Sources */,
 				OBJ_45 /* Extensions.swift in Sources */,
 				OBJ_46 /* ObservableChainingDeclarations.swift in Sources */,
-				OBJ_47 /* Observer.swift in Sources */,
+				OBJ_47 /* Observable.swift in Sources */,
 				OBJ_48 /* Sequence.swift in Sources */,
 				OBJ_49 /* Select.swift in Sources */,
 				OBJ_51 /* Value.swift in Sources */,
@@ -287,7 +287,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_70 /* ContinuationTests.swift in Sources */,
-				OBJ_71 /* ObservableSequenceTests.swift in Sources */,
+				OBJ_71 /* ObservableTests.swift in Sources */,
 				OBJ_72 /* ObservableValueTests.swift in Sources */,
 				OBJ_73 /* SequenceTests.swift in Sources */,
 				OBJ_75 /* XCTestManifests.swift in Sources */,

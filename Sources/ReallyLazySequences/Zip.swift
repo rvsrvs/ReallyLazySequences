@@ -41,13 +41,13 @@ public final class Zip2<T0, T1>: Observable where
     T1: ObservableSequenceProtocol {
     public var description: String
     
-    public typealias ListenableOutputType = (T0.OutputType, T1.OutputType)
+    public typealias ObservableOutputType = (T0.OutputType, T1.OutputType)
     
     public var observers = [UUID: Consumer<(T0.OutputType, T1.OutputType)>]()
     public var hasObservers: Bool { return observers.count > 0 }
     
-    private var t0Proxy: ObserverHandle<T0.ListenableType>?
-    private var t1Proxy: ObserverHandle<T1.ListenableType>?
+    private var t0Proxy: ObserverHandle<T0.ObservableType>?
+    private var t1Proxy: ObserverHandle<T1.ObservableType>?
     
     private var t0Queue: [T0.OutputType?] = []
     private var t1Queue: [T1.OutputType?] = []
@@ -90,14 +90,14 @@ public final class Zip2<T0, T1>: Observable where
         self.description = Utilities.standardizeDescription("Zip2<\n\t\(t0.description),\n\t\(t1.description)\n>")
         self.t0Proxy = nil
         self.t1Proxy = nil
-        self.t0Proxy = t0.listen { [weak self] (t0: T0.OutputType?) -> ContinuationTermination in
+        self.t0Proxy = t0.observe { [weak self] (t0: T0.OutputType?) -> ContinuationTermination in
             guard let strongSelf = self else { return .terminate }
             guard let t0 = t0 else { strongSelf.value = nil; return .terminate }
             guard strongSelf.value?.0 == nil else { strongSelf.t0Queue.append(t0); return .canContinue }
             strongSelf.value = (t0, self?.value?.1)
             return .canContinue
         }
-        self.t1Proxy = t1.listen { [weak self] (t1: T1.OutputType?) -> ContinuationTermination in
+        self.t1Proxy = t1.observe { [weak self] (t1: T1.OutputType?) -> ContinuationTermination in
             guard let strongSelf = self else { return .terminate }
             guard let t1 = t1 else { strongSelf.value = nil; return .terminate }
             guard strongSelf.value?.1 == nil else { strongSelf.t1Queue.append(t1); return .canContinue }

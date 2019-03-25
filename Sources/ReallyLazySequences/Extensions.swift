@@ -116,7 +116,7 @@ public extension ConsumableSequenceProtocol {
 }
 
 extension ChainedObservableSequenceProtocol {
-    public func proxy() -> ObserverHandle<ListenableType> {
+    public func proxy() -> ObserverHandle<ObservableType> {
         return predecessor.proxy()
     }
     
@@ -124,7 +124,7 @@ extension ChainedObservableSequenceProtocol {
         return predecessor.compose(composer(delivery)) as? ContinuableInputDelivery
     }
 
-    public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ObserverHandle<Self.ListenableType> {
+    public func observe(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ObserverHandle<Self.ObservableType> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
             return .done(delivery(value))
         }
@@ -134,20 +134,20 @@ extension ChainedObservableSequenceProtocol {
 }
 
 public extension ObservableSequenceProtocol {
-    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T> {
-        return ListenableMap<Self, T>(predecessor: self) { delivery in
+    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ObservableMap<Self, T> {
+        return ObservableMap<Self, T>(predecessor: self) { delivery in
             Composers.mapComposer(delivery: delivery, transform: transform)
         }
     }
 
-    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T> {
-        return ListenableCompactMap<Self, T>(predecessor: self) { delivery in
+    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ObservableCompactMap<Self, T> {
+        return ObservableCompactMap<Self, T>(predecessor: self) { delivery in
             return Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
     }
 
-    func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ListenableFlatMap<Self, T> {
-        return ListenableFlatMap<Self, T>(predecessor: self) { delivery in
+    func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ObservableFlatMap<Self, T> {
+        return ObservableFlatMap<Self, T>(predecessor: self) { delivery in
             Composers.flatMapComposer(delivery: delivery, transform: transform)
         }
     }
@@ -156,8 +156,8 @@ public extension ObservableSequenceProtocol {
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
-    ) -> ListenableReduce<Self, T> {
-        return ListenableReduce<Self, T>(predecessor: self) { delivery in
+    ) -> ObservableReduce<Self, T> {
+        return ObservableReduce<Self, T>(predecessor: self) { delivery in
             return Composers.statefulCompactMapComposer(
                 delivery: delivery,
                 initialState: initialValue(),
@@ -173,19 +173,19 @@ public extension ObservableSequenceProtocol {
         }
     }
     
-    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ListenableReduce<Self, T> {
+    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ObservableReduce<Self, T> {
         return collect(initialValue: initialValue, combine: combine, until: { $1 == nil })
     }
     
-    func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType> {
-        return ListenableFilter<Self, OutputType>(predecessor: self) { delivery in
+    func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ObservableFilter<Self, OutputType> {
+        return ObservableFilter<Self, OutputType>(predecessor: self) { delivery in
             let transform = { (value: OutputType) throws -> OutputType? in try filter(value) ? value : nil }
             return Composers.compactMapComposer(delivery: delivery, transform: transform)
         }
     }
 
-    func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType> {
-        return ListenableDispatch<Self, OutputType>(predecessor: self) { delivery in
+    func dispatch(_ queue: OperationQueue) -> ObservableDispatch<Self, OutputType> {
+        return ObservableDispatch<Self, OutputType>(predecessor: self) { delivery in
             Composers.dispatchComposer(delivery: delivery, queue: queue)
         }
     }

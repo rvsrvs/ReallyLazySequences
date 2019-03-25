@@ -1,5 +1,5 @@
 //
-//  ListenableChainingDeclarations.swift
+//  ObservableChainingDeclarations.swift
 //  ReallyLazySequences
 //
 //  Created by Van Simmons on 8/19/18.
@@ -28,8 +28,8 @@
 
 import Foundation
 
-public struct ListenableMap<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
-    public typealias ListenableType = Predecessor.ListenableType
+public struct ObservableMap<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
+    public typealias ObservableType = Predecessor.ObservableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -45,8 +45,8 @@ public struct ListenableMap<Predecessor: ObservableSequenceProtocol, Output>: Ch
     }
 }
 
-public struct ListenableReduce<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
-    public typealias ListenableType = Predecessor.ListenableType
+public struct ObservableReduce<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
+    public typealias ObservableType = Predecessor.ObservableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -62,8 +62,8 @@ public struct ListenableReduce<Predecessor: ObservableSequenceProtocol, Output>:
     }
 }
 
-public struct ListenableFilter<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
-    public typealias ListenableType = Predecessor.ListenableType
+public struct ObservableFilter<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
+    public typealias ObservableType = Predecessor.ObservableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -79,8 +79,8 @@ public struct ListenableFilter<Predecessor: ObservableSequenceProtocol, Output>:
     }
 }
 
-public struct ListenableFlatMap<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
-    public typealias ListenableType = Predecessor.ListenableType
+public struct ObservableFlatMap<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
+    public typealias ObservableType = Predecessor.ObservableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -96,8 +96,8 @@ public struct ListenableFlatMap<Predecessor: ObservableSequenceProtocol, Output>
     }
 }
 
-public struct ListenableCompactMap<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
-    public typealias ListenableType = Predecessor.ListenableType
+public struct ObservableCompactMap<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
+    public typealias ObservableType = Predecessor.ObservableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output
@@ -113,8 +113,8 @@ public struct ListenableCompactMap<Predecessor: ObservableSequenceProtocol, Outp
     }
 }
 
-public struct ListenableDispatch<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
-    public typealias ListenableType = Predecessor.ListenableType
+public struct ObservableDispatch<Predecessor: ObservableSequenceProtocol, Output>: ChainedObservableSequenceProtocol {
+    public typealias ObservableType = Predecessor.ObservableType
     public typealias PredecessorType = Predecessor
     public typealias InputType = Predecessor.InputType
     public typealias OutputType = Output

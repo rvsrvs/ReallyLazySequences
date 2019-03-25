@@ -42,18 +42,18 @@ class ZipTests: XCTestCase {
     func testZip() {
         let expectation = self.expectation(description: "Expectation")
         
-        let listenable = Observer<Int>()
+        let observable = SimpleObservable<Int>()
         
-        let t0 = listenable
-            .observableSequence
+        let t0 = observable
+            .observer
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }
             }
             .map {  $0 * 2 }
         
-        let t1 = listenable
-            .observableSequence
+        let t1 = observable
+            .observer
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }
@@ -62,9 +62,9 @@ class ZipTests: XCTestCase {
         
         var count = 0
         let z = zip(t0, t1)
-            .observableSequence
+            .observer
             .map { ($0.0 / 2, $0.1 / 2.0) }
-            .listen { (t: (Int, Double)?) -> ContinuationTermination in
+            .observe { (t: (Int, Double)?) -> ContinuationTermination in
                 guard let t = t else {
                     expectation.fulfill()
                     XCTAssert(count == 5, "Terminating after having received wrong count of: \(count) values")
@@ -76,8 +76,8 @@ class ZipTests: XCTestCase {
             }
         print(z.description)
         do {
-            try listenable.process(5)
-            try listenable.process(nil)
+            try observable.process(5)
+            try observable.process(nil)
         } catch {
             XCTFail("Failed testZip processing")
         }

@@ -29,7 +29,7 @@
 import XCTest
 @testable import ReallyLazySequences
 
-class ListenableValueTests: XCTestCase {
+class ObservableValueTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
@@ -41,31 +41,31 @@ class ListenableValueTests: XCTestCase {
         super.tearDown()
     }
     
-    func testListenableValue() {
+    func testObservableValue() {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let testValue = ListenableValue(2)
+        let observableValue = ObservableValue(2)
         
-        var proxy1 = testValue
-            .observableSequence
+        var proxy1 = observableValue
+            .observer
             .map { $0 * 2 }
-            .listen {
+            .observe {
                 guard $0 != nil else { XCTFail(); return .canContinue  }
                 doubler.fulfill()
                 return .canContinue 
             }
         
-        var proxy2 = testValue
-            .observableSequence
+        var proxy2 = observableValue
+            .observer
             .map { $0 * 4 }
-            .listen {
+            .observe {
                 guard $0 != nil else { XCTFail(); return .canContinue  }
                 quadrupler.fulfill()
                 return .canContinue
             }
         
-        testValue.value = 4
+        observableValue.value = 4
         waitForExpectations(timeout: 2.0) { (error) in XCTAssertNil(error, "Timeout waiting for completion") }
         _ = proxy1.terminate()
         _ = proxy2.terminate()

@@ -28,10 +28,10 @@
 
 import Foundation
 
-public final class ListenableValue<T>: Observable {
+public final class ObservableValue<T>: Observable {
     public var description: String
     
-    public typealias ListenableOutputType = T
+    public typealias ObservableOutputType = T
     
     public var observers = [UUID: Consumer<T>]()
     public var hasObservers: Bool { return observers.count > 0 }
@@ -46,7 +46,7 @@ public final class ListenableValue<T>: Observable {
     }
     
     init(_ value: T) {
-        self.description = Utilities.standardizeDescription("ListenableValue<\(type(of: T.self))>")
+        self.description = Utilities.standardizeDescription("ObservableValue<\(type(of: T.self))>")
         self.value = value
     }
 }

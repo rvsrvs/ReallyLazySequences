@@ -29,25 +29,25 @@
 import Foundation
 
 public protocol Observable: class, CustomStringConvertible {
-    associatedtype ListenableOutputType
+    associatedtype ObservableOutputType
 
-    var observers: [UUID: Consumer<ListenableOutputType>] { get set }
+    var observers: [UUID: Consumer<ObservableOutputType>] { get set }
     var hasObservers: Bool { get }
-    var observableSequence: ObservableSequence<Self> { get }
+    var observer: ObservableSequence<Self> { get }
 
-    func add(observer: Consumer<ListenableOutputType>, with: UUID)
-    func remove(_ observerId: UUID) -> Consumer<ListenableOutputType>?
+    func add(observer: Consumer<ObservableOutputType>, with: UUID)
+    func remove(_ observerId: UUID) -> Consumer<ObservableOutputType>?
     func terminate()
 }
 
 extension Observable {
     public var hasObservers: Bool { return observers.count > 0 }
     
-    public func add(observer: Consumer<ListenableOutputType>, with uuid: UUID) {
+    public func add(observer: Consumer<ObservableOutputType>, with uuid: UUID) {
         observers[uuid] = observer
     }
     
-    public func remove(_ observerId: UUID) -> Consumer<ListenableOutputType>? {
+    public func remove(_ observerId: UUID) -> Consumer<ObservableOutputType>? {
         return observers.removeValue(forKey: observerId)
     }
     
@@ -58,8 +58,8 @@ extension Observable {
         }
     }
 
-    public var observableSequence: ObservableSequence<Self> {
-        return ObservableSequence<Self>(self) { (uuid: UUID, consumer: Consumer<ListenableOutputType>) in
+    public var observer: ObservableSequence<Self> {
+        return ObservableSequence<Self>(self) { (uuid: UUID, consumer: Consumer<ObservableOutputType>) in
             self.add(observer: consumer, with: uuid)
         }
     }
@@ -73,81 +73,81 @@ public struct ObserverHandle<T>: CustomStringConvertible, Equatable, Hashable wh
     public var description: String
     
     var identifier: UUID
-    var listenable: T?
+    var observable: T?
     
-    public init(identifier: UUID, listenable: T?) {
+    public init(identifier: UUID, observable: T?) {
         self.identifier = identifier
-        self.listenable = listenable
-        self.description = Utilities.standardizeDescription("\(listenable?.description ?? "nil")   >> ObserverHandle<identifier = \"\(identifier)>\"")
+        self.observable = observable
+        self.description = Utilities.standardizeDescription("\(observable?.description ?? "nil")   >> ObserverHandle<identifier = \"\(identifier)>\"")
     }
     
     public func hash(into hasher: inout Hasher) {
         return hasher.combine(identifier)
     }
     
-    public mutating func terminate() -> Consumer<T.ListenableOutputType>? {
-        guard let m = listenable else { return nil }
+    public mutating func terminate() -> Consumer<T.ObservableOutputType>? {
+        guard let m = observable else { return nil }
         let c = m.remove(identifier)
-        listenable = nil
+        observable = nil
         return c
     }
 }
 
 public protocol ObservableSequenceProtocol: SequenceProtocol {
-    associatedtype ListenableType: Observable
-    func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ObserverHandle<Self.ListenableType>
-    func proxy() -> ObserverHandle<Self.ListenableType>
+    associatedtype ObservableType: Observable
+    func observe(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ObserverHandle<Self.ObservableType>
+    func proxy() -> ObserverHandle<Self.ObservableType>
     
-    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T>
-    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ListenableCompactMap<Self, T>
-    func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ListenableFlatMap<Self, T> 
+    func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ObservableMap<Self, T>
+    func compactMap<T>(_ transform: @escaping (OutputType) throws -> T? ) -> ObservableCompactMap<Self, T>
+    func flatMap<T>(_ transform: @escaping (OutputType) throws -> Subsequence<OutputType, T>) -> ObservableFlatMap<Self, T> 
 
-    // Listenable Chaining
-    func dispatch(_ queue: OperationQueue) -> ListenableDispatch<Self, OutputType>
+    // Observable Chaining
+    func dispatch(_ queue: OperationQueue) -> ObservableDispatch<Self, OutputType>
     func collect<T>(
         initialValue: @autoclosure @escaping () -> T,
         combine: @escaping (T, OutputType) throws -> T,
         until: @escaping (T, OutputType?) -> Bool
-    ) -> ListenableReduce<Self, T>
-    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ListenableReduce<Self, T>
-    func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ListenableFilter<Self, OutputType>
+    ) -> ObservableReduce<Self, T>
+    func reduce<T>(_ initialValue: T, _ combine: @escaping (T, OutputType) throws -> T) -> ObservableReduce<Self, T>
+    func filter(_ filter: @escaping (OutputType) throws -> Bool ) -> ObservableFilter<Self, OutputType>
 }
 
 public struct ObservableSequence<T>: ObservableSequenceProtocol where T: Observable {
-    public typealias ListenableType = T
-    public typealias InputType = T.ListenableOutputType
-    public typealias OutputType = T.ListenableOutputType
+    public typealias ObservableType = T
+    public typealias InputType = T.ObservableOutputType
+    public typealias OutputType = T.ObservableOutputType
 
     public var description: String
 
-    public var installer: (UUID, Consumer<T.ListenableOutputType>) -> Void
-    private weak var listenable: T?
+    public var installer: (UUID, Consumer<T.ObservableOutputType>) -> Void
+    private weak var observable: T?
     private var identifier = UUID()
 
-    init(_ listenable: T, installer: @escaping (UUID, Consumer<T.ListenableOutputType>) -> Void) {
-        self.listenable = listenable
+    init(_ observable: T, installer: @escaping (UUID, Consumer<T.ObservableOutputType>) -> Void) {
+        self.observable = observable
         self.installer = installer
-        self.description = Utilities.standardizeDescription("\(listenable.description) >> Observer<\(type(of: T.ListenableOutputType.self))>")
+        self.description = Utilities.standardizeDescription("\(observable.description) >> Observer<\(type(of: T.ObservableOutputType.self))>")
     }
 
     public func proxy() -> ObserverHandle<T> {
-        return ObserverHandle(identifier: identifier, listenable: listenable)
+        return ObserverHandle(identifier: identifier, observable: observable)
     }
 
     public func compose(_ delivery: @escaping ContinuableOutputDelivery) -> ContinuableInputDelivery? {
-        let consumer = Consumer<T.ListenableOutputType>(delivery: delivery)
+        let consumer = Consumer<T.ObservableOutputType>(delivery: delivery)
         installer(identifier, consumer)
         return nil
     }
 
-    public func listen(_ delivery: @escaping (T.ListenableOutputType?) -> ContinuationTermination) -> ObserverHandle<T> {
+    public func observe(_ delivery: @escaping (T.ObservableOutputType?) -> ContinuationTermination) -> ObserverHandle<T> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in return .done(delivery(value)) }
         let _ = compose(deliveryWrapper)
-        return ObserverHandle(identifier: identifier, listenable: listenable)
+        return ObserverHandle(identifier: identifier, observable: observable)
     }
 }
 
-public protocol ChainedObservableSequenceProtocol: ObservableSequenceProtocol where ListenableType == PredecessorType.ListenableType {
+public protocol ChainedObservableSequenceProtocol: ObservableSequenceProtocol where ObservableType == PredecessorType.ObservableType {
     associatedtype PredecessorType: ObservableSequenceProtocol
     typealias PredecessorContinuableOutputDelivery = (PredecessorType.OutputType?) -> ContinuationResult
     typealias Composer = (@escaping ContinuableOutputDelivery) -> PredecessorContinuableOutputDelivery
@@ -157,11 +157,11 @@ public protocol ChainedObservableSequenceProtocol: ObservableSequenceProtocol wh
 }
 
 public protocol ObserverProtocol: Observable {
-    func process(_ value: ListenableOutputType?) throws -> Void
+    func process(_ value: ObservableOutputType?) throws -> Void
 }
 
 extension ObserverProtocol {
-    public func process(_ value: ListenableOutputType?) throws -> Void {
+    public func process(_ value: ObservableOutputType?) throws -> Void {
         guard self.hasObservers else { return }
         self.observers.forEach { (pair) in
             let (identifier, observer) = pair
@@ -171,13 +171,13 @@ extension ObserverProtocol {
     }
 }
 
-public final class Observer<T>: ObserverProtocol {
+public final class SimpleObservable<T>: ObserverProtocol {
     public var description: String
     
     public var observers: [UUID : Consumer<T>] = [ : ]
-    public typealias ListenableOutputType = T
+    public typealias ObservableOutputType = T
     
     public init() {
-        self.description = Utilities.standardizeDescription("ListenableSequence<\(type(of: T.self))>")
+        self.description = Utilities.standardizeDescription("ObservableSequence<\(type(of: T.self))>")
     }
 }

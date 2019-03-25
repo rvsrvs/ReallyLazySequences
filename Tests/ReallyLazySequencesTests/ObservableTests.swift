@@ -42,41 +42,41 @@ class ProducerTests: XCTestCase {
         super.tearDown()
     }
     
-    func testListenableSequence() {
+    func testObservable() {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let observer = Observer<Int>()
+        let observable = SimpleObservable<Int>()
         
-        var proxy1 = observer
-            .observableSequence
+        var proxy1 = observable
+            .observer
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }
             }
             .map { $0 * 2 }
-            .listen {
+            .observe {
                 guard let value = $0 else { doubler.fulfill(); return .terminate }
                 guard value < 10 else { return .terminate }
                 return .canContinue
             }
         
-        var proxy2 = observer
-            .observableSequence
+        var proxy2 = observable
+            .observer
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }
             }
             .map { $0 * 4 }
-            .listen {
+            .observe {
                 guard let value = $0 else { quadrupler.fulfill(); return .terminate }
                 guard value < 20 else { return .terminate }
                 return .canContinue
             }
         
         do {
-            try observer.process(5)
-            try observer.process(nil)
+            try observable.process(5)
+            try observable.process(nil)
         } catch {
             XCTFail("Failed while processing")
         }

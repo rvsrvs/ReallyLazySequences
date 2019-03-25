@@ -75,12 +75,12 @@ class SequenceTests: XCTestCase {
     func testSimpleObserver() {
         let expectation = self.expectation(description: "First Observer")
         
-        let observer = Observer<Int>()
+        let observer = SimpleObservable<Int>()
         
         var observerHandle = observer
-            .observableSequence
+            .observer
             .flatMap { (value) -> Subsequence<Int,Int> in Subsequence(0 ..< value) }
-            .listen {
+            .observe {
                 guard $0 != nil else {
                     expectation.fulfill()
                     return .canContinue
