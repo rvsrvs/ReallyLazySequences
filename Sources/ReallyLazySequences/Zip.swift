@@ -31,23 +31,23 @@ import Foundation
 //func zip<Sequence1, Sequence2>(_ sequence1: Sequence1, _ sequence2: Sequence2) -> Zip2Sequence<Sequence1, Sequence2> where Sequence1 : Sequence, Sequence2 : Sequence
 
 public func zip<T0, T1>(_ t0: T0, _ t1: T1) -> Zip2<T0, T1> where
-    T0: ListenableSequenceProtocol,
-    T1: ListenableSequenceProtocol {
+    T0: ObservableSequenceProtocol,
+    T1: ObservableSequenceProtocol {
     return Zip2(t0, t1)
 }
 
-public final class Zip2<T0, T1>: Listenable where
-    T0: ListenableSequenceProtocol,
-    T1: ListenableSequenceProtocol {
+public final class Zip2<T0, T1>: Observable where
+    T0: ObservableSequenceProtocol,
+    T1: ObservableSequenceProtocol {
     public var description: String
     
     public typealias ListenableOutputType = (T0.OutputType, T1.OutputType)
     
-    public var listeners = [UUID: Consumer<(T0.OutputType, T1.OutputType)>]()
-    public var hasListeners: Bool { return listeners.count > 0 }
+    public var observers = [UUID: Consumer<(T0.OutputType, T1.OutputType)>]()
+    public var hasObservers: Bool { return observers.count > 0 }
     
-    private var t0Proxy: ListenerHandle<T0.ListenableType>?
-    private var t1Proxy: ListenerHandle<T1.ListenableType>?
+    private var t0Proxy: ObserverHandle<T0.ListenableType>?
+    private var t1Proxy: ObserverHandle<T1.ListenableType>?
     
     private var t0Queue: [T0.OutputType?] = []
     private var t1Queue: [T1.OutputType?] = []
@@ -55,8 +55,8 @@ public final class Zip2<T0, T1>: Listenable where
     private func sendIfNecessary(_ v0: T0.OutputType?, _ v1: T1.OutputType?) -> Bool {
         if  let v0 = value?.0, let v1 = value?.1 {
             let v = (v0, v1)
-            listeners.keys.forEach { uuid in
-                do { _ = try listeners[uuid]?.process(v) }
+            observers.keys.forEach { uuid in
+                do { _ = try observers[uuid]?.process(v) }
                 catch { _ = remove(uuid) }
             }
             return true
@@ -67,8 +67,8 @@ public final class Zip2<T0, T1>: Listenable where
     var value: (T0.OutputType?, T1.OutputType?)? {
         didSet {
             guard value != nil else {
-                listeners.keys.forEach { uuid in
-                    do { _ = try listeners[uuid]?.process(nil) }
+                observers.keys.forEach { uuid in
+                    do { _ = try observers[uuid]?.process(nil) }
                     catch { _ = remove(uuid) }
                 }
                 return

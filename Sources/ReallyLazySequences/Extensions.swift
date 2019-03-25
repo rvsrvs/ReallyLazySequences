@@ -115,8 +115,8 @@ public extension ConsumableSequenceProtocol {
     }
 }
 
-extension ChainedListenableSequenceProtocol {
-    public func proxy() -> ListenerHandle<ListenableType> {
+extension ChainedObservableSequenceProtocol {
+    public func proxy() -> ObserverHandle<ListenableType> {
         return predecessor.proxy()
     }
     
@@ -124,7 +124,7 @@ extension ChainedListenableSequenceProtocol {
         return predecessor.compose(composer(delivery)) as? ContinuableInputDelivery
     }
 
-    public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ListenerHandle<Self.ListenableType> {
+    public func listen(_ delivery: @escaping (OutputType?) -> ContinuationTermination) -> ObserverHandle<Self.ListenableType> {
         let deliveryWrapper = { (value: OutputType?) -> ContinuationResult in
             return .done(delivery(value))
         }
@@ -133,7 +133,7 @@ extension ChainedListenableSequenceProtocol {
     }
 }
 
-public extension ListenableSequenceProtocol {
+public extension ObservableSequenceProtocol {
     func map<T>(_ transform: @escaping (OutputType) throws -> T ) -> ListenableMap<Self, T> {
         return ListenableMap<Self, T>(predecessor: self) { delivery in
             Composers.mapComposer(delivery: delivery, transform: transform)

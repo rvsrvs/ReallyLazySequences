@@ -1,5 +1,5 @@
 //
-//  ListenerTests.swift
+//  ObserverTests.swift
 //  ReallyLazySequencesTests
 //
 //  Created by Van Simmons on 8/6/18.
@@ -48,7 +48,7 @@ class ListenableValueTests: XCTestCase {
         let testValue = ListenableValue(2)
         
         var proxy1 = testValue
-            .listener
+            .observableSequence
             .map { $0 * 2 }
             .listen {
                 guard $0 != nil else { XCTFail(); return .canContinue  }
@@ -57,7 +57,7 @@ class ListenableValueTests: XCTestCase {
             }
         
         var proxy2 = testValue
-            .listener
+            .observableSequence
             .map { $0 * 4 }
             .listen {
                 guard $0 != nil else { XCTFail(); return .canContinue  }

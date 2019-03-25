@@ -28,18 +28,18 @@
 
 import Foundation
 
-public final class ListenableValue<T>: Listenable {
+public final class ListenableValue<T>: Observable {
     public var description: String
     
     public typealias ListenableOutputType = T
     
-    public var listeners = [UUID: Consumer<T>]()
-    public var hasListeners: Bool { return listeners.count > 0 }
+    public var observers = [UUID: Consumer<T>]()
+    public var hasObservers: Bool { return observers.count > 0 }
     
     var value: T {
         didSet {
-            listeners.keys.forEach { uuid in
-                do { _ = try listeners[uuid]?.process(value) }
+            observers.keys.forEach { uuid in
+                do { _ = try observers[uuid]?.process(value) }
                 catch { _ = remove(uuid) }
             }
         }

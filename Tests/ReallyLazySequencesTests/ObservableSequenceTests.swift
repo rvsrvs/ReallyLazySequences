@@ -49,7 +49,7 @@ class ProducerTests: XCTestCase {
         let observer = Observer<Int>()
         
         var proxy1 = observer
-            .listener
+            .observableSequence
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }
@@ -62,7 +62,7 @@ class ProducerTests: XCTestCase {
             }
         
         var proxy2 = observer
-            .listener
+            .observableSequence
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }

@@ -42,7 +42,7 @@ class ContinuationTests: XCTestCase {
     enum ReallyLazySequenceError: Error {
         case isComplete
         case nonPushable
-        case noListeners
+        case noObservers
         
         var description: String {
             switch self {
@@ -50,8 +50,8 @@ class ContinuationTests: XCTestCase {
                 return "ReallyLazySequence has already completed.  Pushes not allowed"
             case .nonPushable:
                 return "push may only be called on Sequences which are NOT already attached to producers"
-            case .noListeners:
-                return "No listeners available for producer to produce into"
+            case .noObservers:
+                return "No observers available for producer to produce into"
             }
         }
     }

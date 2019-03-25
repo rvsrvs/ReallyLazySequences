@@ -45,7 +45,7 @@ class ZipTests: XCTestCase {
         let listenable = Observer<Int>()
         
         let t0 = listenable
-            .listener
+            .observableSequence
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }
@@ -53,7 +53,7 @@ class ZipTests: XCTestCase {
             .map {  $0 * 2 }
         
         let t1 = listenable
-            .listener
+            .observableSequence
             .flatMap { (value) -> Subsequence<Int,Int> in
                 var iterator = (0 ..< value).makeIterator()
                 return Subsequence { iterator.next() }
@@ -62,7 +62,7 @@ class ZipTests: XCTestCase {
         
         var count = 0
         let z = zip(t0, t1)
-            .listener
+            .observableSequence
             .map { ($0.0 / 2, $0.1 / 2.0) }
             .listen { (t: (Int, Double)?) -> ContinuationTermination in
                 guard let t = t else {

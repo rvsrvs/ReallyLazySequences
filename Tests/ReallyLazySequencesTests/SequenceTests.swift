@@ -29,7 +29,7 @@
 import XCTest
 @testable import ReallyLazySequences
 
-class ReallyLazySequencesTests: XCTestCase {
+class SequenceTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
@@ -72,13 +72,13 @@ class ReallyLazySequencesTests: XCTestCase {
         XCTAssertEqual(accumulatedResults, [0,34,68])
     }
     
-    func testSimpleListener() {
-        let expectation = self.expectation(description: "First Listener")
+    func testSimpleObserver() {
+        let expectation = self.expectation(description: "First Observer")
         
         let observer = Observer<Int>()
         
         var observerHandle = observer
-            .listener
+            .observableSequence
             .flatMap { (value) -> Subsequence<Int,Int> in Subsequence(0 ..< value) }
             .listen {
                 guard $0 != nil else {
