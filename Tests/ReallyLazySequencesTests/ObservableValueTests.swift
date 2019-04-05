@@ -45,7 +45,7 @@ class ObservableValueTests: XCTestCase {
         let doubler = self.expectation(description: "Doubler")
         let quadrupler = self.expectation(description: "Quadrupler")
         
-        let observableValue = ObservableValue(2)
+        let observableValue = Value(2)
         
         var proxy1 = observableValue
             .observer

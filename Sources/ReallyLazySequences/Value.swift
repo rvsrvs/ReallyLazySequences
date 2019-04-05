@@ -26,15 +26,24 @@
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-public final class ObservableValue<T>: ObservableProtocol {
+public protocol ObservableValueProtocol: ObservableProtocol {
+    var value: ObservableOutputType { get }
+}
+
+public protocol MutableObservableValueProtocol: ObservableValueProtocol {
+    var value: ObservableOutputType { get set }
+}
+
+
+public final class Value<T>: MutableObservableValueProtocol {
     public var description: String
     
     public typealias ObservableOutputType = T
     
-    public var observers = [ObserverHandle<ObservableValue<T>>: Consumer<T>]()
+    public var observers = [ObserverHandle<Value<T>>: Consumer<T>]()
     public var hasObservers: Bool { return observers.count > 0 }
     
-    var value: T {
+    public var value: T {
         didSet {
             observers.forEach { handle, consumer in
                 do { _ = try consumer.process(value) }
